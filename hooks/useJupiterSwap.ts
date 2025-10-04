@@ -3,6 +3,7 @@ import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { VersionedTransaction } from '@solana/web3.js'
 import { useTokens } from '@/contexts/TokenContext'
 import { parseTokenAmount } from '@/lib/solana/tokens/token-info'
+import JupiterService from '@/lib/solana/defi/jupiter-service'
 
 export interface JupiterQuote {
   inputMint: string
@@ -59,7 +60,10 @@ export function useJupiterSwap(): UseJupiterSwapReturn {
   const [loadingSwap, setLoadingSwap] = useState(false)
   const [error, setError] = useState('')
 
-  // Get quote from Jupiter API
+  // Initialize Jupiter service
+  const jupiterService = new JupiterService(connection)
+
+  // Get quote from Jupiter API using service
   const getQuote = useCallback(async (
     inputMint: string,
     outputMint: string,
@@ -87,7 +91,7 @@ export function useJupiterSwap(): UseJupiterSwapReturn {
       // Convert amount to smallest unit using correct decimals
       const amountInSmallestUnit = parseTokenAmount(amount, decimals)
       
-      console.log('🔄 Getting quote with:', {
+      console.log('🔄 Getting quote with Jupiter service:', {
         inputMint,
         outputMint,
         amount,
@@ -95,30 +99,27 @@ export function useJupiterSwap(): UseJupiterSwapReturn {
         amountInSmallestUnit
       })
       
-      // Jupiter Lite API v1 quote endpoint
-      const response = await fetch(
-        `https://lite-api.jup.ag/swap/v1/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amountInSmallestUnit}&slippageBps=${slippageBps}`
+      // Use Jupiter service instead of direct API call
+      const quoteResponse = await jupiterService.getQuote(
+        inputMint,
+        outputMint,
+        amountInSmallestUnit,
+        slippageBps
       )
       
-      if (!response.ok) {
-        throw new Error(`Failed to get quote: ${response.statusText}`)
+      if (!quoteResponse) {
+        throw new Error('Failed to get quote from Jupiter')
       }
       
-      const data = await response.json()
-      
-      if (data.error) {
-        throw new Error(data.error)
-      }
-      
-      console.log('✅ Got quote:', data)
-      setQuote(data)
+      console.log('✅ Got quote via Jupiter service:', quoteResponse)
+      setQuote(quoteResponse as any) // Type compatibility
     } catch (err: any) {
       console.error('❌ Quote error:', err)
       setError(err.message || 'Failed to get quote')
     } finally {
       setLoadingQuote(false)
     }
-  }, [getTokenInfoCached])
+  }, [getTokenInfoCached, connection])
 
   // Execute swap transaction
   const executeSwap = useCallback(async (quote: JupiterQuote): Promise<string | null> => {
@@ -143,38 +144,22 @@ export function useJupiterSwap(): UseJupiterSwapReturn {
     setError('')
 
     try {
-      console.log('🔄 Starting swap execution...')
+      console.log('🔄 Starting swap execution with Jupiter service...')
       console.log('Quote:', quote)
       console.log('User PublicKey:', publicKey.toString())
 
-      // Get swap transaction from Jupiter
-      const swapResponse = await fetch('https://lite-api.jup.ag/swap/v1/swap', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          quoteResponse: quote,
-          userPublicKey: publicKey.toString(),
-          wrapAndUnwrapSol: true,
-          prioritizationFeeLamports: 'auto',
-          dynamicComputeUnitLimit: true,
-        }),
-      })
+      // Use Jupiter service to build swap transaction
+      const swapData = await jupiterService.buildSwapTransaction(
+        quote as any, // Type compatibility
+        publicKey.toString(),
+        true // wrapAndUnwrapSol
+      )
 
-      if (!swapResponse.ok) {
-        const errorText = await swapResponse.text()
-        console.error('Jupiter API error:', errorText)
-        throw new Error(`Failed to get swap transaction: ${swapResponse.statusText}`)
+      if (!swapData?.swapTransaction) {
+        throw new Error('No swap transaction returned from Jupiter service')
       }
 
-      const swapData: SwapTransaction = await swapResponse.json()
-
-      if (!swapData.swapTransaction) {
-        throw new Error('No swap transaction returned from Jupiter')
-      }
-
-      console.log('✅ Got swap transaction from Jupiter')
+      console.log('✅ Got swap transaction from Jupiter service')
 
       // Deserialize the transaction
       const swapTransactionBuf = Buffer.from(swapData.swapTransaction, 'base64')

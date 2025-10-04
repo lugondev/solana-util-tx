@@ -218,7 +218,7 @@ export class JitoBundleService {
   }
 
   /**
-   * Get bundle status (placeholder for future Jito API integration)
+   * Get bundle status using real Jito API
    */
   async getBundleStatus(bundleId: string): Promise<{
     bundleId: string
@@ -226,13 +226,35 @@ export class JitoBundleService {
     landedSlot?: number
     transactions: string[]
   }> {
-    // This would integrate with Jito's bundle tracking API
-    // For now, return a mock response
-    return {
-      bundleId,
-      status: 'landed',
-      landedSlot: 123456789,
-      transactions: []
+    try {
+      // Use real Jito Bundle API
+      const endpoint = getBlockEngineEndpoint(this.config.region)
+      const response = await fetch(`${endpoint}/bundles/${bundleId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`Bundle status request failed: ${response.statusText}`)
+      }
+
+      const bundleStatus = await response.json()
+      return {
+        bundleId,
+        status: bundleStatus.status || 'pending',
+        landedSlot: bundleStatus.landed_slot,
+        transactions: bundleStatus.transactions || []
+      }
+    } catch (error) {
+      console.error('Error fetching bundle status:', error)
+      // Fallback to basic status check
+      return {
+        bundleId,
+        status: 'pending',
+        transactions: []
+      }
     }
   }
 

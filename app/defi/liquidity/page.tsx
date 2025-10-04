@@ -20,11 +20,28 @@ export default function LiquidityPage() {
 
     setSearchingPools(true)
     
-    // TODO: Implement actual pool search using Raydium/Orca APIs
-    setTimeout(() => {
+    try {
+      // Import and use Raydium service
+      const { default: RaydiumService } = await import('@/lib/solana/defi/raydium-service')
+      const { getConnection } = await import('@/lib/solana/connection')
+      
+      const connection = getConnection()
+      const raydiumService = new RaydiumService(connection)
+      
+      const pools = await raydiumService.searchPools(tokenAAddress.trim(), tokenBAddress.trim())
+      
+      if (pools.length > 0) {
+        console.log('Found pools:', pools)
+        alert(`Found ${pools.length} Raydium pool(s) for this token pair!`)
+      } else {
+        alert('No pools found for this token pair on Raydium')
+      }
+    } catch (error) {
+      console.error('Error searching pools:', error)
+      alert('Error searching for pools. Please check the token addresses.')
+    } finally {
       setSearchingPools(false)
-      alert('Pool search requires integration with DEX APIs (Raydium, Orca, etc.)')
-    }, 2000)
+    }
   }
 
   const calculateImpermanentLoss = (change: number) => {
@@ -360,24 +377,33 @@ export default function LiquidityPage() {
               </div>
 
               <div className="space-y-3">
-                <div className="p-3 bg-gray-800 border-2 border-gray-700">
-                  <div className="font-pixel text-xs text-yellow-400 mb-1">TODO:</div>
+                <div className="p-3 bg-green-900/20 border-2 border-green-600/30">
+                  <div className="font-pixel text-xs text-green-400 mb-1">IMPLEMENTED:</div>
                   <ul className="font-mono text-xs text-gray-400 space-y-1">
-                    <li>• Integrate Raydium SDK</li>
-                    <li>• Integrate Orca SDK</li>
-                    <li>• Add real-time pool data</li>
-                    <li>• Implement add/remove liquidity</li>
-                    <li>• Add yield farming features</li>
+                    <li>• Raydium SDK integration</li>
+                    <li>• Pool search functionality</li>
+                    <li>• Real-time pool data fetching</li>
+                    <li>• UI/UX framework</li>
+                    <li>• External DEX links</li>
+                    <li>• IL calculator</li>
                   </ul>
                 </div>
 
-                <div className="p-3 bg-green-900/20 border-2 border-green-600/30">
-                  <div className="font-pixel text-xs text-green-400 mb-1">COMPLETED:</div>
+                <div className="p-3 bg-gray-800 border-2 border-gray-700">
+                  <div className="font-pixel text-xs text-yellow-400 mb-1">IN PROGRESS:</div>
                   <ul className="font-mono text-xs text-gray-400 space-y-1">
-                    <li>• UI/UX framework</li>
-                    <li>• Pool search interface</li>
-                    <li>• IL calculator</li>
-                    <li>• External DEX links</li>
+                    <li>• Add/remove liquidity transactions</li>
+                    <li>• Price oracle integration</li>
+                    <li>• Advanced metrics calculation</li>
+                  </ul>
+                </div>
+
+                <div className="p-3 bg-blue-900/20 border-2 border-blue-600/30">
+                  <div className="font-pixel text-xs text-blue-400 mb-1">PLANNED:</div>
+                  <ul className="font-mono text-xs text-gray-400 space-y-1">
+                    <li>• Orca SDK integration</li>
+                    <li>• Yield farming features</li>
+                    <li>• LP position management</li>
                   </ul>
                 </div>
               </div>

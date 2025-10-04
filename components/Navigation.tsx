@@ -30,6 +30,7 @@ const navigationItems: NavigationItem[] = [
     children: [
       { label: 'Send', href: '/transaction/send' },
       { label: 'Simulate', href: '/transaction/simulate' },
+      { label: 'Enhanced Simulate', href: '/transaction/enhanced-simulate', icon: '🔬' },
       { label: 'History', href: '/transaction/history' },
     ]
   },
@@ -76,7 +77,6 @@ const navigationItems: NavigationItem[] = [
       { label: 'Swap (Jupiter)', href: '/defi/swap' },
       { label: 'Liquidity', href: '/defi/liquidity' },
       { label: 'Limit Orders', href: '/defi/limit-orders' },
-      { label: 'Lending', href: '/defi/lending', comingSoon: true },
     ]
   },
   {
@@ -174,13 +174,21 @@ function NavigationMenu({ item, level = 0 }: NavigationMenuProps) {
   )
 }
 
-export default function Navigation() {
+interface NavigationProps {
+  isMobileMenuOpen?: boolean
+  onMobileMenuToggle?: () => void
+  className?: string
+}
+
+export default function Navigation({ isMobileMenuOpen = false, onMobileMenuToggle, className = '' }: NavigationProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   
   return (
-    <nav className="h-screen bg-gray-900 border-r-4 border-green-400/20 flex flex-col">
+    <nav className={`h-screen bg-gray-900 border-r-4 border-green-400/20 flex flex-col transition-all duration-300 ${
+      isCollapsed ? 'w-20' : 'w-72'
+    } ${className}`}>
       {/* Header */}
-      <div className="p-6 border-b-4 border-green-400/20">
+      <div className={`${isCollapsed ? 'p-3' : 'p-6'} border-b-4 border-green-400/20`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-green-400 border-4 border-green-400 animate-pulse" />
@@ -191,13 +199,26 @@ export default function Navigation() {
               </div>
             )}
           </div>
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="font-pixel text-xs text-gray-400 hover:text-green-400 p-2"
-          >
-            {isCollapsed ? '▶' : '◀'}
-          </button>
+          {!isCollapsed && (
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="font-pixel text-xs text-gray-400 hover:text-green-400 p-2"
+            >
+              ◀
+            </button>
+          )}
         </div>
+        {isCollapsed && (
+          <div className="flex justify-center mt-3">
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="font-pixel text-xs text-gray-400 hover:text-green-400 p-2"
+              title="Mở rộng menu"
+            >
+              ▶
+            </button>
+          </div>
+        )}
       </div>
       
       {/* Navigation Items */}
@@ -213,8 +234,11 @@ export default function Navigation() {
         {isCollapsed && (
           <div className="py-4 space-y-2">
             {navigationItems.map((item, index) => (
-              <div key={index} className="px-4">
-                <div className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-green-400 transition-colors">
+              <div key={index} className="px-2 flex justify-center">
+                <div 
+                  className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-green-400 transition-colors cursor-pointer rounded"
+                  title={item.label}
+                >
                   {item.icon}
                 </div>
               </div>

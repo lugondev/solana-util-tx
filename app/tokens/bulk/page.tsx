@@ -1,16 +1,79 @@
 'use client'
 
 import { useState } from 'react'
+import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { PixelCard } from '@/components/ui/pixel-card'
 import { PixelButton } from '@/components/ui/pixel-button'
 import { PixelInput } from '@/components/ui/pixel-input'
-import { Upload, Download, Send, Coins, FileText, AlertCircle } from 'lucide-react'
+import { Upload, Download, Send, Coins, FileText, CheckCircle, Loader2 } from 'lucide-react'
+import BulkTokenService, { BulkRecipient, BulkValidationResult } from '@/lib/solana/tokens/bulk-token-service'
+import { useTokenInfo } from '@/contexts/TokenContext'
 
 export default function BulkTokenOperationsPage() {
+  const { connected, publicKey, signAllTransactions, sendTransaction } = useWallet()
+  const { connection } = useConnection()
   const [operation, setOperation] = useState<'multi-send' | 'airdrop' | ''>('')
   const [addressList, setAddressList] = useState('')
   const [amount, setAmount] = useState('')
   const [tokenMint, setTokenMint] = useState('')
+  const [batchSize, setBatchSize] = useState('10')
+  const [isValidating, setIsValidating] = useState(false)
+  const [isExecuting, setIsExecuting] = useState(false)
+  const [validationResult, setValidationResult] = useState<BulkValidationResult | null>(null)
+  const [executionResult, setExecutionResult] = useState<any>(null)
+  
+  // Token info for the selected mint
+  const tokenInfo = useTokenInfo(tokenMint)
+  
+  // Initialize bulk token service
+  const [bulkService] = useState(() => new BulkTokenService(connection))
+
+  // Validate addresses and amounts
+  const handleValidate = async () => {
+    if (!operation || !tokenMint.trim() || !addressList.trim()) {
+      alert('Please fill in all required fields')
+      return
+    }
+
+    if (operation === 'multi-send' && !amount.trim()) {
+      alert('Please enter amount for multi-send operation')
+      return
+    }
+
+    setIsValidating(true)
+    try {
+      // Parse recipients from address list
+      let recipients: BulkRecipient[]
+      
+      if (operation === 'multi-send') {
+        // For multi-send, each line is an address, use the same amount for all
+        const addresses = addressList.split('\n').filter(line => line.trim())
+        recipients = addresses.map(address => ({
+          address: address.trim(),
+          amount: amount
+        }))
+      } else {
+        // For airdrop, parse CSV format (address,amount)
+        recipients = bulkService.parseCSVData(addressList, 'airdrop')
+      }
+
+      // Validate the operation
+      const result = await bulkService.validateBulkOperation({
+        tokenMint,
+        operation: operation as 'multi-send' | 'airdrop',
+        recipients,
+        batchSize: parseInt(batchSize),
+        slippage: 0.5
+      })
+
+      setValidationResult(result)
+    } catch (error) {
+      console.error('Validation error:', error)
+      alert('Error validating addresses. Please check your input.')
+    } finally {
+      setIsValidating(false)
+    }
+  }
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -19,20 +82,73 @@ export default function BulkTokenOperationsPage() {
     const reader = new FileReader()
     reader.onload = (e) => {
       const text = e.target?.result as string
-      if (file.name.endsWith('.csv')) {
-        // Parse CSV - expecting format: address,amount
-        const lines = text.split('\n').filter(line => line.trim())
-        const addresses = lines.map(line => {
-          const [addr, amt] = line.split(',')
-          return `${addr.trim()}${amt ? ` - ${amt.trim()}` : ''}`
-        }).join('\n')
-        setAddressList(addresses)
-      } else {
-        // Plain text - one address per line
-        setAddressList(text)
-      }
+      setAddressList(text)
     }
     reader.readAsText(file)
+  }
+
+  // Execute bulk operation
+  const handleExecute = async () => {
+    if (!connected || !publicKey || !signAllTransactions || !sendTransaction) {
+      alert('Please connect your wallet first')
+      return
+    }
+
+    if (!validationResult || !validationResult.valid) {
+      alert('Please validate addresses first')
+      return
+    }
+
+    setIsExecuting(true)
+    try {
+      // Parse recipients
+      let recipients: BulkRecipient[]
+      
+      if (operation === 'multi-send') {
+        const addresses = addressList.split('\n').filter(line => line.trim())
+        recipients = addresses.map(address => ({
+          address: address.trim(),
+          amount: amount
+        }))
+      } else {
+        recipients = bulkService.parseCSVData(addressList, 'airdrop')
+      }
+
+      // Execute the bulk operation
+      const result = await bulkService.executeBulkOperation(
+        {
+          tokenMint,
+          operation: operation as 'multi-send' | 'airdrop',
+          recipients,
+          batchSize: parseInt(batchSize),
+          slippage: 0.5
+        },
+        publicKey,
+        signAllTransactions,
+        (tx) => sendTransaction(tx, connection),
+        tokenInfo.decimals || 9
+      )
+
+      setExecutionResult(result)
+      console.log('Bulk operation result:', result)
+    } catch (error) {
+      console.error('Execution error:', error)
+      alert('Error executing bulk operation. Please try again.')
+    } finally {
+      setIsExecuting(false)
+    }
+  }
+
+  // Download CSV template
+  const downloadTemplate = (type: 'multi-send' | 'airdrop') => {
+    const template = bulkService.generateCSVTemplate(type)
+    const blob = new Blob([template], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${type}-template.csv`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   return (
@@ -130,6 +246,16 @@ export default function BulkTokenOperationsPage() {
                     step="0.000001"
                   />
                 )}
+
+                <PixelInput
+                  label="BATCH SIZE"
+                  type="number"
+                  value={batchSize}
+                  onChange={(e) => setBatchSize(e.target.value)}
+                  placeholder="Number of transfers per transaction"
+                  min="1"
+                  max="20"
+                />
 
                 <div>
                   <label className="block font-pixel text-xs text-gray-400 mb-2">
@@ -237,7 +363,7 @@ export default function BulkTokenOperationsPage() {
                       ESTIMATED COST:
                     </div>
                     <div className="font-mono text-sm text-white">
-                      ~{(addressList.split('\n').filter(line => line.trim()).length * 0.000005).toFixed(6)} SOL
+                      ~{(Math.ceil(addressList.split('\n').filter(line => line.trim()).length / parseInt(batchSize)) * 0.000005).toFixed(6)} SOL
                     </div>
                     <div className="font-mono text-xs text-gray-400 mt-1">
                       Transaction fees only (excludes token amounts)
@@ -260,26 +386,86 @@ export default function BulkTokenOperationsPage() {
 
                 <div className="space-y-3">
                   <PixelButton
+                    onClick={handleValidate}
+                    disabled={isValidating || !operation || !tokenMint.trim() || !addressList.trim()}
                     variant="secondary"
-                    disabled
                     className="w-full"
                   >
-                    [VALIDATE ADDRESSES]
+                    {isValidating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        [VALIDATING...]
+                      </>
+                    ) : (
+                      '[VALIDATE ADDRESSES]'
+                    )}
                   </PixelButton>
 
                   <PixelButton
+                    onClick={handleExecute}
+                    disabled={isExecuting || !validationResult?.valid || !connected}
                     variant="primary"
-                    disabled
                     className="w-full"
                   >
-                    [EXECUTE BULK OPERATION]
+                    {isExecuting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        [EXECUTING...]
+                      </>
+                    ) : (
+                      '[EXECUTE BULK OPERATION]'
+                    )}
                   </PixelButton>
 
-                  <div className="text-center">
-                    <span className="px-3 py-1 bg-yellow-600/20 text-yellow-400 border border-yellow-600/30 font-pixel text-xs">
-                      COMING SOON
-                    </span>
-                  </div>
+                  {!connected && (
+                    <div className="text-center">
+                      <span className="px-3 py-1 bg-red-600/20 text-red-400 border border-red-600/30 font-pixel text-xs">
+                        WALLET NOT CONNECTED
+                      </span>
+                    </div>
+                  )}
+
+                  {validationResult && (
+                    <div className="p-3 border-4 border-gray-700">
+                      <div className="font-pixel text-xs mb-2">
+                        {validationResult.valid ? (
+                          <span className="text-green-400">✓ VALIDATION PASSED</span>
+                        ) : (
+                          <span className="text-red-400">✗ VALIDATION FAILED</span>
+                        )}
+                      </div>
+                      
+                      <div className="font-mono text-xs text-gray-400 space-y-1">
+                        <div>Recipients: {validationResult.totalRecipients}</div>
+                        <div>Estimated Cost: {validationResult.estimatedCost.toFixed(6)} SOL</div>
+                        {validationResult.invalidAddresses.length > 0 && (
+                          <div className="text-red-400">
+                            Invalid addresses: {validationResult.invalidAddresses.length}
+                          </div>
+                        )}
+                        {validationResult.duplicateAddresses.length > 0 && (
+                          <div className="text-yellow-400">
+                            Duplicate addresses: {validationResult.duplicateAddresses.length}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {executionResult && (
+                    <div className="p-3 border-4 border-green-600/30 bg-green-900/20">
+                      <div className="font-pixel text-xs text-green-400 mb-2">
+                        ✓ EXECUTION COMPLETED
+                      </div>
+                      
+                      <div className="font-mono text-xs text-gray-400 space-y-1">
+                        <div>Successful: {executionResult.successfulTransfers}</div>
+                        <div>Failed: {executionResult.failedTransfers}</div>
+                        <div>Total Cost: {executionResult.totalCost.toFixed(6)} SOL</div>
+                        <div>Signatures: {executionResult.signatures.length}</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </PixelCard>
@@ -295,7 +481,10 @@ export default function BulkTokenOperationsPage() {
               </div>
 
               <div className="space-y-3">
-                <button className="w-full flex items-center gap-3 p-3 border-4 border-gray-700 hover:border-green-400/50 transition-colors">
+                <button 
+                  onClick={() => downloadTemplate('multi-send')}
+                  className="w-full flex items-center gap-3 p-3 border-4 border-gray-700 hover:border-green-400/50 transition-colors"
+                >
                   <FileText className="h-4 w-4 text-gray-400" />
                   <div className="text-left">
                     <div className="font-pixel text-xs text-white">Multi-send Template</div>
@@ -304,7 +493,10 @@ export default function BulkTokenOperationsPage() {
                   <Download className="h-4 w-4 text-gray-400 ml-auto" />
                 </button>
 
-                <button className="w-full flex items-center gap-3 p-3 border-4 border-gray-700 hover:border-green-400/50 transition-colors">
+                <button 
+                  onClick={() => downloadTemplate('airdrop')}
+                  className="w-full flex items-center gap-3 p-3 border-4 border-gray-700 hover:border-green-400/50 transition-colors"
+                >
                   <FileText className="h-4 w-4 text-gray-400" />
                   <div className="text-left">
                     <div className="font-pixel text-xs text-white">Airdrop Template</div>
@@ -366,13 +558,12 @@ export default function BulkTokenOperationsPage() {
           </div>
 
           <div className="pt-4 border-t-4 border-gray-700">
-            <div className="p-3 bg-yellow-600/10 border-4 border-yellow-600/20">
+            <div className="p-3 bg-green-600/10 border-4 border-green-600/20">
               <div className="flex items-start gap-2">
-                <AlertCircle className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
-                <div className="font-mono text-xs text-yellow-400">
-                  <strong>Coming Soon:</strong> Bulk token operations are currently in development. 
-                  This feature will support efficient batch processing of multiple token transfers 
-                  with automatic retry logic and progress tracking.
+                <CheckCircle className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
+                <div className="font-mono text-xs text-green-400">
+                  <strong>Fully Implemented:</strong> Bulk token operations now support real multi-send and airdrop 
+                  functionality with proper validation, batching, and execution. Connect your wallet to get started!
                 </div>
               </div>
             </div>

@@ -28,13 +28,45 @@ export default function LimitOrdersPage() {
     setOrderType(orderType === 'buy' ? 'sell' : 'buy')
   }
 
-  const createOrder = () => {
+  const createOrder = async () => {
     if (!tokenIn.trim() || !tokenOut.trim() || !amount || !targetPrice) {
       alert('Please fill in all required fields')
       return
     }
     
-    alert('Limit order functionality requires integration with order book protocols (Jupiter, OpenBook, etc.)')
+    try {
+      // Import Jupiter service
+      const { default: JupiterService } = await import('@/lib/solana/defi/jupiter-service')
+      const { getConnection } = await import('@/lib/solana/connection')
+      
+      const connection = getConnection()
+      const jupiterService = new JupiterService(connection)
+      
+      // Calculate target amounts
+      const inputAmount = orderType === 'buy' ? 
+        (parseFloat(amount) * parseFloat(targetPrice)).toString() : 
+        amount
+      const outputAmount = orderType === 'buy' ? 
+        amount : 
+        (parseFloat(amount) * parseFloat(targetPrice)).toString()
+      
+      const result = await jupiterService.createLimitOrder(
+        tokenIn,
+        tokenOut,
+        inputAmount,
+        outputAmount,
+        Date.now() + (parseInt(expiry) * 24 * 60 * 60 * 1000) // Convert days to timestamp
+      )
+      
+      if (result.error) {
+        alert(result.error)
+      } else {
+        alert('Limit order feature is being integrated with Jupiter Limit Orders API')
+      }
+    } catch (error) {
+      console.error('Error creating limit order:', error)
+      alert('Error creating limit order. Please try again.')
+    }
   }
 
   return (
@@ -229,27 +261,28 @@ export default function LimitOrdersPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-800 border-2 border-gray-700">
-                  <div className="font-pixel text-xs text-yellow-400 mb-2">TODO:</div>
-                  <ul className="font-mono text-xs text-gray-400 space-y-1">
-                    <li>• Jupiter Limit Orders SDK</li>
-                    <li>• OpenBook integration</li>
-                    <li>• Order matching logic</li>
-                    <li>• Price monitoring</li>
-                    <li>• Automatic execution</li>
-                    <li>• Order management</li>
-                  </ul>
-                </div>
-
                 <div className="p-4 bg-green-900/20 border-2 border-green-600/30">
-                  <div className="font-pixel text-xs text-green-400 mb-2">COMPLETED:</div>
+                  <div className="font-pixel text-xs text-green-400 mb-2">IMPLEMENTED:</div>
                   <ul className="font-mono text-xs text-gray-400 space-y-1">
+                    <li>• Jupiter service integration</li>
                     <li>• Order creation UI</li>
                     <li>• Buy/sell selection</li>
                     <li>• Price/amount inputs</li>
                     <li>• Expiry settings</li>
                     <li>• Order summary</li>
                     <li>• Token swap logic</li>
+                  </ul>
+                </div>
+
+                <div className="p-4 bg-gray-800 border-2 border-gray-700">
+                  <div className="font-pixel text-xs text-yellow-400 mb-2">IN PROGRESS:</div>
+                  <ul className="font-mono text-xs text-gray-400 space-y-1">
+                    <li>• Jupiter Limit Orders API</li>
+                    <li>• Order execution logic</li>
+                    <li>• Price monitoring</li>
+                    <li>• Automatic execution</li>
+                    <li>• Order management</li>
+                    <li>• OpenBook integration</li>
                   </ul>
                 </div>
               </div>

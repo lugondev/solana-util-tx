@@ -1,67 +1,52 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useConnection } from '@solana/wallet-adapter-react'
 import { PixelCard } from '@/components/ui/pixel-card'
 import { PixelButton } from '@/components/ui/pixel-button'
 import { PixelInput } from '@/components/ui/pixel-input'
 import { TrendingUp, DollarSign, Activity, Clock, AlertTriangle, BarChart3 } from 'lucide-react'
-
-interface TipData {
-  timestamp: string
-  tip: number
-  bundleSuccess: boolean
-  blockPosition: number
-  validator: string
-}
-
-const mockTipData: TipData[] = [
-  {
-    timestamp: '2024-10-04 14:30:25',
-    tip: 0.05,
-    bundleSuccess: true,
-    blockPosition: 1,
-    validator: 'Jito (Mainnet)'
-  },
-  {
-    timestamp: '2024-10-04 14:29:12',
-    tip: 0.01,
-    bundleSuccess: false,
-    blockPosition: 0,
-    validator: 'Jito (Mainnet)'
-  },
-  {
-    timestamp: '2024-10-04 14:28:45',
-    tip: 0.02,
-    bundleSuccess: true,
-    blockPosition: 3,
-    validator: 'Jito (Mainnet)'
-  }
-]
+import JitoTipTracker, { JitoTipData, JitoNetworkStats } from '@/lib/solana/jito/tip-tracker'
 
 export default function JitoTipsPage() {
+  const { connection } = useConnection()
   const [tipAmount, setTipAmount] = useState('0.01')
   const [selectedTimeframe, setSelectedTimeframe] = useState('1h')
-  const [liveData, setLiveData] = useState(mockTipData)
+  const [liveData, setLiveData] = useState<JitoTipData[]>([])
+  const [networkStats, setNetworkStats] = useState<JitoNetworkStats | null>(null)
+  const [tipTracker] = useState(() => new JitoTipTracker(connection))
+  const [isTracking, setIsTracking] = useState(false)
 
-  // Simulate real-time updates
+  // Initialize tip tracking
   useEffect(() => {
-    const interval = setInterval(() => {
-      const newTip: TipData = {
-        timestamp: new Date().toLocaleString(),
-        tip: Math.random() * 0.1,
-        bundleSuccess: Math.random() > 0.3,
-        blockPosition: Math.floor(Math.random() * 5) + 1,
-        validator: 'Jito (Mainnet)'
-      }
-      setLiveData(prev => [newTip, ...prev.slice(0, 19)])
-    }, 5000)
+    if (!isTracking) {
+      setIsTracking(true)
+      tipTracker.startTracking((newTip) => {
+        setLiveData(prev => [newTip, ...prev.slice(0, 19)])
+        setNetworkStats(tipTracker.getNetworkStats())
+      })
 
-    return () => clearInterval(interval)
-  }, [])
+      // Load initial data
+      const initialData = tipTracker.getTipHistory()
+      setLiveData(initialData)
+      setNetworkStats(tipTracker.getNetworkStats())
+    }
 
-  const avgTip = liveData.reduce((sum, data) => sum + data.tip, 0) / liveData.length
-  const successRate = (liveData.filter(data => data.bundleSuccess).length / liveData.length) * 100
-  const recommendedTip = avgTip * 1.2
+    return () => {
+      tipTracker.stopTracking()
+      setIsTracking(false)
+    }
+  }, [tipTracker, isTracking])
+
+  const avgTip = networkStats?.avgTip || 0.01
+  const successRate = networkStats?.successRate || 75
+  const recommendedTip = networkStats?.recommendedTip || 0.02
+
+  // Analyze current tip
+  const tipAnalysis = tipTracker.analyzeTipEfficiency(parseFloat(tipAmount))
+
+  // Get tip recommendation
+  const recommendation = tipTracker.getTipRecommendation(0.85)
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -102,7 +87,7 @@ export default function JitoTipsPage() {
                   <div className="font-mono text-xs text-gray-400">Recommended</div>
                 </div>
                 <div className="text-center p-3 bg-gray-800 border-2 border-gray-700">
-                  <div className="font-mono text-lg text-yellow-400">~400ms</div>
+                  <div className="font-mono text-lg text-yellow-400">~{networkStats?.blockTime || 400}ms</div>
                   <div className="font-mono text-xs text-gray-400">Avg Block Time</div>
                 </div>
               </div>
@@ -110,10 +95,11 @@ export default function JitoTipsPage() {
               <div className="p-3 bg-blue-600/10 border-4 border-blue-600/20">
                 <div className="flex items-center gap-2 mb-2">
                   <TrendingUp className="h-4 w-4 text-blue-400" />
-                  <span className="font-pixel text-xs text-blue-400">TIP RECOMMENDATION:</span>
+                  <span className="font-pixel text-xs text-blue-400">LIVE TIP ANALYSIS:</span>
                 </div>
-                <div className="font-mono text-sm text-blue-300">
-                  Based on current network activity, use {recommendedTip.toFixed(4)} SOL for optimal landing probability
+                <div className="font-mono text-xs text-blue-300">
+                  Based on {liveData.length} recent bundles, recommended tip is {recommendation.tip.toFixed(4)} SOL 
+                  for {(recommendation.confidence * 100).toFixed(0)}% confidence. {recommendation.reasoning}
                 </div>
               </div>
             </div>
@@ -190,18 +176,25 @@ export default function JitoTipsPage() {
                   <div className="flex justify-between">
                     <span className="font-mono text-xs text-gray-400">Success Probability:</span>
                     <span className={`font-mono text-xs ${
-                      parseFloat(tipAmount) >= recommendedTip ? 'text-green-400' :
-                      parseFloat(tipAmount) >= avgTip ? 'text-yellow-400' : 'text-red-400'
+                      tipAnalysis.expectedSuccessRate >= 0.8 ? 'text-green-400' :
+                      tipAnalysis.expectedSuccessRate >= 0.5 ? 'text-yellow-400' : 'text-red-400'
                     }`}>
-                      {parseFloat(tipAmount) >= recommendedTip ? 'HIGH (85-95%)' :
-                       parseFloat(tipAmount) >= avgTip ? 'MEDIUM (60-80%)' : 'LOW (20-50%)'}
+                      {(tipAnalysis.expectedSuccessRate * 100).toFixed(0)}%
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="font-mono text-xs text-gray-400">Expected Position:</span>
-                    <span className="font-mono text-xs text-white">
-                      #{parseFloat(tipAmount) >= recommendedTip ? '1-2' :
-                        parseFloat(tipAmount) >= avgTip ? '2-4' : '4-8'}
+                    <span className="font-mono text-xs text-gray-400">Efficiency:</span>
+                    <span className={`font-mono text-xs ${
+                      tipAnalysis.efficiency >= 0.8 ? 'text-green-400' :
+                      tipAnalysis.efficiency >= 0.6 ? 'text-yellow-400' : 'text-red-400'
+                    }`}>
+                      {(tipAnalysis.efficiency * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-mono text-xs text-gray-400">Suggestion:</span>
+                    <span className="font-mono text-xs text-white text-right">
+                      {tipAnalysis.suggestion}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -284,10 +277,16 @@ export default function JitoTipsPage() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 bg-gray-800 border-2 border-gray-700">
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <div className={`w-2 h-2 rounded-full ${
+                      networkStats?.competition === 'LOW' ? 'bg-green-400' :
+                      networkStats?.competition === 'MEDIUM' ? 'bg-yellow-400' : 'bg-red-400'
+                    }`}></div>
                     <span className="font-mono text-xs text-gray-400">Network Load</span>
                   </div>
-                  <span className="font-mono text-xs text-green-400">NORMAL</span>
+                  <span className={`font-mono text-xs ${
+                    networkStats?.competition === 'LOW' ? 'text-green-400' :
+                    networkStats?.competition === 'MEDIUM' ? 'text-yellow-400' : 'text-red-400'
+                  }`}>{networkStats?.competition || 'MEDIUM'}</span>
                 </div>
 
                 <div className="flex items-center justify-between p-3 bg-gray-800 border-2 border-gray-700">
@@ -295,7 +294,10 @@ export default function JitoTipsPage() {
                     <Clock className="h-4 w-4 text-blue-400" />
                     <span className="font-mono text-xs text-gray-400">Competition</span>
                   </div>
-                  <span className="font-mono text-xs text-yellow-400">MEDIUM</span>
+                  <span className={`font-mono text-xs ${
+                    networkStats?.competition === 'LOW' ? 'text-green-400' :
+                    networkStats?.competition === 'MEDIUM' ? 'text-yellow-400' : 'text-red-400'
+                  }`}>{networkStats?.competition || 'MEDIUM'}</span>
                 </div>
 
                 <div className="flex items-center justify-between p-3 bg-gray-800 border-2 border-gray-700">
@@ -303,13 +305,16 @@ export default function JitoTipsPage() {
                     <BarChart3 className="h-4 w-4 text-purple-400" />
                     <span className="font-mono text-xs text-gray-400">Volatility</span>
                   </div>
-                  <span className="font-mono text-xs text-green-400">LOW</span>
+                  <span className={`font-mono text-xs ${
+                    networkStats?.volatility === 'LOW' ? 'text-green-400' :
+                    networkStats?.volatility === 'MEDIUM' ? 'text-yellow-400' : 'text-red-400'
+                  }`}>{networkStats?.volatility || 'LOW'}</span>
                 </div>
               </div>
 
               <div className="pt-3 border-t-4 border-gray-700">
                 <div className="font-mono text-xs text-gray-400 text-center">
-                  Last updated: {new Date().toLocaleTimeString()}
+                  Last updated: {new Date().toLocaleTimeString()} (Live data)
                 </div>
               </div>
             </div>
