@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { PixelCard } from '@/components/ui/pixel-card'
 import { PixelButton } from '@/components/ui/pixel-button'
 import { PixelInput } from '@/components/ui/pixel-input'
@@ -11,8 +11,28 @@ interface JupiterQuote {
   outputMint: string
   inAmount: string
   outAmount: string
-  priceImpactPct: number
-  marketInfos: any[]
+  otherAmountThreshold: string
+  swapMode: string
+  slippageBps: number
+  platformFee: any
+  priceImpactPct: string
+  routePlan: Array<{
+    swapInfo: {
+      ammKey: string
+      label: string
+      inputMint: string
+      outputMint: string
+      inAmount: string
+      outAmount: string
+      feeAmount: string
+      feeMint: string
+    }
+    percent: number
+    bps: number
+  }>
+  contextSlot: number
+  timeTaken: number
+  swapUsdValue: string
 }
 
 export default function SwapPage() {
@@ -23,6 +43,14 @@ export default function SwapPage() {
   const [quote, setQuote] = useState<JupiterQuote | null>(null)
   const [loadingQuote, setLoadingQuote] = useState(false)
   const [error, setError] = useState('')
+
+  // Clear quote when input changes
+  useEffect(() => {
+    if (quote) {
+      setQuote(null)
+      setError('')
+    }
+  }, [inputToken, outputToken, inputAmount])
 
   const getQuote = async () => {
     if (!inputToken.trim() || !outputToken.trim() || !inputAmount || parseFloat(inputAmount) <= 0) {
@@ -70,6 +98,16 @@ export default function SwapPage() {
   const formatAmount = (amount: string, decimals: number = 6) => {
     const num = parseInt(amount) / Math.pow(10, decimals)
     return num.toFixed(6)
+  }
+
+  const formatPriceImpact = (priceImpact: string) => {
+    const impact = parseFloat(priceImpact)
+    return isNaN(impact) ? '0.00' : impact.toFixed(2)
+  }
+
+  const getPriceImpactColor = (priceImpact: string) => {
+    const impact = parseFloat(priceImpact)
+    return isNaN(impact) || impact <= 1 ? 'text-green-400' : 'text-red-400'
   }
 
   return (
@@ -138,9 +176,19 @@ export default function SwapPage() {
                     <input
                       type="text"
                       readOnly
-                      placeholder="Quote amount"
-                      className="w-full px-3 py-2 bg-gray-900 border-2 border-gray-600 font-mono text-lg text-green-400"
+                      value={quote ? formatAmount(quote.outAmount) : ''}
+                      placeholder="Output amount will appear here after getting quote"
+                      className={`w-full px-3 py-2 bg-gray-900 border-2 font-mono text-lg ${
+                        quote 
+                          ? 'border-green-400 text-green-400 bg-green-900/10' 
+                          : 'border-gray-600 text-gray-400'
+                      } cursor-not-allowed`}
                     />
+                    {quote && (
+                      <div className="mt-1 font-mono text-xs text-green-400">
+                        Estimated output: ~{formatAmount(quote.outAmount)} tokens
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -190,24 +238,54 @@ export default function SwapPage() {
 
                 {/* Quick Token Suggestions */}
                 <div className="p-4 bg-gray-800 border-2 border-gray-700">
-                  <div className="font-pixel text-xs text-gray-400 mb-2">Popular tokens:</div>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      { symbol: 'SOL', address: 'So11111111111111111111111111111111111111112' },
-                      { symbol: 'USDC', address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
-                      { symbol: 'USDT', address: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB' }
-                    ].map((token) => (
-                      <button
-                        key={token.symbol}
-                        className="px-2 py-1 font-mono text-xs border border-gray-600 text-gray-400 hover:border-green-400 hover:text-green-400 transition-colors"
-                        onClick={() => {
-                          if (!inputToken) setInputToken(token.address)
-                          else if (!outputToken) setOutputToken(token.address)
-                        }}
-                      >
-                        {token.symbol}
-                      </button>
-                    ))}
+                  <div className="font-pixel text-xs text-gray-400 mb-3">QUICK SELECT:</div>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <div className="font-mono text-xs text-gray-500 mb-1">FROM Token:</div>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { symbol: 'SOL', address: 'So11111111111111111111111111111111111111112' },
+                          { symbol: 'USDC', address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
+                          { symbol: 'USDT', address: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB' }
+                        ].map((token) => (
+                          <button
+                            key={`from-${token.symbol}`}
+                            className={`px-2 py-1 font-mono text-xs border transition-colors ${
+                              inputToken === token.address
+                                ? 'border-green-400 text-green-400 bg-green-900/20'
+                                : 'border-gray-600 text-gray-400 hover:border-green-400 hover:text-green-400'
+                            }`}
+                            onClick={() => setInputToken(token.address)}
+                          >
+                            {token.symbol}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="font-mono text-xs text-gray-500 mb-1">TO Token:</div>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { symbol: 'SOL', address: 'So11111111111111111111111111111111111111112' },
+                          { symbol: 'USDC', address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
+                          { symbol: 'USDT', address: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB' }
+                        ].map((token) => (
+                          <button
+                            key={`to-${token.symbol}`}
+                            className={`px-2 py-1 font-mono text-xs border transition-colors ${
+                              outputToken === token.address
+                                ? 'border-green-400 text-green-400 bg-green-900/20'
+                                : 'border-gray-600 text-gray-400 hover:border-green-400 hover:text-green-400'
+                            }`}
+                            onClick={() => setOutputToken(token.address)}
+                          >
+                            {token.symbol}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -239,14 +317,26 @@ export default function SwapPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="font-mono text-xs text-gray-400">Price Impact:</span>
-                    <span className={`font-mono text-xs ${quote.priceImpactPct > 1 ? 'text-red-400' : 'text-green-400'}`}>
-                      {quote.priceImpactPct.toFixed(2)}%
+                    <span className={`font-mono text-xs ${getPriceImpactColor(quote.priceImpactPct)}`}>
+                      {formatPriceImpact(quote.priceImpactPct)}%
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="font-mono text-xs text-gray-400">Route Hops:</span>
                     <span className="font-mono text-xs text-white">
-                      {quote.marketInfos?.length || 1} markets
+                      {quote.routePlan.length} hop(s)
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-mono text-xs text-gray-400">Swap USD Value:</span>
+                    <span className="font-mono text-xs text-white">
+                      ${parseFloat(quote.swapUsdValue).toFixed(4)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-mono text-xs text-gray-400">Route DEX:</span>
+                    <span className="font-mono text-xs text-white">
+                      {quote.routePlan[0]?.swapInfo.label || 'Unknown'}
                     </span>
                   </div>
                 </div>
