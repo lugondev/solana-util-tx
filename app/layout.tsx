@@ -1,63 +1,67 @@
 'use client'
 
 import './globals.css'
-import {ConnectionProvider, WalletProvider} from '@solana/wallet-adapter-react'
-import {WalletAdapterNetwork} from '@solana/wallet-adapter-base'
-import {PhantomWalletAdapter, SolflareWalletAdapter} from '@solana/wallet-adapter-wallets'
-import {WalletModalProvider, WalletMultiButton} from '@solana/wallet-adapter-react-ui'
-import {clusterApiUrl} from '@solana/web3.js'
-import {useMemo} from 'react'
-import Link from 'next/link'
+import WalletProvider from '@/components/WalletProvider'
+import Navigation from '@/components/Navigation'
+import { NetworkSwitcher } from '@/components/NetworkSwitcher'
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import { Press_Start_2P, VT323 } from 'next/font/google'
 
 // Import wallet adapter CSS
 import '@solana/wallet-adapter-react-ui/styles.css'
 
+// Pixel fonts
+const pressStart2P = Press_Start_2P({
+	weight: '400',
+	subsets: ['latin'],
+	variable: '--font-pixel',
+	display: 'swap',
+})
+
+const vt323 = VT323({
+	weight: '400',
+	subsets: ['latin'],
+	variable: '--font-mono',
+	display: 'swap',
+})
+
 export default function RootLayout({children}: {children: React.ReactNode}) {
-	// The network can be set to 'devnet', 'testnet', or 'mainnet-beta'
-	const network = WalletAdapterNetwork.Mainnet
-
-	// Use custom RPC endpoint from environment variable or fallback to default
-	const endpoint = useMemo(() => {
-		return process.env.NEXT_PUBLIC_SOLANA_RPC_URL || clusterApiUrl(network)
-	}, [network])
-
-	const wallets = useMemo(() => [new PhantomWalletAdapter(), new SolflareWalletAdapter()], [])
-
 	return (
-		<html lang='en'>
-			<body className='min-h-screen bg-gray-50'>
-				<ConnectionProvider endpoint={endpoint}>
-					<WalletProvider wallets={wallets} autoConnect>
-						<WalletModalProvider>
-							<nav className='bg-white shadow-sm border-b'>
-								<div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-									<div className='flex justify-between h-16'>
-										<div className='flex items-center space-x-8'>
-											<Link href='/' className='text-xl font-bold text-gray-900'>
-												Solana Utils
-											</Link>
-											<div className='flex space-x-6'>
-												<Link href='/' className='text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium'>
-													Home
-												</Link>
-												<Link href='/wallet' className='text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium'>
-													Wallet
-												</Link>
-												<Link href='/transaction' className='text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium'>
-													Transaction
-												</Link>
-											</div>
-										</div>
-										<div className='flex items-center'>
-											<WalletMultiButton className='!bg-gray-900 hover:!bg-gray-700' />
-										</div>
-									</div>
+		<html lang='en' className={`${pressStart2P.variable} ${vt323.variable}`}>
+			<body className='min-h-screen bg-gray-900 text-white font-mono'>
+				<WalletProvider>
+					<div className='flex h-screen'>
+						{/* Sidebar Navigation */}
+						<aside className='w-64 flex-shrink-0'>
+							<Navigation />
+						</aside>
+						
+						{/* Main Content */}
+						<div className='flex-1 flex flex-col overflow-hidden'>
+							{/* Top Bar */}
+							<header className='h-16 bg-gray-800 border-b-4 border-green-400/20 flex items-center justify-between px-6'>
+								<div className='flex items-center gap-4'>
+									<NetworkSwitcher />
 								</div>
-							</nav>
-							<main className='container mx-auto px-4 py-8'>{children}</main>
-						</WalletModalProvider>
-					</WalletProvider>
-				</ConnectionProvider>
+								<div className='flex items-center gap-4'>
+									<WalletMultiButton className='!bg-green-400 hover:!bg-green-400/80 !text-gray-900 !font-pixel !text-xs !py-2 !px-4' />
+								</div>
+							</header>
+							
+							{/* Main Content Area */}
+							<main className='flex-1 overflow-auto bg-gray-900 p-6'>
+								{children}
+							</main>
+						</div>
+					</div>
+					
+					{/* Scanline Effect */}
+					<div className='fixed inset-0 pointer-events-none z-50 opacity-10'>
+						<div className='absolute inset-0' style={{
+							backgroundImage: 'repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.1) 0px, transparent 1px, transparent 2px, rgba(0, 0, 0, 0.1) 3px)'
+						}} />
+					</div>
+				</WalletProvider>
 			</body>
 		</html>
 	)

@@ -1,78 +1,237 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
-import Link from 'next/link';
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useState } from 'react'
+import { ChevronRight, ChevronDown } from 'lucide-react'
 
-/**
- * Navigation component for the Solana utility application
- * Provides navigation links and mobile menu functionality
- */
-export default function Navigation() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+interface NavigationItem {
+  label: string
+  href?: string
+  children?: NavigationItem[]
+  icon?: string
+  comingSoon?: boolean
+}
 
-  const navItems = [
-    { name: 'Home', href: '/' },
-    { name: 'Wallet', href: '/wallet' },
-    { name: 'Transaction', href: '/transaction' },
-  ];
+const navigationItems: NavigationItem[] = [
+  { 
+    label: 'DASHBOARD', 
+    href: '/', 
+    icon: '🏠' 
+  },
+  { 
+    label: 'WALLET', 
+    href: '/wallet', 
+    icon: '💰' 
+  },
+  {
+    label: 'TRANSACTIONS',
+    icon: '⚡',
+    children: [
+      { label: 'Send', href: '/transaction/send' },
+      { label: 'Simulate', href: '/transaction/simulate' },
+      { label: 'History', href: '/transaction/history' },
+    ]
+  },
+  {
+    label: 'TOKENS',
+    icon: '🪙',
+    children: [
+      { label: 'Transfer', href: '/tokens/transfer', icon: '🔄' },
+      { label: 'Mint', href: '/tokens/mint', icon: '🏭' },
+      { label: 'Burn', href: '/tokens/burn', icon: '🔥' },
+      { label: 'Bulk Operations', href: '/tokens/bulk', icon: '📦' },
+      { label: 'Analytics', href: '/tokens/analytics', icon: '📊' },
+    ]
+  },
+  {
+    label: 'ALT',
+    icon: '📋',
+    children: [
+      { label: 'Create ALT', href: '/alt/create' },
+      { label: 'Manage ALT', href: '/alt/manage' },
+      { label: 'ALT Explorer', href: '/alt/explorer' },
+    ]
+  },
+  {
+    label: 'JITO/MEV',
+    icon: '🚀',
+    children: [
+      { label: 'Bundles', href: '/jito/bundle' },
+      { label: 'Tips', href: '/jito/tips' },
+    ]
+  },
+  {
+    label: 'ACCOUNTS',
+    icon: '📊',
+    children: [
+      { label: 'Explorer', href: '/accounts/explorer' },
+      { label: 'PDA Calculator', href: '/accounts/pda' },
+    ]
+  },
+  {
+    label: 'DEFI',
+    icon: '🔄',
+    children: [
+      { label: 'Swap (Jupiter)', href: '/defi/swap' },
+      { label: 'Liquidity', href: '/defi/liquidity' },
+      { label: 'Limit Orders', href: '/defi/limit-orders' },
+      { label: 'Lending', href: '/defi/lending', comingSoon: true },
+    ]
+  },
+  {
+    label: 'DEV TOOLS',
+    icon: '🛠️',
+    children: [
+      { label: 'Keypair', href: '/dev-tools/keypair' },
+      { label: 'Programs', href: '/dev-tools/programs' },
+      { label: 'Utilities', href: '/dev-tools/utils' },
+    ]
+  },
+]
 
-  return (
-    <nav className="bg-white shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <h1 className="text-xl font-bold text-gray-800">Solana Utils</h1>
-            </div>
+interface NavigationMenuProps {
+  item: NavigationItem
+  level?: number
+}
+
+function NavigationMenu({ item, level = 0 }: NavigationMenuProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const pathname = usePathname()
+  
+  const hasChildren = item.children && item.children.length > 0
+  const isActive = item.href ? pathname === item.href : false
+  const hasActiveChild = item.children?.some(child => pathname === child.href)
+  
+  const paddingClass = level === 0 ? 'pl-4' : 'pl-8'
+  
+  if (hasChildren) {
+    return (
+      <div>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className={`w-full flex items-center justify-between ${paddingClass} pr-4 py-3 font-pixel text-xs transition-colors ${
+            hasActiveChild 
+              ? 'text-green-400 bg-green-400/10' 
+              : 'text-gray-400 hover:text-green-400'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            {item.icon && <span className="text-sm">{item.icon}</span>}
+            <span>{item.label}</span>
           </div>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                {item.name}
-              </Link>
+          {isOpen ? (
+            <ChevronDown className="h-3 w-3" />
+          ) : (
+            <ChevronRight className="h-3 w-3" />
+          )}
+        </button>
+        
+        {isOpen && (
+          <div className="border-l-4 border-green-400/20 ml-6">
+            {item.children?.map((child, index) => (
+              <NavigationMenu key={index} item={child} level={level + 1} />
             ))}
           </div>
+        )}
+      </div>
+    )
+  }
+  
+  const linkContent = (
+    <div className="flex items-center gap-3">
+      {item.icon && <span className="text-sm">{item.icon}</span>}
+      <span>{item.label}</span>
+      {item.comingSoon && (
+        <span className="text-xs px-2 py-0.5 bg-yellow-600/20 text-yellow-400 border border-yellow-600/30">
+          SOON
+        </span>
+      )}
+    </div>
+  )
+  
+  if (item.comingSoon) {
+    return (
+      <div
+        className={`${paddingClass} pr-4 py-3 font-pixel text-xs cursor-not-allowed opacity-50`}
+      >
+        {linkContent}
+      </div>
+    )
+  }
+  
+  return (
+    <Link
+      href={item.href || '#'}
+      className={`block ${paddingClass} pr-4 py-3 font-pixel text-xs transition-colors ${
+        isActive 
+          ? 'text-green-400 bg-green-400/10 border-r-4 border-green-400' 
+          : 'text-gray-400 hover:text-green-400'
+      }`}
+    >
+      {linkContent}
+    </Link>
+  )
+}
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-600 hover:text-gray-900 focus:outline-none focus:text-gray-900"
-            >
-              {isMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </button>
+export default function Navigation() {
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  
+  return (
+    <nav className="h-screen bg-gray-900 border-r-4 border-green-400/20 flex flex-col">
+      {/* Header */}
+      <div className="p-4 border-b-4 border-green-400/20">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-green-400 border-4 border-green-400 animate-pulse" />
+            {!isCollapsed && (
+              <div>
+                <h1 className="font-pixel text-sm text-green-400">SOLANA</h1>
+                <p className="font-pixel text-xs text-gray-400">UTIL-TX</p>
+              </div>
+            )}
           </div>
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="font-pixel text-xs text-gray-400 hover:text-green-400 p-1"
+          >
+            {isCollapsed ? '▶' : '◀'}
+          </button>
         </div>
       </div>
-
-      {/* Mobile Navigation */}
-      {isMenuOpen && (
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-gray-600 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {item.name}
-              </Link>
+      
+      {/* Navigation Items */}
+      <div className="flex-1 overflow-y-auto">
+        {!isCollapsed && (
+          <div className="py-4">
+            {navigationItems.map((item, index) => (
+              <NavigationMenu key={index} item={item} />
             ))}
           </div>
-        </div>
-      )}
+        )}
+        
+        {isCollapsed && (
+          <div className="py-4 space-y-2">
+            {navigationItems.map((item, index) => (
+              <div key={index} className="px-4">
+                <div className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-green-400 transition-colors">
+                  {item.icon}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      
+      {/* Footer */}
+      <div className="p-4 border-t-4 border-green-400/20">
+        {!isCollapsed && (
+          <div className="font-mono text-xs text-gray-500">
+            <div>v1.0.0</div>
+            <div>Phase 2</div>
+          </div>
+        )}
+      </div>
     </nav>
-  );
+  )
 }

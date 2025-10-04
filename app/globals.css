@@ -2,163 +2,345 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom base styles */
+/* Pixel Art Base Styles */
 @layer base {
+  /* Pixel Color Palette - Dark Theme */
+  :root {
+    /* Background Colors - Darker for consistency */
+    --pixel-bg-primary: #0a0a0f;
+    --pixel-bg-secondary: #111116;
+    --pixel-bg-tertiary: #1a1a20;
+    --pixel-bg-quaternary: #242430;
+    
+    /* Accent Colors - Matrix Green */
+    --pixel-accent: #00ff41;
+    --pixel-accent-dim: #00cc33;
+    --pixel-accent-bright: #00ff88;
+    --pixel-accent-dark: #009922;
+    
+    /* Status Colors */
+    --pixel-success: #00ff41;
+    --pixel-warning: #ffaa00;
+    --pixel-error: #ff3366;
+    --pixel-info: #00aaff;
+    
+    /* Text Colors - Better contrast */
+    --pixel-text-primary: #ffffff;
+    --pixel-text-secondary: #cccccc;
+    --pixel-text-tertiary: #999999;
+    --pixel-text-quaternary: #666666;
+    --pixel-text-accent: #00ff41;
+    
+    /* Border & Shadow - Darker */
+    --pixel-border-primary: #333333;
+    --pixel-border-secondary: #444444;
+    --pixel-border-accent: #00ff41;
+    --pixel-shadow: #000000;
+    
+    /* Input & Form Colors */
+    --pixel-input-bg: #1a1a20;
+    --pixel-input-border: #333333;
+    --pixel-input-focus: #00ff41;
+    
+    /* Special Effects */
+    --pixel-glow: #00ff41;
+    --pixel-scanline: rgba(0, 0, 0, 0.1);
+  }
+
   html {
     scroll-behavior: smooth;
+    font-size: 16px; /* Base font size */
   }
   
   body {
-    @apply text-gray-900 bg-gray-50;
+    background-color: var(--pixel-bg-primary);
+    color: var(--pixel-text-primary);
+    font-family: var(--font-pixel);
+    font-size: 12px; /* Pixel font base size */
+    line-height: 1.4;
+    image-rendering: pixelated;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   * {
-    @apply border-gray-200;
+    image-rendering: pixelated;
+    box-sizing: border-box;
+  }
+  
+  /* Headings with consistent pixel sizing */
+  h1 { font-size: 24px; line-height: 1.2; }
+  h2 { font-size: 20px; line-height: 1.2; }
+  h3 { font-size: 16px; line-height: 1.2; }
+  h4 { font-size: 14px; line-height: 1.2; }
+  h5 { font-size: 12px; line-height: 1.2; }
+  h6 { font-size: 10px; line-height: 1.2; }
+  
+  /* Pixel Animations */
+  @keyframes pixel-blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+
+  @keyframes pixel-loading {
+    0% { content: '.'; }
+    33% { content: '..'; }
+    66% { content: '...'; }
+    100% { content: '.'; }
+  }
+
+  @keyframes pixel-slide-in {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+
+  @keyframes pixel-slide-in-right {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes pixel-slide-up {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes pixel-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes pixel-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  @keyframes pixel-glow {
+    0%, 100% {
+      text-shadow: 
+        0 0 2px var(--pixel-glow),
+        0 0 4px var(--pixel-glow);
+    }
+    50% {
+      text-shadow: 
+        0 0 4px var(--pixel-glow),
+        0 0 8px var(--pixel-glow),
+        0 0 12px var(--pixel-glow);
+    }
   }
 }
 
-/* Custom component styles */
+/* Pixel Art Component Styles */
 @layer components {
-  /* Wallet adapter button customization */
+  /* Pixel Button Base - Consistent sizing */
+  .pixel-btn {
+    font-family: var(--font-pixel);
+    border: 4px solid var(--pixel-border-primary);
+    background: var(--pixel-bg-secondary);
+    color: var(--pixel-text-primary);
+    padding: 12px 20px;
+    font-size: 10px;
+    line-height: 1;
+    cursor: pointer;
+    transition: none;
+    image-rendering: pixelated;
+    position: relative;
+    text-transform: uppercase;
+    box-shadow: 4px 4px 0 var(--pixel-shadow);
+  }
+  
+  .pixel-btn:hover {
+    border-color: var(--pixel-accent);
+    color: var(--pixel-accent);
+    box-shadow: 4px 4px 0 var(--pixel-accent-dark);
+  }
+  
+  /* Pixel Card - Consistent dark theme */
+  .pixel-card {
+    border: 4px solid var(--pixel-border-primary);
+    background: var(--pixel-bg-secondary);
+    color: var(--pixel-text-primary);
+    padding: 20px;
+    box-shadow: 
+      4px 4px 0 var(--pixel-shadow),
+      8px 8px 0 rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Pixel Input - Consistent styling */
+  .pixel-input {
+    font-family: var(--font-mono);
+    background: var(--pixel-input-bg);
+    border: 4px solid var(--pixel-input-border);
+    color: var(--pixel-text-primary);
+    padding: 12px 16px;
+    font-size: 12px;
+    line-height: 1;
+    transition: none;
+    image-rendering: pixelated;
+  }
+  
+  .pixel-input:focus {
+    outline: none;
+    border-color: var(--pixel-input-focus);
+    box-shadow: 0 0 0 2px var(--pixel-accent-dark);
+  }
+  
+  .pixel-input::placeholder {
+    color: var(--pixel-text-quaternary);
+  }
+
+  /* Wallet adapter button customization - Pixel Style */
   .wallet-adapter-button {
-    @apply bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200;
+    font-family: var(--font-pixel) !important;
+    background-color: var(--pixel-bg-secondary) !important;
+    color: var(--pixel-accent) !important;
+    border: 4px solid var(--pixel-accent) !important;
+    padding: 12px 24px !important;
+    font-size: 10px !important;
+    text-transform: uppercase !important;
+    transition: none !important;
+    border-radius: 0 !important;
+    box-shadow: 4px 4px 0 var(--pixel-accent-dim), 8px 8px 0 var(--pixel-shadow) !important;
   }
   
   .wallet-adapter-button:not([disabled]):hover {
-    @apply bg-purple-700;
+    background-color: var(--pixel-accent) !important;
+    color: var(--pixel-bg-primary) !important;
+    box-shadow: 4px 4px 0 var(--pixel-accent-bright), 8px 8px 0 var(--pixel-accent-dim) !important;
   }
   
   .wallet-adapter-button[disabled] {
-    @apply opacity-50 cursor-not-allowed;
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
   }
   
-  /* Wallet adapter modal customization */
+  /* Wallet adapter modal customization - Pixel Style */
   .wallet-adapter-modal {
-    @apply bg-white rounded-lg shadow-xl;
+    background-color: var(--pixel-bg-secondary) !important;
+    font-family: var(--font-pixel) !important;
+    border: 4px solid var(--pixel-accent) !important;
+    border-radius: 0 !important;
+    box-shadow: 8px 8px 0 var(--pixel-shadow), 16px 16px 0 rgba(0, 0, 0, 0.5) !important;
   }
   
   .wallet-adapter-modal-title {
-    @apply text-xl font-semibold text-gray-900;
+    font-family: var(--font-pixel) !important;
+    color: var(--pixel-accent) !important;
+    font-size: 14px !important;
+    text-transform: uppercase !important;
   }
   
   .wallet-adapter-modal-list {
-    @apply space-y-2;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
   }
   
   .wallet-adapter-modal-list-item {
-    @apply p-3 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-colors cursor-pointer;
+    padding: 12px !important;
+    background-color: var(--pixel-bg-tertiary) !important;
+    color: var(--pixel-text-primary) !important;
+    border: 4px solid var(--pixel-border-primary) !important;
+    border-radius: 0 !important;
+    transition: none !important;
+    cursor: pointer !important;
   }
   
-  /* Custom card component */
-  .card {
-    @apply bg-white rounded-lg shadow-md border border-gray-200;
+  .wallet-adapter-modal-list-item:hover {
+    border-color: var(--pixel-accent) !important;
+    background-color: var(--pixel-bg-primary) !important;
   }
   
-  .card-header {
-    @apply p-6 border-b border-gray-200;
+  /* Pixel Form Components */
+  .pixel-label {
+    font-family: var(--font-pixel);
+    color: var(--pixel-text-secondary);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    display: block;
   }
   
-  .card-body {
-    @apply p-6;
+  .pixel-error {
+    font-family: var(--font-mono);
+    color: var(--pixel-error);
+    font-size: 10px;
+    margin-top: 4px;
   }
   
-  .card-footer {
-    @apply p-6 border-t border-gray-200 bg-gray-50;
+  /* Pixel Alert Styles */
+  .pixel-alert {
+    border: 4px solid;
+    padding: 16px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--pixel-bg-tertiary);
   }
   
-  /* Custom button variants */
-  .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  .pixel-alert-success {
+    border-color: var(--pixel-success);
+    color: var(--pixel-success);
   }
   
-  .btn-primary {
-    @apply bg-purple-600 text-white hover:bg-purple-700 focus:ring-purple-500;
+  .pixel-alert-error {
+    border-color: var(--pixel-error);
+    color: var(--pixel-error);
   }
   
-  .btn-secondary {
-    @apply bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500;
+  .pixel-alert-warning {
+    border-color: var(--pixel-warning);
+    color: var(--pixel-warning);
   }
   
-  .btn-success {
-    @apply bg-green-600 text-white hover:bg-green-700 focus:ring-green-500;
-  }
-  
-  .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
-  }
-  
-  .btn-outline {
-    @apply border border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white focus:ring-purple-500;
-  }
-  
-  /* Custom form styles */
-  .form-input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent;
-  }
-  
-  .form-input.error {
-    @apply border-red-500 focus:ring-red-500;
-  }
-  
-  .form-label {
-    @apply block text-sm font-medium text-gray-700 mb-2;
-  }
-  
-  .form-error {
-    @apply text-red-500 text-sm mt-1;
-  }
-  
-  /* Custom alert styles */
-  .alert {
-    @apply p-4 rounded-lg border;
-  }
-  
-  .alert-success {
-    @apply bg-green-50 border-green-200 text-green-800;
-  }
-  
-  .alert-error {
-    @apply bg-red-50 border-red-200 text-red-800;
-  }
-  
-  .alert-warning {
-    @apply bg-yellow-50 border-yellow-200 text-yellow-800;
-  }
-  
-  .alert-info {
-    @apply bg-blue-50 border-blue-200 text-blue-800;
+  .pixel-alert-info {
+    border-color: var(--pixel-info);
+    color: var(--pixel-info);
   }
 }
 
-/* Custom utility classes */
+/* Pixel Utility Classes */
 @layer utilities {
-  .text-gradient {
-    @apply bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent;
+  /* Text utilities */
+  .text-pixel-primary { color: var(--pixel-text-primary); }
+  .text-pixel-secondary { color: var(--pixel-text-secondary); }
+  .text-pixel-tertiary { color: var(--pixel-text-tertiary); }
+  .text-pixel-accent { color: var(--pixel-text-accent); }
+  
+  /* Background utilities */
+  .bg-pixel-primary { background-color: var(--pixel-bg-primary); }
+  .bg-pixel-secondary { background-color: var(--pixel-bg-secondary); }
+  .bg-pixel-tertiary { background-color: var(--pixel-bg-tertiary); }
+  
+  /* Border utilities */
+  .border-pixel { border-color: var(--pixel-border-primary); }
+  .border-pixel-accent { border-color: var(--pixel-border-accent); }
+  
+  /* Pixel shadows */
+  .shadow-pixel {
+    box-shadow: 4px 4px 0 var(--pixel-shadow);
   }
   
-  .bg-gradient-purple {
-    @apply bg-gradient-to-r from-purple-500 to-purple-600;
-  }
-  
-  .shadow-purple {
-    box-shadow: 0 4px 14px 0 rgba(139, 69, 197, 0.15);
-  }
-  
-  .border-gradient {
-    @apply border-2 border-transparent bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-border;
+  .shadow-pixel-lg {
+    box-shadow: 
+      4px 4px 0 var(--pixel-shadow),
+      8px 8px 0 rgba(0, 0, 0, 0.3);
   }
   
   /* Animation utilities */
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-in-out;
+  .animate-pixel-blink {
+    animation: pixel-blink 1s infinite;
   }
   
-  .animate-slide-up {
-    animation: slideUp 0.3s ease-out;
+  .animate-pixel-pulse {
+    animation: pixel-pulse 2s infinite;
   }
   
-  .animate-bounce-in {
-    animation: bounceIn 0.6s ease-out;
+  .animate-pixel-glow {
+    animation: pixel-glow 2s infinite;
+  }
+  
+  .animate-pixel-spin {
+    animation: pixel-spin 1s linear infinite;
   }
 }
 
@@ -203,7 +385,8 @@
 /* Responsive design helpers */
 @media (max-width: 640px) {
   .container {
-    @apply px-4;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 }
 
@@ -214,7 +397,8 @@
   }
   
   body {
-    @apply bg-white text-black;
+    background-color: white !important;
+    color: black !important;
   }
 }
 
@@ -234,22 +418,29 @@
 
 /* Focus styles for better accessibility */
 .focus-visible:focus {
-  @apply outline-none ring-2 ring-purple-500 ring-offset-2;
+  outline: none !important;
+  box-shadow: 0 0 0 2px var(--pixel-accent), 0 0 0 4px var(--pixel-accent-dark) !important;
 }
 
-/* Custom scrollbar */
+/* Pixel Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100;
+  background: var(--pixel-bg-primary);
+  border: 2px solid var(--pixel-border-primary);
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded-full;
+  background: var(--pixel-accent);
+  border: 2px solid var(--pixel-bg-primary);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400;
+  background: var(--pixel-accent-bright);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--pixel-bg-primary);
 }

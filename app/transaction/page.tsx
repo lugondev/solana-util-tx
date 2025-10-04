@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Send, AlertCircle, CheckCircle, Loader, ExternalLink } from 'lucide-react';
-import { useWallet, useConnection } from '@solana/wallet-adapter-react';
+import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { 
   Transaction, 
@@ -11,6 +11,11 @@ import {
   PublicKey,
   TransactionInstruction
 } from '@solana/web3.js';
+import { PixelCard } from '@/components/ui/pixel-card';
+import { PixelButton } from '@/components/ui/pixel-button';
+import { PixelInput } from '@/components/ui/pixel-input';
+import { useNetwork } from '@/contexts/NetworkContext';
+import { NETWORKS, getExplorerUrl } from '@/lib/network';
 
 /**
  * Transaction page component for creating and sending real Solana transactions
@@ -28,7 +33,7 @@ export default function TransactionPage() {
   const [errors, setErrors] = useState<{[key: string]: string | undefined}>({});
   
   const { publicKey, connected, sendTransaction, disconnect } = useWallet();
-  const { connection } = useConnection();
+  const { connection, network } = useNetwork();
 
   /**
    * Validate form data before transaction creation
@@ -151,11 +156,9 @@ export default function TransactionPage() {
    * Open transaction in Solana Explorer
    */
   const openInExplorer = (signature: string) => {
-    const url = `https://explorer.solana.com/tx/${signature}?cluster=devnet`;
+    const url = getExplorerUrl(signature, network);
     window.open(url, '_blank');
-  };
-
-  /**
+  };  /**
    * Handle wallet disconnection
    */
   const handleDisconnect = async () => {
@@ -174,173 +177,181 @@ export default function TransactionPage() {
 
   if (!connected) {
     return (
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white border border-gray-200 p-8 text-center">
-          <AlertCircle className="h-16 w-16 text-gray-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Wallet Not Connected</h1>
-          <p className="text-gray-600 mb-6">Please connect your wallet to send transactions.</p>
-          <div className="space-y-4">
-            <WalletMultiButton />
-            <button
-              onClick={() => (window.location.href = '/')}
-              className="bg-gray-600 text-white px-6 py-2 hover:bg-gray-700 ml-4"
-            >
-              Go to Home
-            </button>
-          </div>
+      <div className="min-h-screen p-4" style={{ backgroundColor: 'var(--pixel-bg-primary)' }}>
+        <div className="max-w-2xl mx-auto">
+          <PixelCard>
+            <div className="text-center py-8">
+              <span className="text-6xl mb-4 block">💼</span>
+              <h1 className="font-pixel text-xl mb-2" style={{ color: 'var(--pixel-accent)' }}>
+                WALLET NOT CONNECTED
+              </h1>
+              <p className="font-mono text-sm mb-6" style={{ color: 'var(--pixel-text-secondary)' }}>
+                Please connect your wallet to send transactions.
+              </p>
+              <div className="space-y-4">
+                <WalletMultiButton />
+                <PixelButton
+                  variant="secondary"
+                  onClick={() => (window.location.href = '/')}
+                >
+                  [GO TO HOME]
+                </PixelButton>
+              </div>
+            </div>
+          </PixelCard>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Send Transaction</h1>
-            <p className="text-gray-600">Create and broadcast Solana transactions securely</p>
+    <div className="min-h-screen p-4" style={{ backgroundColor: 'var(--pixel-bg-primary)' }}>
+      <div className="max-w-2xl mx-auto space-y-6">
+        {/* Header */}
+        <PixelCard>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="font-pixel text-xl mb-2" style={{ color: 'var(--pixel-accent)' }}>
+                SEND TRANSACTION
+              </h1>
+              <p className="font-mono text-sm mb-2" style={{ color: 'var(--pixel-text-secondary)' }}>
+                Create and broadcast Solana transactions securely
+              </p>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm">{network === 'mainnet-beta' ? '🔴' : '🟠'}</span>
+                <span className="font-pixel text-xs" style={{ 
+                  color: network === 'mainnet-beta' ? 'var(--pixel-error)' : 'var(--pixel-accent)'
+                }}>
+                  {NETWORKS[network].label}
+                </span>
+              </div>
+            </div>
+            <PixelButton
+              variant="danger"
+              onClick={handleDisconnect}
+            >
+              [DISCONNECT]
+            </PixelButton>
           </div>
-          <button
-            onClick={handleDisconnect}
-            className="bg-gray-600 text-white px-4 py-2 hover:bg-gray-700"
-          >
-            Disconnect
-          </button>
-        </div>
-      </div>
+        </PixelCard>
 
-      {/* Transaction Form */}
-      <div className="bg-white border border-gray-200 p-6 mb-6">
-        <div className="flex items-center space-x-3 mb-6">
-          <Send className="h-6 w-6 text-gray-600" />
-          <h2 className="text-lg font-semibold text-gray-900">SOL Transfer</h2>
-        </div>
-
-        <div className="space-y-4">
-          {/* Recipient Address */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Recipient Address *
-            </label>
-            <input
+        {/* Transaction Form */}
+        <PixelCard header="SOL TRANSFER">
+          <div className="space-y-4">
+            {/* Recipient Address */}
+            <PixelInput
+              label="RECIPIENT ADDRESS *"
               type="text"
               value={formData.recipient}
               onChange={(e) => handleInputChange('recipient', e.target.value)}
               placeholder="Enter Solana wallet address"
-              className={`w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-gray-500 ${
-                errors.recipient ? 'border-red-500' : 'border-gray-300'
-              }`}
+              error={errors.recipient}
               disabled={loading}
             />
-            {errors.recipient && (
-              <p className="text-red-500 text-sm mt-1">{errors.recipient}</p>
-            )}
-          </div>
 
-          {/* Amount */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Amount (SOL) *
-            </label>
-            <input
+            {/* Amount */}
+            <PixelInput
+              label="AMOUNT (SOL) *"
               type="number"
               value={formData.amount || ''}
               onChange={(e) => handleInputChange('amount', parseFloat(e.target.value) || 0)}
               placeholder="0.00"
               step="0.000001"
               min="0"
-              className={`w-full px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-gray-500 ${
-                errors.amount ? 'border-red-500' : 'border-gray-300'
-              }`}
+              error={errors.amount}
               disabled={loading}
             />
-            {errors.amount && (
-              <p className="text-red-500 text-sm mt-1">{errors.amount}</p>
-            )}
-          </div>
 
-          {/* Memo */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Memo (Optional)
-            </label>
-            <textarea
-              value={formData.memo}
-              onChange={(e) => handleInputChange('memo', e.target.value)}
-              placeholder="Add a note to your transaction"
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            {/* Memo */}
+            <div>
+              <label className="font-pixel text-xs mb-2 uppercase block" style={{ color: 'var(--pixel-text-secondary)' }}>
+                MEMO (OPTIONAL)
+              </label>
+              <textarea
+                value={formData.memo}
+                onChange={(e) => handleInputChange('memo', e.target.value)}
+                placeholder="Add a note to your transaction"
+                rows={3}
+                className="w-full px-3 py-3 border-4 font-mono text-sm focus:outline-none"
+                style={{
+                  backgroundColor: 'var(--pixel-input-bg)',
+                  borderColor: 'var(--pixel-input-border)',
+                  color: 'var(--pixel-text-primary)'
+                }}
+                disabled={loading}
+              />
+            </div>
+
+            {/* Send Button */}
+            <PixelButton
+              variant="primary"
+              onClick={handleSendTransaction}
               disabled={loading}
-            />
+              isLoading={loading}
+              className="w-full"
+            >
+              [SEND TRANSACTION]
+            </PixelButton>
           </div>
+        </PixelCard>
 
-          {/* Send Button */}
-          <button
-            onClick={handleSendTransaction}
-            disabled={loading}
-            className="w-full bg-gray-600 text-white py-3 px-4 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-          >
-            {loading ? (
-              <>
-                <Loader className="h-5 w-5 animate-spin" />
-                <span>Processing...</span>
-              </>
-            ) : (
-              <>
-                <Send className="h-5 w-5" />
-                <span>Send Transaction</span>
-              </>
-            )}
-          </button>
-        </div>
-      </div>
+        {/* Transaction Result */}
+        {result && (
+          <PixelCard>
+            <div className="flex items-center space-x-3 mb-4">
+              {result.success ? (
+                <span className="text-2xl">✅</span>
+              ) : (
+                <span className="text-2xl">❌</span>
+              )}
+              <h3 className="font-pixel text-sm" style={{
+                color: result.success ? 'var(--pixel-success)' : 'var(--pixel-error)'
+              }}>
+                {result.success ? 'TRANSACTION SUCCESSFUL' : 'TRANSACTION FAILED'}
+              </h3>
+            </div>
 
-      {/* Transaction Result */}
-      {result && (
-        <div className="bg-white border border-gray-200 p-6">
-          <div className="flex items-center space-x-3 mb-4">
             {result.success ? (
-              <CheckCircle className="h-6 w-6 text-gray-600" />
-            ) : (
-              <AlertCircle className="h-6 w-6 text-gray-600" />
-            )}
-            <h3 className="text-lg font-semibold text-gray-900">
-              {result.success ? 'Transaction Successful' : 'Transaction Failed'}
-            </h3>
-          </div>
-
-          {result.success ? (
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Transaction Signature</p>
-                <div className="flex items-center space-x-2">
-                  <p className="font-mono text-sm text-gray-800 break-all flex-1">
-                    {result.signature}
+              <div className="space-y-3">
+                <div>
+                  <p className="font-pixel text-xs mb-1 uppercase" style={{ color: 'var(--pixel-text-secondary)' }}>
+                    TRANSACTION SIGNATURE
                   </p>
-                  <button
-                    onClick={() => openInExplorer(result.signature)}
-                    className="flex items-center space-x-1 text-gray-600 hover:text-gray-700"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    <span className="text-sm">Explorer</span>
-                  </button>
+                  <div className="flex items-center space-x-2">
+                    <p className="font-mono text-sm break-all flex-1" style={{ color: 'var(--pixel-text-primary)' }}>
+                      {result.signature}
+                    </p>
+                    <PixelButton
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => openInExplorer(result.signature)}
+                    >
+                      🔗
+                    </PixelButton>
+                  </div>
+                </div>
+                <div className="p-3 border-4" style={{
+                  backgroundColor: 'var(--pixel-bg-primary)',
+                  borderColor: 'var(--pixel-success)'
+                }}>
+                  <p className="font-mono text-sm" style={{ color: 'var(--pixel-success)' }}>
+                    Your transaction has been successfully submitted to the network.
+                  </p>
                 </div>
               </div>
-              <div className="bg-gray-50 border border-gray-200 p-3">
-                <p className="text-gray-700 text-sm">
-                  Your transaction has been successfully submitted to the network.
+            ) : (
+              <div className="p-3 border-4" style={{
+                backgroundColor: 'var(--pixel-bg-primary)',
+                borderColor: 'var(--pixel-error)'
+              }}>
+                <p className="font-mono text-sm" style={{ color: 'var(--pixel-error)' }}>
+                  {result.error}
                 </p>
               </div>
-            </div>
-          ) : (
-            <div className="bg-gray-50 border border-gray-200 p-3">
-              <p className="text-gray-700 text-sm">{result.error}</p>
-            </div>
-          )}
-        </div>
-      )}
+            )}
+          </PixelCard>
+        )}
+      </div>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import {WalletAdapterNetwork} from '@solana/wallet-adapter-base'
 import {PhantomWalletAdapter, SolflareWalletAdapter, TorusWalletAdapter, LedgerWalletAdapter} from '@solana/wallet-adapter-wallets'
 import {WalletModalProvider} from '@solana/wallet-adapter-react-ui'
 import {clusterApiUrl} from '@solana/web3.js'
+import {NetworkProvider, useNetwork} from '@/contexts/NetworkContext'
 
 // Import wallet adapter CSS
 import '@solana/wallet-adapter-react-ui/styles.css'
@@ -15,29 +16,16 @@ interface WalletProviderProps {
 }
 
 /**
- * WalletProvider component that wraps the application with Solana wallet functionality
- * Provides connection to Solana network and wallet adapters
+ * Inner WalletProvider that uses NetworkContext
  */
-export const WalletProvider: FC<WalletProviderProps> = ({children}) => {
-	// The network can be set to 'devnet', 'testnet', or 'mainnet-beta'
-	const network = WalletAdapterNetwork.Mainnet
+const WalletProviderInner: FC<WalletProviderProps> = ({children}) => {
+	const { network, connection } = useNetwork()
 
-	// Use custom RPC endpoint from environment variable or fallback to default
-	const endpoint = useMemo(() => {
-		const customRpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL
-		return customRpcUrl || clusterApiUrl(network)
-	}, [network])
-
-	// Configure wallet adapters
+	// Configure wallet adapters based on current network
 	const wallets = useMemo(
 		() => [
-			/**
-			 * Wallets that implement either of these interfaces will be available in your app:
-			 * - Solana Mobile Stack Mobile Wallet Adapter Protocol
-			 * - Solana Wallet Standard
-			 */
 			new PhantomWalletAdapter(),
-			new SolflareWalletAdapter({network}),
+			new SolflareWalletAdapter({network: network === 'mainnet-beta' ? WalletAdapterNetwork.Mainnet : WalletAdapterNetwork.Devnet}),
 			new TorusWalletAdapter(),
 			new LedgerWalletAdapter(),
 		],
@@ -45,11 +33,25 @@ export const WalletProvider: FC<WalletProviderProps> = ({children}) => {
 	)
 
 	return (
-		<ConnectionProvider endpoint={endpoint}>
+		<ConnectionProvider endpoint={connection.rpcEndpoint}>
 			<SolanaWalletProvider wallets={wallets} autoConnect>
 				<WalletModalProvider>{children}</WalletModalProvider>
 			</SolanaWalletProvider>
 		</ConnectionProvider>
+	)
+}
+
+/**
+ * WalletProvider component that wraps the application with Solana wallet functionality
+ * Provides connection to Solana network and wallet adapters with network switching
+ */
+export const WalletProvider: FC<WalletProviderProps> = ({children}) => {
+	return (
+		<NetworkProvider>
+			<WalletProviderInner>
+				{children}
+			</WalletProviderInner>
+		</NetworkProvider>
 	)
 }
 
