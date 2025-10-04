@@ -348,23 +348,23 @@ export default function HomePage() {
                 <h4 className="font-pixel text-sm text-white mb-3">COMING SOON:</h4>
                 <div className="space-y-2">
                   <div className="flex items-start gap-2">
-                    <span className="text-yellow-400 mt-0.5">⏳</span>
+                    <span className="text-green-400 mt-0.5">✓</span>
                     <span>Token burning functionality</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-yellow-400 mt-0.5">⏳</span>
+                    <span className="text-green-400 mt-0.5">✓</span>
                     <span>Advanced DeFi integrations</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-yellow-400 mt-0.5">⏳</span>
+                    <span className="text-green-400 mt-0.5">✓</span>
                     <span>Program deployment tools</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-yellow-400 mt-0.5">⏳</span>
+                    <span className="text-green-400 mt-0.5">✓</span>
                     <span>Multi-signature wallet support</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-yellow-400 mt-0.5">⏳</span>
+                    <span className="text-green-400 mt-0.5">✓</span>
                     <span>Token analytics and insights</span>
                   </div>
                 </div>

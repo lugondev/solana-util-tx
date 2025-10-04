@@ -20,9 +20,17 @@ const navigationItems: NavigationItem[] = [
     icon: '🏠' 
   },
   { 
-    label: 'WALLET', 
-    href: '/wallet', 
-    icon: '💰' 
+    label: 'FEATURES', 
+    href: '/features', 
+    icon: '⭐' 
+  },
+  { 
+    label: 'WALLET',
+    icon: '💰',
+    children: [
+      { label: 'Overview', href: '/wallet' },
+      { label: 'Multisig', href: '/wallet/multisig', icon: '�️' },
+    ]
   },
   {
     label: 'TRANSACTIONS',
@@ -85,6 +93,7 @@ const navigationItems: NavigationItem[] = [
     children: [
       { label: 'Keypair', href: '/dev-tools/keypair' },
       { label: 'Programs', href: '/dev-tools/programs' },
+      { label: 'Deploy', href: '/dev-tools/deploy', icon: '🚀' },
       { label: 'Utilities', href: '/dev-tools/utils' },
     ]
   },
