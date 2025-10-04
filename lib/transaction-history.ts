@@ -5,7 +5,7 @@
 export interface TransactionHistoryItem {
   id: string
   signature: string
-  type: 'sol-transfer' | 'token-transfer' | 'alt-create' | 'alt-extend' | 'custom'
+  type: 'sol-transfer' | 'token-transfer' | 'alt-create' | 'alt-extend' | 'jito-bundle' | 'custom'
   status: 'pending' | 'confirmed' | 'failed'
   timestamp: number
   amount?: number

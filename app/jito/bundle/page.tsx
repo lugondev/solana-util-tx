@@ -1,51 +1,103 @@
 'use client'
 
 import { useState } from 'react'
+import { useWallet } from '@solana/wallet-adapter-react'
 import { PixelCard } from '@/components/ui/pixel-card'
 import { PixelButton } from '@/components/ui/pixel-button'
-import { PixelInput } from '@/components/ui/pixel-input'
-import { Package, Layers, TrendingUp, Clock, AlertCircle, Zap } from 'lucide-react'
-
-interface BundleTransaction {
-  id: string
-  signature: string
-  type: 'swap' | 'transfer' | 'mint' | 'burn'
-  estimatedCU: number
-  priority: 'high' | 'medium' | 'low'
-}
+import { PixelWalletButton } from '@/components/ui/pixel-wallet-button'
+import { JitoRegionSelector } from '@/components/jito/jito-region-selector'
+import { BundleTransactionBuilder } from '@/components/jito/bundle-transaction-builder'
+import { useJitoBundle } from '@/hooks/useJitoBundle'
+import { BundleTransaction } from '@/lib/solana/jito/bundle-service'
+import { JITO_TIP_PRESETS, JitoTipPreset } from '@/lib/solana/jito/config'
+import { 
+  Layers, 
+  Zap, 
+  TrendingUp, 
+  Clock, 
+  AlertCircle, 
+  CheckCircle,
+  ExternalLink,
+  Loader2,
+  DollarSign
+} from 'lucide-react'
 
 export default function JitoBundlePage() {
+  const { connected, publicKey } = useWallet()
   const [transactions, setTransactions] = useState<BundleTransaction[]>([])
-  const [bundleTip, setBundleTip] = useState('0.001')
-  const [maxRetries, setMaxRetries] = useState('3')
-  const [isBuilding, setIsBuilding] = useState(false)
+  const [selectedTipPreset, setSelectedTipPreset] = useState<JitoTipPreset>('standard')
+  const [customTip, setCustomTip] = useState('')
+  const [useCustomTip, setUseCustomTip] = useState(false)
+  const [customEndpoint, setCustomEndpoint] = useState('')
+  
+  const {
+    isSimulating,
+    isSubmitting,
+    error,
+    lastResult,
+    config,
+    updateConfig,
+    simulateBundle,
+    submitBundle,
+    estimateCost,
+    reset
+  } = useJitoBundle()
 
-  const addTransaction = () => {
-    const newTx: BundleTransaction = {
-      id: `tx_${Date.now()}`,
-      signature: '',
-      type: 'swap',
-      estimatedCU: 200000,
-      priority: 'medium'
+  const currentTip = useCustomTip 
+    ? parseFloat(customTip) || 0
+    : JITO_TIP_PRESETS[selectedTipPreset].amount
+
+  const handleTipPresetChange = (preset: JitoTipPreset) => {
+    setSelectedTipPreset(preset)
+    setUseCustomTip(false)
+    updateConfig({ tip: JITO_TIP_PRESETS[preset].amount })
+  }
+
+  const handleCustomTipChange = (value: string) => {
+    setCustomTip(value)
+    const tipAmount = parseFloat(value) || 0
+    updateConfig({ tip: tipAmount })
+  }
+
+  const handleRegionChange = (region: string) => {
+    updateConfig({ region })
+  }
+
+  const handleSimulate = async () => {
+    if (transactions.length === 0) return
+    
+    try {
+      const result = await simulateBundle(transactions)
+      console.log('Simulation result:', result)
+    } catch (error) {
+      console.error('Simulation failed:', error)
     }
-    setTransactions([...transactions, newTx])
   }
 
-  const removeTransaction = (id: string) => {
-    setTransactions(transactions.filter(tx => tx.id !== id))
+  const handleSubmit = async () => {
+    if (transactions.length === 0) return
+    
+    try {
+      const result = await submitBundle(transactions)
+      console.log('Bundle result:', result)
+    } catch (error) {
+      console.error('Bundle submission failed:', error)
+    }
   }
 
-  const updateTransaction = (id: string, updates: Partial<BundleTransaction>) => {
-    setTransactions(transactions.map(tx => 
-      tx.id === id ? { ...tx, ...updates } : tx
-    ))
+  const getTotalCost = () => {
+    return estimateCost(transactions)
   }
 
-  const totalCU = transactions.reduce((sum, tx) => sum + tx.estimatedCU, 0)
-  const estimatedCost = parseFloat(bundleTip) + (totalCU * 0.000001)
+  const getPriorityLevel = (tip: number) => {
+    if (tip >= 0.1) return { level: 'CRITICAL', color: 'text-red-400' }
+    if (tip >= 0.01) return { level: 'HIGH', color: 'text-yellow-400' } 
+    if (tip >= 0.005) return { level: 'NORMAL', color: 'text-green-400' }
+    return { level: 'LOW', color: 'text-gray-400' }
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Header */}
       <div className="mb-8">
         <h1 className="font-pixel text-2xl text-green-400 mb-2 flex items-center gap-3">
@@ -53,139 +105,135 @@ export default function JitoBundlePage() {
           JITO BUNDLE BUILDER
         </h1>
         <p className="font-mono text-sm text-gray-400">
-          Build and submit transaction bundles for priority execution via Jito
+          Build and submit transaction bundles for priority execution via Jito MEV protection
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Column: Bundle Configuration */}
-        <div className="space-y-6">
-          {/* Bundle Settings */}
+      {!connected && (
+        <div className="mb-8">
           <PixelCard>
-            <div className="space-y-4">
-              <div className="border-b-4 border-green-400/20 pb-3">
-                <h3 className="font-pixel text-sm text-green-400">
-                  ⚙️ BUNDLE SETTINGS
-                </h3>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <PixelInput
-                  label="BUNDLE TIP (SOL)"
-                  type="number"
-                  value={bundleTip}
-                  onChange={(e) => setBundleTip(e.target.value)}
-                  placeholder="0.001"
-                  min="0"
-                  step="0.001"
-                />
-                <PixelInput
-                  label="MAX RETRIES"
-                  type="number"
-                  value={maxRetries}
-                  onChange={(e) => setMaxRetries(e.target.value)}
-                  placeholder="3"
-                  min="1"
-                  max="10"
-                />
-              </div>
-
-              <div className="p-3 bg-blue-600/10 border-4 border-blue-600/20">
-                <div className="font-mono text-xs text-blue-400 mb-1">
-                  💡 TIP GUIDELINES:
-                </div>
-                <div className="font-mono text-xs text-blue-300 space-y-1">
-                  <div>• Normal traffic: 0.001-0.005 SOL</div>
-                  <div>• High traffic: 0.01-0.1 SOL</div>
-                  <div>• Critical timing: 0.1+ SOL</div>
-                </div>
-              </div>
-            </div>
-          </PixelCard>
-
-          {/* Transaction List */}
-          <PixelCard>
-            <div className="space-y-4">
-              <div className="border-b-4 border-green-400/20 pb-3 flex items-center justify-between">
-                <h3 className="font-pixel text-sm text-green-400">
-                  📦 TRANSACTIONS ({transactions.length})
-                </h3>
-                <PixelButton
-                  onClick={addTransaction}
-                  variant="secondary"
-                  className="text-xs"
-                >
-                  [ADD TX]
-                </PixelButton>
-              </div>
-
-              <div className="space-y-3">
-                {transactions.map((tx, index) => (
-                  <div key={tx.id} className="p-3 border-4 border-gray-700">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="font-pixel text-xs text-white">
-                        TRANSACTION #{index + 1}
-                      </span>
-                      <button
-                        onClick={() => removeTransaction(tx.id)}
-                        className="text-red-400 hover:text-red-300 font-pixel text-xs"
-                      >
-                        [REMOVE]
-                      </button>
-                    </div>
-
-                    <div className="space-y-2">
-                      <select
-                        value={tx.type}
-                        onChange={(e) => updateTransaction(tx.id, { type: e.target.value as any })}
-                        className="w-full px-2 py-1 bg-gray-800 border-2 border-gray-700 focus:border-green-400 font-mono text-xs text-white"
-                      >
-                        <option value="swap">Token Swap</option>
-                        <option value="transfer">Transfer</option>
-                        <option value="mint">Mint Token</option>
-                        <option value="burn">Burn Token</option>
-                      </select>
-
-                      <div className="grid grid-cols-2 gap-2">
-                        <input
-                          type="number"
-                          value={tx.estimatedCU}
-                          onChange={(e) => updateTransaction(tx.id, { estimatedCU: parseInt(e.target.value) || 0 })}
-                          placeholder="Compute Units"
-                          className="px-2 py-1 bg-gray-800 border-2 border-gray-700 focus:border-green-400 font-mono text-xs text-white"
-                        />
-                        <select
-                          value={tx.priority}
-                          onChange={(e) => updateTransaction(tx.id, { priority: e.target.value as any })}
-                          className="px-2 py-1 bg-gray-800 border-2 border-gray-700 focus:border-green-400 font-mono text-xs text-white"
-                        >
-                          <option value="low">Low Priority</option>
-                          <option value="medium">Medium Priority</option>
-                          <option value="high">High Priority</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {transactions.length === 0 && (
-                  <div className="text-center py-8 border-4 border-dashed border-gray-700">
-                    <Package className="h-12 w-12 text-gray-600 mx-auto mb-3" />
-                    <div className="font-mono text-sm text-gray-500">
-                      No transactions in bundle
-                    </div>
-                    <div className="font-mono text-xs text-gray-600 mt-1">
-                      Add transactions to start building your bundle
-                    </div>
-                  </div>
-                )}
-              </div>
+            <div className="text-center py-8">
+              <h3 className="font-pixel text-lg text-yellow-400 mb-4">
+                🔗 WALLET CONNECTION REQUIRED
+              </h3>
+              <p className="font-mono text-sm text-gray-400 mb-6">
+                Connect your wallet to start building and submitting Jito bundles
+              </p>
+              <PixelWalletButton variant="success" />
             </div>
           </PixelCard>
         </div>
+      )}
 
-        {/* Right Column: Bundle Summary & Actions */}
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Left Column: Configuration */}
+        <div className="xl:col-span-1 space-y-6">
+          {/* Region Selection */}
+          <JitoRegionSelector
+            selectedRegion={config.region}
+            onRegionChange={handleRegionChange}
+            customEndpoint={customEndpoint}
+            onCustomEndpointChange={setCustomEndpoint}
+          />
+
+          {/* Tip Configuration */}
+          <PixelCard>
+            <div className="space-y-4">
+              <div className="border-b-4 border-green-400/20 pb-3">
+                <h3 className="font-pixel text-sm text-green-400 flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  TIP CONFIGURATION
+                </h3>
+              </div>
+
+              <div className="space-y-3">
+                {/* Tip Presets */}
+                <div className="grid grid-cols-2 gap-2">
+                  {Object.entries(JITO_TIP_PRESETS).map(([key, preset]) => (
+                    <button
+                      key={key}
+                      onClick={() => handleTipPresetChange(key as JitoTipPreset)}
+                      className={`p-3 border-4 transition-colors text-left ${
+                        !useCustomTip && selectedTipPreset === key
+                          ? 'border-green-400 bg-green-400/10'
+                          : 'border-gray-700 hover:border-green-400/50'
+                      }`}
+                    >
+                      <div className={`font-pixel text-xs ${preset.color} mb-1`}>
+                        {preset.name}
+                      </div>
+                      <div className="font-mono text-xs text-white">
+                        {preset.amount} SOL
+                      </div>
+                      <div className="font-mono text-xs text-gray-400 mt-1">
+                        {preset.description}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Custom Tip */}
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 font-pixel text-xs text-gray-400">
+                    <input
+                      type="checkbox"
+                      checked={useCustomTip}
+                      onChange={(e) => {
+                        setUseCustomTip(e.target.checked)
+                        if (e.target.checked) {
+                          updateConfig({ tip: parseFloat(customTip) || 0 })
+                        } else {
+                          updateConfig({ tip: JITO_TIP_PRESETS[selectedTipPreset].amount })
+                        }
+                      }}
+                      className="w-4 h-4"
+                    />
+                    CUSTOM TIP
+                  </label>
+                  
+                  {useCustomTip && (
+                    <input
+                      type="number"
+                      value={customTip}
+                      onChange={(e) => handleCustomTipChange(e.target.value)}
+                      placeholder="0.001"
+                      step="0.001"
+                      min="0"
+                      className="w-full px-3 py-2 bg-gray-800 border-4 border-gray-700 focus:border-green-400 font-mono text-sm text-white"
+                    />
+                  )}
+                </div>
+
+                {/* Current Tip Display */}
+                <div className="p-3 bg-gray-800 border-4 border-gray-700">
+                  <div className="flex justify-between items-center">
+                    <span className="font-mono text-xs text-gray-400">Current Tip:</span>
+                    <span className="font-mono text-sm text-green-400">{currentTip.toFixed(6)} SOL</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-1">
+                    <span className="font-mono text-xs text-gray-400">Priority Level:</span>
+                    <span className={`font-pixel text-xs ${getPriorityLevel(currentTip).color}`}>
+                      {getPriorityLevel(currentTip).level}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Tip Guidelines */}
+                <div className="p-3 bg-blue-600/10 border-4 border-blue-600/20">
+                  <div className="font-mono text-xs text-blue-400 mb-2">
+                    💡 <strong>Tip Guidelines:</strong>
+                  </div>
+                  <div className="space-y-1 font-mono text-xs text-blue-300">
+                    <div>• Higher tips = better landing probability</div>
+                    <div>• 0.001-0.005 SOL for normal traffic</div>
+                    <div>• 0.01+ SOL for high congestion periods</div>
+                    <div>• 0.1+ SOL for critical timing needs</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </PixelCard>
+
           {/* Bundle Summary */}
           <PixelCard>
             <div className="space-y-4">
@@ -196,169 +244,191 @@ export default function JitoBundlePage() {
               </div>
 
               <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div className="text-center p-3 bg-gray-800 border-2 border-gray-700">
                     <div className="font-mono text-lg text-white">{transactions.length}</div>
                     <div className="font-mono text-xs text-gray-400">Transactions</div>
                   </div>
                   <div className="text-center p-3 bg-gray-800 border-2 border-gray-700">
-                    <div className="font-mono text-lg text-green-400">{totalCU.toLocaleString()}</div>
-                    <div className="font-mono text-xs text-gray-400">Total CU</div>
+                    <div className="font-mono text-lg text-blue-400">
+                      ~{getTotalCost().toFixed(6)} SOL
+                    </div>
+                    <div className="font-mono text-xs text-gray-400">Total Cost</div>
                   </div>
-                </div>
-
-                <div className="text-center p-3 bg-gray-800 border-2 border-gray-700">
-                  <div className="font-mono text-lg text-blue-400">~{estimatedCost.toFixed(6)} SOL</div>
-                  <div className="font-mono text-xs text-gray-400">Estimated Cost</div>
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="font-mono text-xs text-gray-400">Bundle Tip:</span>
-                    <span className="font-mono text-xs text-white">{bundleTip} SOL</span>
+                    <span className="font-mono text-xs text-white">{currentTip.toFixed(6)} SOL</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="font-mono text-xs text-gray-400">Compute Cost:</span>
-                    <span className="font-mono text-xs text-white">~{(totalCU * 0.000001).toFixed(6)} SOL</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-mono text-xs text-gray-400">Priority Level:</span>
-                    <span className={`font-mono text-xs ${
-                      parseFloat(bundleTip) >= 0.1 ? 'text-red-400' : 
-                      parseFloat(bundleTip) >= 0.01 ? 'text-yellow-400' : 'text-green-400'
-                    }`}>
-                      {parseFloat(bundleTip) >= 0.1 ? 'CRITICAL' : 
-                       parseFloat(bundleTip) >= 0.01 ? 'HIGH' : 'NORMAL'}
+                    <span className="font-mono text-xs text-gray-400">Est. Fees:</span>
+                    <span className="font-mono text-xs text-white">
+                      ~{(getTotalCost() - currentTip).toFixed(6)} SOL
                     </span>
                   </div>
                 </div>
-              </div>
-            </div>
-          </PixelCard>
 
-          {/* Bundle Actions */}
-          <PixelCard>
-            <div className="space-y-4">
-              <div className="border-b-4 border-green-400/20 pb-3">
-                <h3 className="font-pixel text-sm text-green-400">
-                  🚀 BUNDLE ACTIONS
-                </h3>
-              </div>
+                {/* Actions */}
+                <div className="space-y-2">
+                  <PixelButton
+                    onClick={handleSimulate}
+                    disabled={!connected || transactions.length === 0 || isSimulating}
+                    className="w-full text-xs"
+                    variant="secondary"
+                  >
+                    {isSimulating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        [SIMULATING...]
+                      </>
+                    ) : (
+                      <>
+                        <Layers className="h-4 w-4" />
+                        [SIMULATE BUNDLE]
+                      </>
+                    )}
+                  </PixelButton>
 
-              <div className="space-y-3">
-                <PixelButton
-                  disabled={transactions.length === 0}
-                  className="w-full"
-                >
-                  <Layers className="h-4 w-4" />
-                  [SIMULATE BUNDLE]
-                </PixelButton>
-
-                <PixelButton
-                  disabled={transactions.length === 0 || isBuilding}
-                  className="w-full"
-                >
-                  {isBuilding ? (
-                    <>
-                      <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
-                      [BUILDING...]
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="h-4 w-4" />
-                      [BUILD & SUBMIT]
-                    </>
-                  )}
-                </PixelButton>
-
-                <div className="text-center">
-                  <span className="px-3 py-1 bg-yellow-600/20 text-yellow-400 border border-yellow-600/30 font-pixel text-xs">
-                    COMING SOON
-                  </span>
+                  <PixelButton
+                    onClick={handleSubmit}
+                    disabled={!connected || transactions.length === 0 || isSubmitting}
+                    className="w-full text-xs"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        [SUBMITTING...]
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="h-4 w-4" />
+                        [SUBMIT BUNDLE]
+                      </>
+                    )}
+                  </PixelButton>
                 </div>
               </div>
             </div>
           </PixelCard>
+        </div>
 
-          {/* Jito Status */}
+        {/* Right Column: Transaction Builder */}
+        <div className="xl:col-span-2 space-y-6">
+          <BundleTransactionBuilder
+            transactions={transactions}
+            onTransactionsChange={setTransactions}
+          />
+
+          {/* Results */}
+          {error && (
+            <PixelCard>
+              <div className="p-4 bg-red-900/20 border-2 border-red-600/30">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <div className="font-pixel text-sm text-red-400 mb-2">
+                      ❌ BUNDLE ERROR
+                    </div>
+                    <div className="font-mono text-xs text-red-400">
+                      {error}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </PixelCard>
+          )}
+
+          {lastResult && lastResult.landed && (
+            <PixelCard>
+              <div className="space-y-4">
+                <div className="border-b-4 border-green-400/20 pb-3">
+                  <h3 className="font-pixel text-sm text-green-400 flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4" />
+                    ✅ BUNDLE SUBMITTED SUCCESSFULLY
+                  </h3>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <div className="font-mono text-xs text-gray-400 mb-1">BUNDLE ID:</div>
+                    <div className="font-mono text-xs text-green-400 break-all p-2 bg-gray-800 border-2 border-gray-700">
+                      {lastResult.bundleId}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="font-mono text-xs text-gray-400 mb-1">
+                      TRANSACTIONS ({lastResult.signatures.length}):
+                    </div>
+                    <div className="space-y-2">
+                      {lastResult.signatures.map((signature, index) => (
+                        <div key={signature} className="flex items-center gap-2">
+                          <span className="font-mono text-xs text-gray-400">#{index + 1}:</span>
+                          <span className="font-mono text-xs text-green-400 break-all flex-1">
+                            {signature.slice(0, 16)}...{signature.slice(-16)}
+                          </span>
+                          <button
+                            onClick={() => window.open(`https://explorer.solana.com/tx/${signature}`, '_blank')}
+                            className="text-blue-400 hover:text-blue-300"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="font-mono text-xs text-gray-400 mb-1">TOTAL COST:</div>
+                    <div className="font-mono text-sm text-green-400">
+                      {lastResult.cost.toFixed(6)} SOL
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </PixelCard>
+          )}
+
+          {/* Jito Info */}
           <PixelCard>
             <div className="space-y-4">
               <div className="border-b-4 border-green-400/20 pb-3">
                 <h3 className="font-pixel text-sm text-green-400">
-                  📡 JITO STATUS
-                </h3>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-gray-800 border-2 border-gray-700">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="font-mono text-xs text-gray-400">Network Status</span>
-                  </div>
-                  <span className="font-mono text-xs text-green-400">OPERATIONAL</span>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-gray-800 border-2 border-gray-700">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-blue-400" />
-                    <span className="font-mono text-xs text-gray-400">Block Time</span>
-                  </div>
-                  <span className="font-mono text-xs text-white">~400ms</span>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-gray-800 border-2 border-gray-700">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-purple-400" />
-                    <span className="font-mono text-xs text-gray-400">Bundle Success Rate</span>
-                  </div>
-                  <span className="font-mono text-xs text-white">94.2%</span>
-                </div>
-
-                <div className="pt-3 border-t-4 border-gray-700">
-                  <div className="font-mono text-xs text-gray-400 text-center">
-                    Real-time data from Jito validators
-                  </div>
-                </div>
-              </div>
-            </div>
-          </PixelCard>
-
-          {/* Info */}
-          <PixelCard>
-            <div className="space-y-4">
-              <div className="border-b-4 border-green-400/20 pb-3">
-                <h3 className="font-pixel text-sm text-green-400">
-                  ℹ️ JITO BUNDLES
+                  ℹ️ ABOUT JITO BUNDLES
                 </h3>
               </div>
 
               <div className="space-y-3 font-mono text-xs text-gray-400">
                 <div className="flex items-start gap-2">
                   <span className="text-green-400 mt-0.5">▸</span>
-                  <span>Bundle transactions for atomic execution</span>
+                  <span><strong>MEV Protection:</strong> Bundle transactions for atomic execution without front-running</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-green-400 mt-0.5">▸</span>
-                  <span>Skip mempool with direct validator submission</span>
+                  <span><strong>Skip Mempool:</strong> Direct submission to Jito validators bypasses public mempool</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-green-400 mt-0.5">▸</span>
-                  <span>Higher tips = better landing probability</span>
+                  <span><strong>All or Nothing:</strong> Either all transactions land or none do - no partial execution</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-green-400 mt-0.5">▸</span>
-                  <span>Failed bundles don't charge fees</span>
+                  <span><strong>Priority Tips:</strong> Higher tips increase bundle landing probability</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-green-400 mt-0.5">▸</span>
+                  <span><strong>No Failed Fees:</strong> Failed bundles don't charge transaction fees</span>
                 </div>
               </div>
 
-              <div className="pt-3 border-t-4 border-gray-700">
-                <div className="p-3 bg-yellow-600/10 border-4 border-yellow-600/20">
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
-                    <div className="font-mono text-xs text-yellow-400">
-                      <strong>Beta Feature:</strong> Jito bundle integration is currently 
-                      in development. This interface shows the planned functionality.
-                    </div>
+              <div className="p-3 bg-yellow-600/10 border-4 border-yellow-600/20">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
+                  <div className="font-mono text-xs text-yellow-400">
+                    <strong>Note:</strong> This is the production-ready Jito bundle interface. 
+                    All bundles are submitted to real Jito block engines for execution.
                   </div>
                 </div>
               </div>

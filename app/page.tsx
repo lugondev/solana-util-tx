@@ -29,6 +29,39 @@ export default function HomePage() {
     }
   }, [connected, publicKey, connection])
 
+  // Structured data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Solana Utility Tools",
+    "alternateName": "SolanaUtils",
+    "description": "Comprehensive Solana utility platform for token management, DeFi operations, transaction building, Jito bundles, and developer tools",
+    "url": "https://solana-util-tx.vercel.app",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "LugonDev",
+      "url": "https://github.com/lugondev"
+    },
+    "keywords": "Solana, blockchain, cryptocurrency, DeFi, tokens, transaction, wallet, developer tools",
+    "featureList": [
+      "SOL transfers with priority fees",
+      "Transaction simulation and testing", 
+      "SPL token management",
+      "Address Lookup Table management",
+      "Jupiter token swaps",
+      "Jito MEV protected bundles",
+      "Developer tools and utilities"
+    ],
+    "screenshot": "https://solana-util-tx.vercel.app/og-image.png"
+  }
+
   const features = [
     {
       title: 'WALLET',
@@ -109,15 +142,22 @@ export default function HomePage() {
     },
     {
       title: 'JITO BUNDLES',
-      description: 'MEV protected transactions (Beta)',
+      description: 'MEV protected transaction bundles',
       href: '/jito/bundle',
-      icon: '�',
-      status: 'beta',
+      icon: '🚀',
+      status: 'active',
     },
   ]
 
   return (
-    <div className="space-y-10">
+    <>
+      {/* Structured Data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      
+      <div className="space-y-10">
       {/* Hero Section */}
       <div className="text-center py-16">
         <div className="flex items-center justify-center mb-8">
@@ -297,15 +337,9 @@ export default function HomePage() {
                     <span className="text-green-400 mt-0.5">✓</span>
                     <span>Developer keypair generator</span>
                   </div>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-pixel text-sm text-white mb-3">BETA/IN DEVELOPMENT:</h4>
-                <div className="space-y-2">
                   <div className="flex items-start gap-2">
-                    <span className="text-blue-400 mt-0.5">β</span>
-                    <span>Jito bundle transactions (MEV protection)</span>
+                    <span className="text-green-400 mt-0.5">✓</span>
+                    <span>Jito MEV protected bundles</span>
                   </div>
                 </div>
               </div>
@@ -347,6 +381,7 @@ export default function HomePage() {
           </div>
         </div>
       </PixelCard>
-    </div>
+      </div>
+    </>
   )
 }

@@ -1,0 +1,55 @@
+{
+  "name": "Solana Utility Tools",
+  "short_name": "SolanaUtils",
+  "description": "Comprehensive Solana utility platform for token management, DeFi operations, and developer tools",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "categories": ["finance", "utilities", "developer"],
+  "lang": "en",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Token Tools",
+      "short_name": "Tokens",
+      "description": "Access token management tools",
+      "url": "/tokens/mint",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "DeFi Tools", 
+      "short_name": "DeFi",
+      "description": "Access DeFi operations",
+      "url": "/defi/swap",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Transaction Builder",
+      "short_name": "Transactions",
+      "description": "Build and simulate transactions",
+      "url": "/transaction",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

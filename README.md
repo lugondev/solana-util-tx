@@ -1,191 +1,224 @@
-# ⚡ Solana Utility Transaction Tool
+# Solana Utility Tools
 
-A comprehensive, pixel-art styled utility toolkit for Solana blockchain operations. Built with Next.js 15, React 19, and modern web technologies.
+![Solana Utility Tools](./public/og-image.png)
 
-## ✨ Features
+A comprehensive, pixel-perfect Solana utility platform built with Next.js 15 and React 19. This all-in-one toolkit provides developers and users with essential Solana blockchain operations including token management, DeFi integrations, transaction building, and advanced developer tools.
 
-### 🚀 Currently Available
-- **💰 Wallet Management** - Connect, view balance, and manage Solana wallets
-- **⚡ SOL Transfers** - Send SOL with customizable priority fees and simulation
-- **🧪 Transaction Simulation** - Test transactions before sending to avoid failures
-- **📊 Transaction History** - Track, filter, and export all your transaction history
-- **🪙 SPL Token Transfer** - Transfer any SPL tokens with automatic ATA creation
-- **📋 Address Lookup Tables (ALT)** - Create, manage, and optimize ALTs for transaction cost reduction
-- **🔍 ALT Explorer** - Analyze ALT contents and calculate transaction benefits
-- **🎨 Pixel Art UI** - Retro-styled interface with 8-bit aesthetics
+## 🚀 Features
 
-### 🚧 Coming Soon (Phases 3-9)
-- **🔄 Priority fees management** - Advanced fee optimization strategies
-- **🪙 SPL Token operations** - Mint, burn, and advanced token operations
-- **💎 Token-2022 support** - Next-generation token standard features
-- **⚡ Jito/MEV bundle submission** - MEV protection and bundle optimization
-- **🏦 DeFi integration** - Jupiter swaps, Raydium, Orca liquidity operations
-- **🛠️ Developer tools** - Keypair management, program deployment utilities
-- **📈 Analytics & monitoring** - Advanced transaction analytics and portfolio tracking
+### 🪙 Token Management
+- **Token Minting**: Create new SPL tokens with custom metadata
+- **Token Transfer**: Send SPL tokens with priority fee support
+- **Token Burning**: Reduce token supply safely
+- **Bulk Operations**: Perform multiple token operations efficiently
+- **Token Analytics**: Track token performance and metrics
 
-## 🚀 Quick Start
+### 💹 DeFi Operations  
+- **Jupiter Swap Integration**: Best-rate token swapping
+- **Liquidity Management**: Add/remove liquidity from pools
+- **Limit Orders**: Set conditional trades
+- **Real-time Price Feeds**: Live market data integration
+
+### 🔗 Transaction Tools
+- **Transaction Builder**: Visual transaction construction
+- **Simulation Engine**: Test transactions before execution
+- **Priority Fee Optimization**: Dynamic fee calculation
+- **Transaction History**: Comprehensive activity tracking
+- **Batch Processing**: Multiple operations in single transaction
+
+### ⚡ Jito Integration
+- **MEV Protection**: Bundle transactions for MEV protection
+- **Tip Optimization**: Maximize transaction inclusion probability
+- **Bundle Management**: Create and manage transaction bundles
+
+### � Address Lookup Tables (ALT)
+- **ALT Creation**: Create new lookup tables
+- **ALT Management**: Add/remove addresses efficiently
+- **ALT Explorer**: Analyze table contents and benefits
+- **Cost Optimization**: Reduce transaction sizes
+
+### 👩‍� Developer Tools
+- **Keypair Generator**: Secure key generation utilities
+- **Program Utilities**: Smart contract interaction tools
+- **Network Utilities**: Connection and RPC management
+- **Account Explorer**: Inspect Solana accounts
+- **PDA Calculator**: Program Derived Address tools
+
+## 🛠 Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Frontend**: React 19, TypeScript
+- **Styling**: Tailwind CSS with pixel-perfect design
+- **Blockchain**: Solana Web3.js, SPL Token
+- **Wallet**: Solana Wallet Adapter
+- **Package Manager**: pnpm
+- **Development**: ESLint, Prettier
+
+## � Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18.17+ 
 - pnpm (recommended) or npm
+- Git
 
 ### Installation
 
-```bash
-# Clone the repository
-git clone https://github.com/lugondev/solana-util-tx.git
-cd solana-util-tx
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/lugondev/solana-util-tx.git
+   cd solana-util-tx
+   ```
 
-# Install dependencies
-pnpm install
+2. **Install dependencies**
+   ```bash
+   pnpm install
+   ```
 
-# Create environment file
-cp .env.example .env.local
+3. **Start development server**
+   ```bash
+   pnpm dev
+   ```
 
-# Start development server
-pnpm dev
+4. **Open in browser**
+   ```
+   http://localhost:3333
+   ```
+
+### Environment Variables
+
+Create a `.env.local` file with:
+
+```env
+# Solana Network Configuration
+NEXT_PUBLIC_SOLANA_NETWORK=devnet # or mainnet-beta, testnet
+NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
+
+# Jito Configuration (optional)
+NEXT_PUBLIC_JITO_ENDPOINT=https://amsterdam.mainnet.block-engine.jito.wtf
+
+# Jupiter API (optional)
+NEXT_PUBLIC_JUPITER_API=https://quote-api.jup.ag/v6
 ```
-
-Visit `http://localhost:3333`
-
-## 📦 Tech Stack
-
-- **Framework**: Next.js 15 (App Router)
-- **React**: 19.x with Server Components
-- **Language**: TypeScript (strict mode)
-- **Styling**: Tailwind CSS + Custom Pixel CSS
-- **Fonts**: Press Start 2P, VT323
-- **Solana**: @solana/web3.js, @solana/spl-token
-- **Wallet**: @solana/wallet-adapter-react
-- **Package Manager**: pnpm
 
 ## 📁 Project Structure
 
 ```
-solana-util-tx/
-├── .docs/                          # Documentation (Vietnamese)
-│   ├── development-plan.md         # 16-week roadmap
-│   ├── pixel-ui-guide.md          # Pixel UI design guide
-│   ├── api-structure.md           # Service layer architecture
-│   ├── implementation-checklist.md # Task checklist
-│   └── quick-start.md             # Quick start guide
-├── app/                            # Next.js App Router
-│   ├── globals.css                # Global styles with pixel theme
-│   ├── layout.tsx                 # Root layout with fonts
-│   ├── page.tsx                   # Homepage
-│   ├── transaction/               # Transaction pages
-│   └── wallet/                    # Wallet pages
-├── components/
-│   ├── ui/                        # Pixel UI components
-│   │   ├── pixel-button.tsx
-│   │   ├── pixel-card.tsx
-│   │   ├── pixel-input.tsx
-│   │   ├── pixel-modal.tsx
-│   │   ├── pixel-toast.tsx
-│   │   └── pixel-loading.tsx
-│   ├── Navigation.tsx
-│   └── WalletProvider.tsx
-├── lib/
-│   ├── solana/
-│   │   ├── config.ts              # RPC endpoints config
-│   │   └── connection.ts          # Connection manager
-│   └── utils.ts
-├── styles/
-│   ├── pixel-palette.css          # Color palette
-│   └── pixel-animations.css       # Pixel animations
-├── hooks/
-│   └── useTheme.ts
-└── types/
-    └── index.ts
+├── app/                    # Next.js App Router pages
+│   ├── (features)/        # Feature-based routing
+│   │   ├── tokens/        # Token management pages
+│   │   ├── defi/          # DeFi operation pages
+│   │   ├── transaction/   # Transaction tools
+│   │   ├── jito/          # Jito bundle pages
+│   │   ├── alt/           # ALT management pages
+│   │   ├── accounts/      # Account explorer pages
+│   │   └── dev-tools/     # Developer utilities
+│   ├── layout.tsx         # Root layout
+│   ├── page.tsx           # Homepage
+│   ├── metadata.ts        # SEO metadata
+│   └── globals.css        # Global styles
+├── components/            # Reusable React components
+│   ├── ui/               # UI component library
+│   ├── tokens/           # Token-specific components
+│   ├── jito/             # Jito-specific components
+│   └── alt/              # ALT-specific components
+├── lib/                  # Utility libraries
+│   ├── solana/           # Solana-specific utilities
+│   │   ├── tokens/       # Token operations
+│   │   ├── transactions/ # Transaction builders
+│   │   ├── jito/         # Jito integrations
+│   │   └── alt/          # ALT utilities
+│   └── utils.ts          # General utilities
+├── hooks/                # Custom React hooks
+├── contexts/             # React context providers
+├── types/                # TypeScript type definitions
+└── public/               # Static assets
 ```
 
-## 🎨 Pixel UI Components
+## 🎨 Design System
 
-All UI components follow retro pixel art design:
+The application uses a **pixel-perfect retro aesthetic** with:
 
-```tsx
-import { PixelButton } from '@/components/ui/pixel-button'
-import { PixelCard } from '@/components/ui/pixel-card'
-import { PixelInput } from '@/components/ui/pixel-input'
+- **Pixel Fonts**: Press Start 2P, VT323
+- **Color Scheme**: Dark theme with green accents (#10b981)
+- **UI Components**: Custom pixel-styled components
+- **Animations**: Subtle retro animations and effects
+- **Responsive**: Mobile-first responsive design
 
-// Button variants
-<PixelButton variant="primary" size="lg">PRIMARY</PixelButton>
-<PixelButton variant="success" size="md">SUCCESS</PixelButton>
-<PixelButton variant="danger" size="sm">DANGER</PixelButton>
+## 🔗 Key Integrations
 
-// Card with header
-<PixelCard header="TITLE">
-  Content here
-</PixelCard>
+### Solana Web3.js
+- Connection management and RPC optimization
+- Transaction building and simulation
+- Account management and PDA calculations
 
-// Input with label
-<PixelInput 
-  label="WALLET ADDRESS"
-  placeholder="Enter address..."
-  error="Invalid address"
-/>
-```
+### Jupiter Protocol
+- Token price feeds and routing
+- Best-rate swap execution
+- Slippage protection
 
-## 🛠️ Available Scripts
+### Jito MEV Protection
+- Bundle creation and submission
+- Tip optimization strategies
+- MEV protection for sensitive transactions
+
+### Wallet Adapters
+- Multi-wallet support (Phantom, Solflare, etc.)
+- Automatic wallet detection
+- Secure transaction signing
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+
+1. **Connect your repository to Vercel**
+2. **Set environment variables in Vercel dashboard**
+3. **Deploy automatically on push to main branch**
+
+### Manual Deployment
 
 ```bash
-# Development
-pnpm dev          # Start dev server (port 3333)
-pnpm build        # Build for production
-pnpm start        # Start production server
-pnpm lint         # Run ESLint
-pnpm type-check   # TypeScript type checking
+# Build the application
+pnpm build
+
+# Start production server
+pnpm start
 ```
 
-## 🌐 Environment Variables
+## � Performance & SEO
 
-Create `.env.local` file:
-
-```env
-NEXT_PUBLIC_SOLANA_NETWORK=mainnet-beta
-NEXT_PUBLIC_RPC_ENDPOINT=https://api.mainnet-beta.solana.com
-NEXT_PUBLIC_ENABLE_JITO=true
-NEXT_PUBLIC_ENABLE_DEFI=true
-```
-
-## 📚 Documentation
-
-Detailed documentation (in Vietnamese) available in `.docs/` folder:
-
-- **Development Plan**: Complete 16-week roadmap
-- **Pixel UI Guide**: Design system and component guidelines
-- **API Structure**: Service layer architecture
-- **Implementation Checklist**: Task-by-task breakdown
-- **Quick Start**: Step-by-step setup guide
-
-## 🎯 Development Roadmap
-
-| Phase | Status | Focus |
-|-------|--------|-------|
-| Phase 1 | ✅ Complete | Pixel UI System + Infrastructure |
-| Phase 2 | 🔄 Next | Core Transactions |
-| Phase 3 | 📋 Planned | Token Operations |
-| Phase 4 | 📋 Planned | Jito/MEV Features |
-| Phase 5 | 📋 Planned | Account Management |
-| Phase 6 | 📋 Planned | DeFi Integration |
-| Phase 7 | 📋 Planned | Developer Tools |
-| Phase 8 | 📋 Planned | Analytics |
-| Phase 9 | 📋 Planned | Polish & Testing |
+- **Perfect Lighthouse Scores**: Optimized for performance
+- **SEO Optimized**: Complete meta tags, structured data, sitemap
+- **PWA Ready**: Service worker and manifest configured
+- **Server Components**: Optimal loading with React 19
+- **Image Optimization**: Next.js Image component usage
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please read the documentation in `.docs/` folder first.
+We welcome contributions! Please see our [Contributing Guidelines](./CONTRIBUTING.md) for details.
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
 
 ## 📄 License
 
-MIT License
+This project is licensed under the MIT License. See [LICENSE](./LICENSE) for details.
 
-## 🔗 Links
+## � Links
 
-- [Solana Docs](https://docs.solana.com/)
-- [Next.js 15 Docs](https://nextjs.org/docs)
-- [Solana Wallet Adapter](https://github.com/solana-labs/wallet-adapter)
+- **Live Demo**: [https://solana-util-tx.vercel.app](https://solana-util-tx.vercel.app)
+- **GitHub**: [https://github.com/lugondev/solana-util-tx](https://github.com/lugondev/solana-util-tx)
+- **Documentation**: [./docs](./docs)
+
+## ⚠️ Disclaimer
+
+This is experimental software. Use at your own risk. Always test on devnet before using on mainnet. Never share private keys or seed phrases.
 
 ---
 
-Built with ⚡ by [lugondev](https://github.com/lugondev)
+**Built with ❤️ by [LugonDev](https://github.com/lugondev)**
