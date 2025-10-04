@@ -103,14 +103,14 @@ function NavigationMenu({ item, level = 0 }: NavigationMenuProps) {
   const isActive = item.href ? pathname === item.href : false
   const hasActiveChild = item.children?.some(child => pathname === child.href)
   
-  const paddingClass = level === 0 ? 'pl-4' : 'pl-8'
+  const paddingClass = level === 0 ? 'pl-6' : 'pl-10'
   
   if (hasChildren) {
     return (
       <div>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className={`w-full flex items-center justify-between ${paddingClass} pr-4 py-3 font-pixel text-xs transition-colors ${
+          className={`w-full flex items-center justify-between ${paddingClass} pr-6 py-4 font-pixel text-xs transition-colors ${
             hasActiveChild 
               ? 'text-green-400 bg-green-400/10' 
               : 'text-gray-400 hover:text-green-400'
@@ -153,7 +153,7 @@ function NavigationMenu({ item, level = 0 }: NavigationMenuProps) {
   if (item.comingSoon) {
     return (
       <div
-        className={`${paddingClass} pr-4 py-3 font-pixel text-xs cursor-not-allowed opacity-50`}
+        className={`${paddingClass} pr-6 py-4 font-pixel text-xs cursor-not-allowed opacity-50`}
       >
         {linkContent}
       </div>
@@ -163,7 +163,7 @@ function NavigationMenu({ item, level = 0 }: NavigationMenuProps) {
   return (
     <Link
       href={item.href || '#'}
-      className={`block ${paddingClass} pr-4 py-3 font-pixel text-xs transition-colors ${
+      className={`block ${paddingClass} pr-6 py-4 font-pixel text-xs transition-colors ${
         isActive 
           ? 'text-green-400 bg-green-400/10 border-r-4 border-green-400' 
           : 'text-gray-400 hover:text-green-400'
@@ -180,20 +180,20 @@ export default function Navigation() {
   return (
     <nav className="h-screen bg-gray-900 border-r-4 border-green-400/20 flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b-4 border-green-400/20">
+      <div className="p-6 border-b-4 border-green-400/20">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-green-400 border-4 border-green-400 animate-pulse" />
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-green-400 border-4 border-green-400 animate-pulse" />
             {!isCollapsed && (
               <div>
-                <h1 className="font-pixel text-sm text-green-400">SOLANA</h1>
+                <h1 className="font-pixel text-base text-green-400">SOLANA</h1>
                 <p className="font-pixel text-xs text-gray-400">UTIL-TX</p>
               </div>
             )}
           </div>
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="font-pixel text-xs text-gray-400 hover:text-green-400 p-1"
+            className="font-pixel text-xs text-gray-400 hover:text-green-400 p-2"
           >
             {isCollapsed ? '▶' : '◀'}
           </button>

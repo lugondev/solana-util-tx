@@ -1,103 +1,102 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useWallet } from '@solana/wallet-adapter-react'
+import { PixelWalletButton } from '@/components/ui/pixel-wallet-button'
 import { PixelCard } from '@/components/ui/pixel-card'
 import { PixelButton } from '@/components/ui/pixel-button'
 import { PixelInput } from '@/components/ui/pixel-input'
-import { ArrowUpDown, ExternalLink, AlertTriangle, Search, Loader2, Info, DollarSign } from 'lucide-react'
-
-interface JupiterQuote {
-  inputMint: string
-  outputMint: string
-  inAmount: string
-  outAmount: string
-  otherAmountThreshold: string
-  swapMode: string
-  slippageBps: number
-  platformFee: any
-  priceImpactPct: string
-  routePlan: Array<{
-    swapInfo: {
-      ammKey: string
-      label: string
-      inputMint: string
-      outputMint: string
-      inAmount: string
-      outAmount: string
-      feeAmount: string
-      feeMint: string
-    }
-    percent: number
-    bps: number
-  }>
-  contextSlot: number
-  timeTaken: number
-  swapUsdValue: string
-}
+import { SwapWalletConnector } from '@/components/ui/swap-wallet-connector'
+import { useJupiterSwap } from '@/hooks/useJupiterSwap'
+import { useTokenInfo } from '@/contexts/TokenContext'
+import { formatTokenAmount } from '@/lib/solana/tokens/token-info'
+import { ArrowUpDown, ExternalLink, AlertTriangle, Search, Loader2, Info, CheckCircle } from 'lucide-react'
 
 export default function SwapPage() {
+  const { connected, publicKey, wallet, connecting } = useWallet()
+  const { quote, loadingQuote, loadingSwap, error, getQuote, executeSwap, reset } = useJupiterSwap()
+  
+  // Debug log
+  console.log('SwapPage Debug:', {
+    connected,
+    publicKey: publicKey?.toString(),
+    walletName: wallet?.adapter?.name,
+    connecting,
+    quote: !!quote,
+    error
+  })
+  
   const [inputToken, setInputToken] = useState('')
   const [outputToken, setOutputToken] = useState('')
   const [inputAmount, setInputAmount] = useState('')
   const [slippage, setSlippage] = useState('0.5')
-  const [quote, setQuote] = useState<JupiterQuote | null>(null)
-  const [loadingQuote, setLoadingQuote] = useState(false)
-  const [error, setError] = useState('')
+  const [transactionSignature, setTransactionSignature] = useState<string | null>(null)
 
-  // Clear quote when input changes
+  // Use token info hooks for automatic token info fetching
+  const inputTokenData = useTokenInfo(inputToken)
+  const outputTokenData = useTokenInfo(outputToken)
+
+  // Debug log
+  console.log('SwapPage Debug:', {
+    connected,
+    publicKey: publicKey?.toString(),
+    walletName: wallet?.adapter?.name,
+    connecting,
+    quote: !!quote,
+    error,
+    inputToken: inputTokenData.tokenInfo ? `${inputTokenData.symbol} (${inputTokenData.decimals}d)` : 'Unknown',
+    outputToken: outputTokenData.tokenInfo ? `${outputTokenData.symbol} (${outputTokenData.decimals}d)` : 'Unknown'
+  })
+
+  // Reset quote khi input thay đổi
   useEffect(() => {
     if (quote) {
-      setQuote(null)
-      setError('')
+      reset()
     }
-  }, [inputToken, outputToken, inputAmount])
+  }, [inputToken, outputToken, reset])
 
-  const getQuote = async () => {
-    if (!inputToken.trim() || !outputToken.trim() || !inputAmount || parseFloat(inputAmount) <= 0) {
-      setError('Please enter valid token addresses and amount')
-      return
-    }
+    // Tự động fill inputAmount khi có quote mới
+    useEffect(() => {
+      if (quote && inputTokenData.tokenInfo) {
+        const formatted = formatDisplayAmount(quote.inAmount, inputTokenData.tokenInfo)
+        if (inputAmount !== formatted) {
+          setInputAmount(formatted)
+        }
+      }
+    }, [quote, inputTokenData.tokenInfo])
 
-    setLoadingQuote(true)
-    setError('')
-    setQuote(null)
-    
-    try {
-      // Convert amount to smallest unit (assuming 6 decimals for most tokens)
-      const amountInSmallestUnit = Math.floor(parseFloat(inputAmount) * 1000000)
-      
-      // Jupiter Lite API v1 quote endpoint (updated endpoint)
-      const response = await fetch(`https://lite-api.jup.ag/swap/v1/quote?inputMint=${inputToken}&outputMint=${outputToken}&amount=${amountInSmallestUnit}&slippageBps=${parseFloat(slippage) * 100}`)
-      
-      if (!response.ok) {
-        throw new Error(`Failed to get quote: ${response.statusText}`)
-      }
-      
-      const data = await response.json()
-      
-      if (data.error) {
-        throw new Error(data.error)
-      }
-      
-      setQuote(data)
-    } catch (err: any) {
-      setError(err.message || 'Failed to get quote')
-    } finally {
-      setLoadingQuote(false)
+  const handleGetQuote = async () => {
+    const slippageBps = Math.floor(parseFloat(slippage) * 100)
+    await getQuote(inputToken, outputToken, inputAmount, slippageBps, inputTokenData.decimals)
+  }
+
+  const handleExecuteSwap = async (quote: any) => {
+    const signature = await executeSwap(quote)
+    if (signature) {
+      setTransactionSignature(signature)
     }
+    return signature
   }
 
   const swapTokens = () => {
     const temp = inputToken
     setInputToken(outputToken)
     setOutputToken(temp)
-    setQuote(null)
-    setError('')
+    reset()
+    // Nếu đã có quote, tự động fill lại inputAmount
+    if (quote && outputTokenData.tokenInfo) {
+      const formatted = formatDisplayAmount(quote.outAmount, outputTokenData.tokenInfo)
+      setInputAmount(formatted)
+    }
   }
 
   const formatAmount = (amount: string, decimals: number = 6) => {
-    const num = parseInt(amount) / Math.pow(10, decimals)
-    return num.toFixed(6)
+    return formatTokenAmount(amount, decimals, 6)
+  }
+
+  const formatDisplayAmount = (amount: string, tokenInfo: any) => {
+    const decimals = tokenInfo?.decimals || 6
+    return formatTokenAmount(amount, decimals, 6)
   }
 
   const formatPriceImpact = (priceImpact: string) => {
@@ -111,21 +110,64 @@ export default function SwapPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-6 py-10 max-w-6xl">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="font-pixel text-2xl text-green-400 mb-2 flex items-center gap-3">
+      <div className="mb-10">
+        <h1 className="font-pixel text-3xl text-green-400 mb-4 flex items-center gap-4">
           <span className="animate-pulse">▸</span>
-          TOKEN SWAP (JUPITER)
+          TOKEN SWAP {connected ? '(WALLET CONNECTED)' : '(JUPITER)'}
         </h1>
-        <p className="font-mono text-sm text-gray-400">
-          Swap tokens with the best rates via Jupiter aggregator
+        <p className="font-mono text-base text-gray-400">
+          {connected 
+            ? 'Swap tokens with the best rates - wallet connected for execution'
+            : 'Swap tokens with the best rates via Jupiter aggregator - connect wallet to execute'
+          }
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* MetaMask Warning Banner */}
+      {wallet?.adapter?.name?.toLowerCase().includes('metamask') && (
+        <div className="mb-6">
+          <PixelCard>
+            <div className="p-4 bg-red-900/20 border-2 border-red-600/30">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-6 w-6 text-red-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <div className="font-pixel text-sm text-red-400 mb-2">
+                    🚫 METAMASK NOT SUPPORTED FOR SWAPS
+                  </div>
+                  <div className="font-mono text-xs text-red-400 mb-3">
+                    MetaMask Solana Snap has critical stability issues causing transaction failures. 
+                    Swaps are disabled for MetaMask users to prevent fund loss.
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    <a 
+                      href="https://phantom.app/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-block px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white font-pixel text-xs border border-purple-400 transition-colors"
+                    >
+                      [GET PHANTOM]
+                    </a>
+                    <a 
+                      href="https://solflare.com/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-block px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white font-pixel text-xs border border-blue-400 transition-colors"
+                    >
+                      [GET SOLFLARE]
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </PixelCard>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column: Swap Interface */}
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Swap Form */}
           <PixelCard>
             <div className="space-y-4">
@@ -135,10 +177,17 @@ export default function SwapPage() {
                 </h3>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {/* Input Token */}
-                <div className="p-4 bg-gray-800 border-4 border-gray-700">
-                  <div className="font-pixel text-xs text-gray-400 mb-2">FROM TOKEN:</div>
+                <div className="p-6 bg-gray-800 border-4 border-gray-700">
+                  <div className="font-pixel text-sm text-gray-400 mb-4 flex items-center justify-between">
+                    <span>FROM TOKEN:</span>
+                    {inputTokenData.tokenInfo && (
+                      <span className="text-blue-400">
+                        {inputTokenData.symbol} ({inputTokenData.decimals} decimals)
+                      </span>
+                    )}
+                  </div>
                   <PixelInput
                     placeholder="Enter token mint address (e.g., So11111111111111111111111111111111111111112)"
                     value={inputToken}
@@ -147,9 +196,10 @@ export default function SwapPage() {
                   <div className="mt-2">
                     <PixelInput
                       type="number"
-                      placeholder="Amount"
+                      placeholder={`Amount ${inputTokenData.tokenInfo ? `(${inputTokenData.symbol})` : ''}`}
                       value={inputAmount}
                       onChange={(e) => setInputAmount(e.target.value)}
+                      step="any"
                     />
                   </div>
                 </div>
@@ -165,8 +215,15 @@ export default function SwapPage() {
                 </div>
 
                 {/* Output Token */}
-                <div className="p-4 bg-gray-800 border-4 border-gray-700">
-                  <div className="font-pixel text-xs text-gray-400 mb-2">TO TOKEN:</div>
+                <div className="p-6 bg-gray-800 border-4 border-gray-700">
+                  <div className="font-pixel text-sm text-gray-400 mb-4 flex items-center justify-between">
+                    <span>TO TOKEN:</span>
+                    {outputTokenData.tokenInfo && (
+                      <span className="text-green-400">
+                        {outputTokenData.symbol} ({outputTokenData.decimals} decimals)
+                      </span>
+                    )}
+                  </div>
                   <PixelInput
                     placeholder="Enter token mint address"
                     value={outputToken}
@@ -176,7 +233,7 @@ export default function SwapPage() {
                     <input
                       type="text"
                       readOnly
-                      value={quote ? formatAmount(quote.outAmount) : ''}
+                      value={quote ? formatDisplayAmount(quote.outAmount, outputTokenData.tokenInfo) : ''}
                       placeholder="Output amount will appear here after getting quote"
                       className={`w-full px-3 py-2 bg-gray-900 border-2 font-mono text-lg ${
                         quote 
@@ -186,7 +243,7 @@ export default function SwapPage() {
                     />
                     {quote && (
                       <div className="mt-1 font-mono text-xs text-green-400">
-                        Estimated output: ~{formatAmount(quote.outAmount)} tokens
+                        Estimated output: ~{formatDisplayAmount(quote.outAmount, outputTokenData.tokenInfo)} {outputTokenData?.symbol || 'tokens'}
                       </div>
                     )}
                   </div>
@@ -205,7 +262,7 @@ export default function SwapPage() {
                   />
                   <div className="flex items-end">
                     <PixelButton
-                      onClick={getQuote}
+                      onClick={handleGetQuote}
                       disabled={loadingQuote || !inputToken.trim() || !outputToken.trim() || !inputAmount}
                       className="w-full"
                     >
@@ -235,57 +292,63 @@ export default function SwapPage() {
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          </PixelCard>
 
-                {/* Quick Token Suggestions */}
-                <div className="p-4 bg-gray-800 border-2 border-gray-700">
-                  <div className="font-pixel text-xs text-gray-400 mb-3">QUICK SELECT:</div>
-                  
-                  <div className="space-y-3">
-                    <div>
-                      <div className="font-mono text-xs text-gray-500 mb-1">FROM Token:</div>
-                      <div className="flex flex-wrap gap-2">
-                        {[
-                          { symbol: 'SOL', address: 'So11111111111111111111111111111111111111112' },
-                          { symbol: 'USDC', address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
-                          { symbol: 'USDT', address: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB' }
-                        ].map((token) => (
-                          <button
-                            key={`from-${token.symbol}`}
-                            className={`px-2 py-1 font-mono text-xs border transition-colors ${
-                              inputToken === token.address
-                                ? 'border-green-400 text-green-400 bg-green-900/20'
-                                : 'border-gray-600 text-gray-400 hover:border-green-400 hover:text-green-400'
-                            }`}
-                            onClick={() => setInputToken(token.address)}
-                          >
-                            {token.symbol}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <div className="font-mono text-xs text-gray-500 mb-1">TO Token:</div>
-                      <div className="flex flex-wrap gap-2">
-                        {[
-                          { symbol: 'SOL', address: 'So11111111111111111111111111111111111111112' },
-                          { symbol: 'USDC', address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
-                          { symbol: 'USDT', address: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB' }
-                        ].map((token) => (
-                          <button
-                            key={`to-${token.symbol}`}
-                            className={`px-2 py-1 font-mono text-xs border transition-colors ${
-                              outputToken === token.address
-                                ? 'border-green-400 text-green-400 bg-green-900/20'
-                                : 'border-gray-600 text-gray-400 hover:border-green-400 hover:text-green-400'
-                            }`}
-                            onClick={() => setOutputToken(token.address)}
-                          >
-                            {token.symbol}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+          {/* Quick Token Suggestions */}
+          <PixelCard>
+            <div className="space-y-4">
+              <div className="border-b-4 border-blue-400/20 pb-3">
+                <h3 className="font-pixel text-sm text-blue-400">
+                  🚀 QUICK SELECT
+                </h3>
+              </div>
+              
+              <div className="space-y-3">
+                <div>
+                  <div className="font-mono text-xs text-gray-500 mb-1">FROM Token:</div>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { symbol: 'SOL', address: 'So11111111111111111111111111111111111111112' },
+                      { symbol: 'USDC', address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
+                      { symbol: 'USDT', address: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB' }
+                    ].map((token) => (
+                      <button
+                        key={`from-${token.symbol}`}
+                        className={`px-2 py-1 font-mono text-xs border transition-colors ${
+                          inputToken === token.address
+                            ? 'border-green-400 text-green-400 bg-green-900/20'
+                            : 'border-gray-600 text-gray-400 hover:border-green-400 hover:text-green-400'
+                        }`}
+                        onClick={() => setInputToken(token.address)}
+                      >
+                        {token.symbol}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="font-mono text-xs text-gray-500 mb-1">TO Token:</div>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { symbol: 'SOL', address: 'So11111111111111111111111111111111111111112' },
+                      { symbol: 'USDC', address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
+                      { symbol: 'USDT', address: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB' }
+                    ].map((token) => (
+                      <button
+                        key={`to-${token.symbol}`}
+                        className={`px-2 py-1 font-mono text-xs border transition-colors ${
+                          outputToken === token.address
+                            ? 'border-green-400 text-green-400 bg-green-900/20'
+                            : 'border-gray-600 text-gray-400 hover:border-green-400 hover:text-green-400'
+                        }`}
+                        onClick={() => setOutputToken(token.address)}
+                      >
+                        {token.symbol}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -306,13 +369,13 @@ export default function SwapPage() {
                   <div className="flex justify-between">
                     <span className="font-mono text-xs text-gray-400">Input Amount:</span>
                     <span className="font-mono text-xs text-white">
-                      {formatAmount(quote.inAmount)} tokens
+                      {formatDisplayAmount(quote.inAmount, inputTokenData.tokenInfo)} {inputTokenData?.symbol || 'tokens'}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="font-mono text-xs text-gray-400">Output Amount:</span>
                     <span className="font-mono text-xs text-green-400">
-                      {formatAmount(quote.outAmount)} tokens
+                      {formatDisplayAmount(quote.outAmount, outputTokenData.tokenInfo)} {outputTokenData?.symbol || 'tokens'}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -341,161 +404,111 @@ export default function SwapPage() {
                   </div>
                 </div>
 
-                <div className="p-4 bg-yellow-900/20 border-2 border-yellow-600/30">
+                <div className={`p-4 border-2 ${connected ? 'bg-green-900/20 border-green-600/30' : 'bg-yellow-900/20 border-yellow-600/30'}`}>
                   <div className="flex items-start gap-2">
-                    <AlertTriangle className="h-4 w-4 text-yellow-400 mt-0.5" />
-                    <div className="font-mono text-xs text-yellow-400">
-                      This is a quote only. To execute swaps, wallet integration is required.
+                    <CheckCircle className={`h-4 w-4 mt-0.5 ${connected ? 'text-green-400' : 'text-yellow-400'}`} />
+                    <div className={`font-mono text-xs ${connected ? 'text-green-400' : 'text-yellow-400'}`}>
+                      {connected 
+                        ? '✓ Wallet connected! Use the wallet panel on the right to execute this swap.' 
+                        : '⚠️ This is a quote only. Connect wallet to execute swaps.'
+                      }
                     </div>
                   </div>
                 </div>
+              </div>
+            </PixelCard>
+          )}
+        </div>
 
-                <PixelButton
-                  className="w-full"
-                  disabled
-                >
-                  <DollarSign className="h-4 w-4" />
-                  [EXECUTE SWAP] - Requires Wallet
-                </PixelButton>
+        {/* Right Column: Wallet & Execution */}
+        <div className="space-y-8">
+          {/* Wallet Connection & Swap Execution */}
+          <SwapWalletConnector
+            quote={quote}
+            loadingSwap={loadingSwap}
+            onExecuteSwap={handleExecuteSwap}
+            transactionSignature={transactionSignature}
+          />
+
+          {/* Transaction History */}
+          {transactionSignature && (
+            <PixelCard>
+              <div className="space-y-4">
+                <div className="border-b-4 border-purple-400/20 pb-3">
+                  <h3 className="font-pixel text-sm text-purple-400">
+                    📋 TRANSACTION HISTORY
+                  </h3>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="p-3 bg-green-900/20 border-2 border-green-600/30">
+                    <div className="font-mono text-xs text-green-400 space-y-2">
+                      <div className="font-pixel text-xs text-green-400 mb-2">✓ LATEST SWAP:</div>
+                      <div className="break-all">
+                        {transactionSignature.slice(0, 12)}...{transactionSignature.slice(-12)}
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => window.open(`https://explorer.solana.com/tx/${transactionSignature}`, '_blank')}
+                          className="flex items-center gap-1 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white font-pixel text-xs border border-blue-400 transition-colors"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          [EXPLORER]
+                        </button>
+                        <button
+                          onClick={() => window.open(`https://solscan.io/tx/${transactionSignature}`, '_blank')}
+                          className="flex items-center gap-1 px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white font-pixel text-xs border border-purple-400 transition-colors"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          [SOLSCAN]
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </PixelCard>
           )}
 
-          {/* Implementation Info */}
+          {/* Help & Tips */}
           <PixelCard>
             <div className="space-y-4">
-              <div className="border-b-4 border-green-400/20 pb-3">
-                <h3 className="font-pixel text-sm text-green-400">
-                  � SWAP IMPLEMENTATION
+              <div className="border-b-4 border-yellow-400/20 pb-3">
+                <h3 className="font-pixel text-sm text-yellow-400">
+                  💡 SWAP TIPS
                 </h3>
-              </div>
-
-              <div className="p-4 bg-green-900/20 border-2 border-green-600/30">
-                <div className="flex items-start gap-2">
-                  <Info className="h-4 w-4 text-green-400 mt-0.5" />
-                  <div className="font-mono text-xs text-green-400">
-                    ✓ Jupiter Lite API v1 integration<br/>
-                    ✓ Real-time quotes (no API key required)<br/>
-                    ✓ Price impact calculation<br/>
-                    ✓ Multi-hop routing
-                  </div>
-                </div>
               </div>
 
               <div className="space-y-3">
-                <div className="p-3 bg-gray-800 border-2 border-gray-700">
-                  <div className="font-pixel text-xs text-yellow-400 mb-1">TODO:</div>
-                  <ul className="font-mono text-xs text-gray-400 space-y-1">
-                    <li>• Wallet adapter integration</li>
-                    <li>• Transaction building</li>
-                    <li>• Swap execution</li>
-                    <li>• Transaction monitoring</li>
-                  </ul>
+                <div className="p-3 bg-blue-900/20 border-2 border-blue-600/30">
+                  <div className="flex items-start gap-2">
+                    <Info className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                    <div className="font-mono text-xs text-blue-400">
+                      <strong>Slippage:</strong> Set higher for volatile tokens. 0.5% is recommended for stable pairs.
+                    </div>
+                  </div>
                 </div>
 
                 <div className="p-3 bg-green-900/20 border-2 border-green-600/30">
-                  <div className="font-pixel text-xs text-green-400 mb-1">COMPLETED:</div>
-                  <ul className="font-mono text-xs text-gray-400 space-y-1">
-                    <li>• Jupiter quote API</li>
-                    <li>• Token input validation</li>
-                    <li>• Slippage controls</li>
-                    <li>• Error handling</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </PixelCard>
-        </div>
-
-        {/* Right Column: Market Info */}
-        <div className="space-y-6">
-          {/* Trading Tips */}
-          <PixelCard>
-            <div className="space-y-4">
-              <div className="border-b-4 border-green-400/20 pb-3">
-                <h3 className="font-pixel text-sm text-green-400">
-                  � TRADING TIPS
-                </h3>
-              </div>
-
-              <div className="space-y-3 font-mono text-xs text-gray-400">
-                <div className="flex items-start gap-2">
-                  <span className="text-green-400 mt-0.5">▸</span>
-                  <span>Use 0.5-1% slippage for most trades</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-green-400 mt-0.5">▸</span>
-                  <span>Higher slippage for volatile tokens</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-green-400 mt-0.5">▸</span>
-                  <span>Check price impact before swapping</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-green-400 mt-0.5">▸</span>
-                  <span>Consider transaction fees in calculations</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-green-400 mt-0.5">▸</span>
-                  <span>Always verify token mint addresses</span>
-                </div>
-              </div>
-            </div>
-          </PixelCard>
-
-          {/* Jupiter Integration */}
-          <PixelCard>
-            <div className="space-y-4">
-              <div className="border-b-4 border-green-400/20 pb-3">
-                <h3 className="font-pixel text-sm text-green-400">
-                  ℹ️ JUPITER LITE API
-                </h3>
-              </div>
-
-              <div className="space-y-3 font-mono text-xs text-gray-400">
-                <div className="p-3 bg-gray-800 border-2 border-gray-700">
-                  <div className="text-green-400 font-pixel text-xs mb-2">LITE API ENDPOINTS:</div>
-                  <div className="space-y-1">
-                    <div>• Quote: /swap/v1/quote</div>
-                    <div>• Swap: /swap/v1/swap (POST)</div>
-                    <div>• Tokens: /tokens/v2/</div>
-                    <div>• Price: /price/v3/</div>
-                  </div>
-                </div>
-                
-                <div className="p-3 bg-gray-800 border-2 border-gray-700">
-                  <div className="text-blue-400 font-pixel text-xs mb-2">FEATURES:</div>
-                  <div className="space-y-1">
-                    <div>• Best route aggregation</div>
-                    <div>• Low slippage optimization</div>
-                    <div>• Multiple DEX support</div>
-                    <div>• MEV protection</div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
+                    <div className="font-mono text-xs text-green-400">
+                      <strong>Price Impact:</strong> Keep under 1% for best rates. Higher impact means less favorable prices.
+                    </div>
                   </div>
                 </div>
 
                 <div className="p-3 bg-yellow-900/20 border-2 border-yellow-600/30">
-                  <div className="text-yellow-400 font-pixel text-xs mb-2">API MIGRATION:</div>
-                  <div className="space-y-1">
-                    <div>• Old: quote-api.jup.ag/v6/</div>
-                    <div>• New: lite-api.jup.ag/swap/v1/</div>
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
+                    <div className="font-mono text-xs text-yellow-400">
+                      <strong>MEV Protection:</strong> Jupiter automatically routes through best DEXs for optimal prices.
+                    </div>
                   </div>
                 </div>
               </div>
-
-              <div className="pt-3 border-t-4 border-gray-700">
-                <PixelButton
-                  onClick={() => window.open('https://dev.jup.ag/docs', '_blank')}
-                  variant="secondary"
-                  className="w-full"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  [JUPITER DOCS]
-                </PixelButton>
-              </div>
             </div>
           </PixelCard>
-
-
         </div>
       </div>
     </div>

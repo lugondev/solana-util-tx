@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { PixelCard } from '@/components/ui/pixel-card'
 import { PixelButton } from '@/components/ui/pixel-button'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import { PixelWalletButton } from '@/components/ui/pixel-wallet-button'
 import { useState, useEffect } from 'react'
 import { useTransactionHistory } from '@/lib/transaction-history'
 import { LAMPORTS_PER_SOL } from '@solana/web3.js'
@@ -91,39 +91,39 @@ export default function HomePage() {
       description: 'Create new SPL tokens',
       href: '/tokens/mint',
       icon: '🏭',
-      status: 'coming-soon',
-    },
-    {
-      title: 'JITO BUNDLES',
-      description: 'MEV protected transactions',
-      href: '/jito/bundle',
-      icon: '🚀',
-      status: 'coming-soon',
+      status: 'active',
     },
     {
       title: 'JUPITER SWAP',
       description: 'Token swapping with best rates',
       href: '/defi/swap',
-      icon: '🔄',
-      status: 'coming-soon',
+      icon: '�',
+      status: 'active',
     },
     {
       title: 'DEV TOOLS',
       description: 'Developer utilities and tools',
       href: '/dev-tools/keypair',
-      icon: '🛠️',
-      status: 'coming-soon',
+      icon: '�️',
+      status: 'active',
+    },
+    {
+      title: 'JITO BUNDLES',
+      description: 'MEV protected transactions (Beta)',
+      href: '/jito/bundle',
+      icon: '�',
+      status: 'beta',
     },
   ]
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Hero Section */}
-      <div className="text-center py-12">
-        <div className="flex items-center justify-center mb-6">
-          <div className="w-16 h-16 bg-green-400 border-8 border-green-400 animate-pulse mr-4" />
+      <div className="text-center py-16">
+        <div className="flex items-center justify-center mb-8">
+          <div className="w-20 h-20 bg-green-400 border-8 border-green-400 animate-pulse mr-6" />
           <div>
-            <h1 className="font-pixel text-4xl text-green-400 mb-2">
+            <h1 className="font-pixel text-4xl text-green-400 mb-3">
               SOLANA UTIL-TX
             </h1>
             <p className="font-mono text-lg text-gray-400">
@@ -133,14 +133,14 @@ export default function HomePage() {
         </div>
 
         {!connected ? (
-          <div className="space-y-4">
-            <p className="font-mono text-sm text-gray-500 mb-6">
+          <div className="space-y-6">
+            <p className="font-mono text-sm text-gray-500 mb-8">
               Connect your wallet to start using advanced Solana features
             </p>
-            <WalletMultiButton className="!bg-green-400 hover:!bg-green-400/80 !text-gray-900 !font-pixel !text-sm !py-3 !px-6" />
+            <PixelWalletButton variant="success" />
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <p className="font-mono text-sm text-green-400">
               Welcome back! Ready to build some transactions?
             </p>
@@ -193,42 +193,47 @@ export default function HomePage() {
 
       {/* Features Grid */}
       <div>
-        <h2 className="font-pixel text-xl text-green-400 mb-6 flex items-center gap-3">
+        <h2 className="font-pixel text-xl text-green-400 mb-8 flex items-center gap-4">
           <span className="animate-pulse">▸</span>
           AVAILABLE FEATURES
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature) => (
             <PixelCard key={feature.title} className="h-full">
               <div className="flex flex-col h-full">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{feature.icon}</span>
+                <div className="flex items-start justify-between mb-5">
+                  <div className="flex items-center gap-4">
+                    <span className="text-3xl">{feature.icon}</span>
                     <div>
-                      <h3 className="font-pixel text-sm text-white mb-1">
+                      <h3 className="font-pixel text-sm text-white mb-2">
                         {feature.title}
                       </h3>
                       {feature.status === 'coming-soon' && (
-                        <span className="px-2 py-0.5 bg-yellow-600/20 text-yellow-400 border border-yellow-600/30 font-pixel text-xs">
+                        <span className="px-3 py-1 bg-yellow-600/20 text-yellow-400 border border-yellow-600/30 font-pixel text-xs">
                           SOON
+                        </span>
+                      )}
+                      {feature.status === 'beta' && (
+                        <span className="px-3 py-1 bg-blue-600/20 text-blue-400 border border-blue-600/30 font-pixel text-xs">
+                          BETA
                         </span>
                       )}
                     </div>
                   </div>
                 </div>
 
-                <p className="font-mono text-xs text-gray-400 mb-4 flex-1">
+                <p className="font-mono text-sm text-gray-400 mb-6 flex-1">
                   {feature.description}
                 </p>
 
-                {feature.status === 'active' ? (
+                {feature.status === 'active' || feature.status === 'beta' ? (
                   <Link href={feature.href}>
                     <PixelButton
                       variant="primary"
                       className="w-full !text-xs"
                     >
-                      [OPEN]
+                      {feature.status === 'beta' ? '[OPEN BETA]' : '[OPEN]'}
                     </PixelButton>
                   </Link>
                 ) : (
@@ -270,7 +275,7 @@ export default function HomePage() {
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-green-400 mt-0.5">✓</span>
-                    <span>SPL token transfers</span>
+                    <span>SPL token transfers and management</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-green-400 mt-0.5">✓</span>
@@ -280,6 +285,28 @@ export default function HomePage() {
                     <span className="text-green-400 mt-0.5">✓</span>
                     <span>Transaction history tracking</span>
                   </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-green-400 mt-0.5">✓</span>
+                    <span>SPL token minting and creation</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-green-400 mt-0.5">✓</span>
+                    <span>Jupiter token swaps integration</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-green-400 mt-0.5">✓</span>
+                    <span>Developer keypair generator</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-pixel text-sm text-white mb-3">BETA/IN DEVELOPMENT:</h4>
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <span className="text-blue-400 mt-0.5">β</span>
+                    <span>Jito bundle transactions (MEV protection)</span>
+                  </div>
                 </div>
               </div>
 
@@ -288,23 +315,23 @@ export default function HomePage() {
                 <div className="space-y-2">
                   <div className="flex items-start gap-2">
                     <span className="text-yellow-400 mt-0.5">⏳</span>
-                    <span>Token minting and burning</span>
+                    <span>Token burning functionality</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-yellow-400 mt-0.5">⏳</span>
-                    <span>Jito MEV protection</span>
+                    <span>Advanced DeFi integrations</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-yellow-400 mt-0.5">⏳</span>
-                    <span>Jupiter token swaps</span>
+                    <span>Program deployment tools</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-yellow-400 mt-0.5">⏳</span>
-                    <span>DeFi integrations</span>
+                    <span>Multi-signature wallet support</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-yellow-400 mt-0.5">⏳</span>
-                    <span>Developer utilities</span>
+                    <span>Token analytics and insights</span>
                   </div>
                 </div>
               </div>

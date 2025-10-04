@@ -16,7 +16,7 @@ export function PixelCard({ children, className, header, footer }: PixelCardProp
   return (
     <div 
       className={cn(
-        'border-4 p-5',
+        'border-4 p-6',
         'shadow-[4px_4px_0_var(--pixel-shadow),8px_8px_0_rgba(0,0,0,0.3)]',
         className
       )}
@@ -28,12 +28,12 @@ export function PixelCard({ children, className, header, footer }: PixelCardProp
     >
       {header && (
         <div 
-          className="border-b-4 pb-3 mb-4"
+          className="border-b-4 pb-4 mb-5"
           style={{ borderColor: 'var(--pixel-border-primary)' }}
         >
           {typeof header === 'string' ? (
             <h3 
-              className="font-pixel text-[12px] uppercase"
+              className="font-pixel text-sm uppercase"
               style={{ color: 'var(--pixel-accent)' }}
             >
               {header}
@@ -46,7 +46,7 @@ export function PixelCard({ children, className, header, footer }: PixelCardProp
       <div>{children}</div>
       {footer && (
         <div 
-          className="border-t-4 pt-3 mt-4"
+          className="border-t-4 pt-4 mt-5"
           style={{ borderColor: 'var(--pixel-border-primary)' }}
         >
           {footer}

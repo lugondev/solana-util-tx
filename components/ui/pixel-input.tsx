@@ -18,15 +18,15 @@ export const PixelInput = forwardRef<HTMLInputElement, PixelInputProps>(
     return (
       <div className="space-y-1">
         {label && (
-          <label className="font-pixel text-[10px] uppercase block" style={{ color: 'var(--pixel-text-secondary)' }}>
+          <label className="font-pixel text-xs uppercase block mb-3" style={{ color: 'var(--pixel-text-secondary)' }}>
             {label}
           </label>
         )}
         <input
           ref={ref}
           className={cn(
-            'font-mono text-[12px] w-full px-3 py-3',
-            'border-4 transition-none',
+            'font-mono text-sm w-full px-5 py-4',
+            'border-4 transition-none min-h-[52px]',
             'shadow-[inset_2px_2px_0_rgba(0,0,0,0.3)]',
             'focus:outline-none',
             'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -49,12 +49,12 @@ export const PixelInput = forwardRef<HTMLInputElement, PixelInputProps>(
           {...props}
         />
         {error && (
-          <p className="font-mono text-[10px]" style={{ color: 'var(--pixel-error)' }}>
+          <p className="font-mono text-xs mt-2" style={{ color: 'var(--pixel-error)' }}>
             ❌ {error}
           </p>
         )}
         {helperText && !error && (
-          <p className="font-mono text-[10px]" style={{ color: 'var(--pixel-text-quaternary)' }}>
+          <p className="font-mono text-xs mt-2" style={{ color: 'var(--pixel-text-quaternary)' }}>
             {helperText}
           </p>
         )}

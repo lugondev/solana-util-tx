@@ -23,12 +23,12 @@ export function PixelButton({
   disabled,
   ...props
 }: PixelButtonProps) {
-  const baseStyles = 'font-pixel inline-block border-4 transition-none relative uppercase cursor-pointer'
+  const baseStyles = 'font-pixel inline-flex items-center justify-center gap-2 border-4 transition-none relative uppercase cursor-pointer'
   
   const sizes = {
-    sm: 'text-[8px] px-3 py-2',
-    md: 'text-[10px] px-4 py-3',
-    lg: 'text-[12px] px-5 py-4'
+    sm: 'text-xs px-4 py-3 min-h-[44px]',
+    md: 'text-sm px-6 py-4 min-h-[48px]',
+    lg: 'text-base px-8 py-5 min-h-[52px]'
   }
   
   const getVariantStyles = () => {

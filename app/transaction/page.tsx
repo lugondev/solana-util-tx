@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Send, AlertCircle, CheckCircle, Loader, ExternalLink } from 'lucide-react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { PixelWalletButton } from '@/components/ui/pixel-wallet-button';
 import { 
   Transaction, 
   SystemProgram, 
@@ -189,7 +189,7 @@ export default function TransactionPage() {
                 Please connect your wallet to send transactions.
               </p>
               <div className="space-y-4">
-                <WalletMultiButton />
+                <PixelWalletButton variant="success" />
                 <PixelButton
                   variant="secondary"
                   onClick={() => (window.location.href = '/')}

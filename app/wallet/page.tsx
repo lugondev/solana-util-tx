@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { PixelWalletButton } from '@/components/ui/pixel-wallet-button';
 import { LAMPORTS_PER_SOL, Transaction } from '@solana/web3.js';
 import { PixelCard } from '@/components/ui/pixel-card';
 import { PixelButton } from '@/components/ui/pixel-button';
@@ -108,7 +108,7 @@ export default function WalletPage() {
                 Connect your wallet to view balance and manage transactions.
               </p>
               <div className="space-y-4">
-                <WalletMultiButton />
+                <PixelWalletButton variant="success" />
                 <PixelButton
                   variant="secondary"
                   onClick={() => (window.location.href = '/')}
@@ -268,7 +268,7 @@ export default function WalletPage() {
                 </p>
               </div>
             </div>
-            <WalletMultiButton />
+            <PixelWalletButton variant="secondary" />
           </div>
         </PixelCard>
       </div>

@@ -7,6 +7,7 @@ import {PhantomWalletAdapter, SolflareWalletAdapter, TorusWalletAdapter, LedgerW
 import {WalletModalProvider} from '@solana/wallet-adapter-react-ui'
 import {clusterApiUrl} from '@solana/web3.js'
 import {NetworkProvider, useNetwork} from '@/contexts/NetworkContext'
+import {TokenProvider} from '@/contexts/TokenContext'
 
 // Import wallet adapter CSS
 import '@solana/wallet-adapter-react-ui/styles.css'
@@ -35,7 +36,11 @@ const WalletProviderInner: FC<WalletProviderProps> = ({children}) => {
 	return (
 		<ConnectionProvider endpoint={connection.rpcEndpoint}>
 			<SolanaWalletProvider wallets={wallets} autoConnect>
-				<WalletModalProvider>{children}</WalletModalProvider>
+				<WalletModalProvider>
+					<TokenProvider>
+						{children}
+					</TokenProvider>
+				</WalletModalProvider>
 			</SolanaWalletProvider>
 		</ConnectionProvider>
 	)
