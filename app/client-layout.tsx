@@ -6,7 +6,10 @@ import Navigation from '@/components/Navigation'
 import MobileNavigation from '@/components/MobileNavigation'
 import { NetworkSwitcher } from '@/components/NetworkSwitcher'
 import { PixelWalletButton } from '@/components/ui/pixel-wallet-button'
+import { SearchTrigger } from '@/components/ui/search-modal'
 import Footer from '@/components/Footer'
+import { ThemeProvider } from '@/contexts/ThemeContext'
+import { SearchProvider } from '@/contexts/SearchContext'
 
 // Import wallet adapter CSS
 import '@solana/wallet-adapter-react-ui/styles.css'
@@ -19,7 +22,9 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   return (
-    <WalletProvider>
+    <ThemeProvider>
+      <SearchProvider>
+        <WalletProvider>
       <div className='flex h-screen'>
         {/* Desktop Sidebar Navigation - Hidden on mobile */}
         <aside className='flex-shrink-0 hidden lg:block'>
@@ -49,6 +54,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
               <NetworkSwitcher />
             </div>
             <div className='flex items-center gap-2 lg:gap-4'>
+              <SearchTrigger />
               <PixelWalletButton variant="success" />
             </div>
           </header>
@@ -69,6 +75,8 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
           backgroundImage: 'repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.1) 0px, transparent 1px, transparent 2px, rgba(0, 0, 0, 0.1) 3px)'
         }} />
       </div>
-    </WalletProvider>
+        </WalletProvider>
+      </SearchProvider>
+    </ThemeProvider>
   )
 }

@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { ChevronRight, ChevronDown } from 'lucide-react'
+import { useSafeTheme } from '@/contexts/ThemeContext'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 interface NavigationItem {
   label: string
@@ -23,6 +25,16 @@ const navigationItems: NavigationItem[] = [
     label: 'FEATURES', 
     href: '/features', 
     icon: '⭐' 
+  },
+  { 
+    label: 'DATA TOOLS',
+    href: '/data-tools',
+    icon: '📊'
+  },
+  { 
+    label: 'ADVANCED TOOLS',
+    href: '/advanced-tools',
+    icon: '🚀'
   },
   { 
     label: 'WALLET',
@@ -191,9 +203,12 @@ interface NavigationProps {
 
 export default function Navigation({ isMobileMenuOpen = false, onMobileMenuToggle, className = '' }: NavigationProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const { isDark } = useSafeTheme()
   
   return (
-    <nav className={`h-screen bg-gray-900 border-r-4 border-green-400/20 flex flex-col transition-all duration-300 ${
+    <nav className={`h-screen ${
+      isDark ? 'bg-gray-900' : 'bg-gray-50'
+    } border-r-4 border-green-400/20 flex flex-col transition-all duration-300 ${
       isCollapsed ? 'w-20' : 'w-72'
     } ${className}`}>
       {/* Header */}
@@ -208,6 +223,33 @@ export default function Navigation({ isMobileMenuOpen = false, onMobileMenuToggl
               </div>
             )}
           </div>
+          
+          {!isCollapsed && (
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <button
+                onClick={() => setIsCollapsed(true)}
+                className={`p-1 rounded ${
+                  isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-200'
+                } transition-colors`}
+                title="Collapse sidebar"
+              >
+                <ChevronRight size={16} className="text-gray-400" />
+              </button>
+            </div>
+          )}
+          
+          {isCollapsed && (
+            <button
+              onClick={() => setIsCollapsed(false)}
+              className={`p-1 rounded ${
+                isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-200'
+              } transition-colors`}
+              title="Expand sidebar"
+            >
+              <ChevronDown size={16} className="text-gray-400" />
+            </button>
+          )}
           {!isCollapsed && (
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}

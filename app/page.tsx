@@ -136,14 +136,70 @@ export default function HomePage() {
     {
       title: 'DEV TOOLS',
       description: 'Developer utilities and tools',
-      href: '/dev-tools/keypair',
-      icon: '�️',
+      href: '/dev-tools',
+      icon: '🛠️',
+      status: 'active',
+    },
+    {
+      title: 'TX PARSER',
+      description: 'Decode raw transactions to human-readable',
+      href: '/dev-tools/transaction-parser',
+      icon: '🔍',
+      status: 'active',
+    },
+    {
+      title: 'VANITY ADDRESS',
+      description: 'Generate custom addresses with prefixes',
+      href: '/dev-tools/vanity-generator',
+      icon: '✨',
+      status: 'active',
+    },
+    {
+      title: 'BULK KEYPAIRS',
+      description: 'Generate multiple wallets at once',
+      href: '/dev-tools/bulk-keypair',
+      icon: '📦',
       status: 'active',
     },
     {
       title: 'JITO BUNDLES',
       description: 'MEV protected transaction bundles',
       href: '/jito/bundle',
+      icon: '🚀',
+      status: 'active',
+    },
+    {
+      title: 'BORSH INSPECTOR',
+      description: 'Decode/encode Borsh data with schemas',
+      href: '/data-tools/borsh-inspector',
+      icon: '🔍',
+      status: 'active',
+    },
+    {
+      title: 'EVENT LOG PARSER',
+      description: 'Parse transaction logs and events',
+      href: '/data-tools/event-parser',
+      icon: '📊',
+      status: 'active',
+    },
+    {
+      title: 'PROGRAM VERSIONING',
+      description: 'Manage program versions and upgrades',
+      href: '/advanced-tools/program-versioning',
+      icon: '📝',
+      status: 'active',
+    },
+    {
+      title: 'DATA TOOLS',
+      description: 'Data processing and analysis suite',
+      href: '/data-tools',
+      icon: '📊',
+      status: 'active',
+    },
+    {
+      title: 'ADVANCED TOOLS',
+      description: 'Enterprise Solana development tools',
+      href: '/advanced-tools',
       icon: '🚀',
       status: 'active',
     },
@@ -296,64 +352,71 @@ export default function HomePage() {
         <div className="space-y-4">
           <div className="border-b-4 border-green-400/20 pb-3">
             <h3 className="font-pixel text-sm text-green-400">
-              ℹ️ ABOUT SOLANA UTIL-TX
+              ℹ️ ABOUT SOLANA DEVELOPER TOOLKIT
             </h3>
           </div>
 
           <div className="space-y-4 font-mono text-xs text-gray-400">
+            <p className="text-gray-300 leading-relaxed mb-6">
+              Your all-in-one Solana blockchain development platform featuring 40+ specialized tools. 
+              From transaction parsing and program deployment to advanced DeFi integrations and data analysis, 
+              this comprehensive suite empowers developers, traders, and blockchain enthusiasts with 
+              professional-grade utilities for every aspect of Solana development.
+            </p>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h4 className="font-pixel text-sm text-white mb-3">CURRENT FEATURES:</h4>
+                <h4 className="font-pixel text-sm text-white mb-3">CORE CATEGORIES:</h4>
                 <div className="space-y-2">
                   <div className="flex items-start gap-2">
                     <span className="text-green-400 mt-0.5">✓</span>
-                    <span>SOL transfers with priority fees</span>
+                    <span>Developer Tools (5 tools)</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-green-400 mt-0.5">✓</span>
-                    <span>Transaction simulation and testing</span>
+                    <span>Transaction Management (4 tools)</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-green-400 mt-0.5">✓</span>
-                    <span>SPL token transfers and management</span>
+                    <span>Token Operations (5 tools)</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-green-400 mt-0.5">✓</span>
-                    <span>Address Lookup Table management</span>
+                    <span>Account & Wallet Tools (5 tools)</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-green-400 mt-0.5">✓</span>
-                    <span>Transaction history tracking</span>
+                    <span>DeFi & Trading (3 tools)</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-green-400 mt-0.5">✓</span>
-                    <span>SPL token minting and creation</span>
+                    <span>Advanced Solana Features (6 tools)</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-green-400 mt-0.5">✓</span>
-                    <span>Jupiter token swaps integration</span>
+                    <span>Data Processing & Analysis (3 tools)</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-green-400 mt-0.5">✓</span>
-                    <span>Developer keypair generator</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-green-400 mt-0.5">✓</span>
-                    <span>Jito MEV protected bundles</span>
+                    <span>Jito MEV Protection (2 tools)</span>
                   </div>
                 </div>
               </div>
 
               <div>
-                <h4 className="font-pixel text-sm text-white mb-3">COMING SOON:</h4>
+                <h4 className="font-pixel text-sm text-white mb-3">KEY FEATURES:</h4>
                 <div className="space-y-2">
                   <div className="flex items-start gap-2">
                     <span className="text-green-400 mt-0.5">✓</span>
-                    <span>Token burning functionality</span>
+                    <span>Transaction parser & decoder</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-green-400 mt-0.5">✓</span>
-                    <span>Advanced DeFi integrations</span>
+                    <span>Vanity address generator</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-green-400 mt-0.5">✓</span>
+                    <span>Bulk keypair generation</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-green-400 mt-0.5">✓</span>
@@ -361,11 +424,27 @@ export default function HomePage() {
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-green-400 mt-0.5">✓</span>
-                    <span>Multi-signature wallet support</span>
+                    <span>PDA finder & brute forcer</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-green-400 mt-0.5">✓</span>
-                    <span>Token analytics and insights</span>
+                    <span>Token extensions manager</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-green-400 mt-0.5">✓</span>
+                    <span>State compression utilities</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-green-400 mt-0.5">✓</span>
+                    <span>Jupiter DEX aggregation</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-green-400 mt-0.5">✓</span>
+                    <span>Multisig wallet support</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-green-400 mt-0.5">✓</span>
+                    <span>Global search with hotkeys (/ or Cmd+K)</span>
                   </div>
                 </div>
               </div>
@@ -373,9 +452,9 @@ export default function HomePage() {
 
             <div className="pt-4 border-t-4 border-gray-700">
               <p className="text-center">
-                <span className="text-green-400">SOLANA UTIL-TX</span> - 
+                <span className="text-green-400">SOLANA DEVELOPER TOOLKIT</span> - 
                 Built with Next.js 15, React 19, and pixel-perfect design. 
-                Your comprehensive toolkit for Solana blockchain operations.
+                Your comprehensive 40+ tool platform for professional Solana blockchain development.
               </p>
             </div>
           </div>
