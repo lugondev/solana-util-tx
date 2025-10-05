@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Advanced Solana Tools | Solana Utility Tools',
-  description: 'Advanced suite của tools cho Solana development. Program versioning, state compression, Token-2022 extensions management với enterprise features.',
+  description: 'Advanced suite of tools for Solana development. Program versioning, state compression, Token-2022 extensions management with enterprise features.',
   keywords: ['solana', 'advanced tools', 'program versioning', 'state compression', 'token 2022', 'extensions'],
 }
 
@@ -10,7 +10,7 @@ export default function AdvancedToolsPage() {
   const tools = [
     {
       title: '📝 Program Version Manager',
-      description: 'Manage program versions, track upgrade history, và create deployment plans',
+      description: 'Manage program versions, track upgrade history, and create deployment plans',
       href: '/advanced-tools/program-versioning',
       features: [
         'Version history tracking',
@@ -23,7 +23,7 @@ export default function AdvancedToolsPage() {
     },
     {
       title: '🗜️ State Compression Utils',
-      description: 'Manage state compression, Merkle trees, và compressed accounts',
+      description: 'Manage state compression, Merkle trees, and compressed accounts',
       href: '/advanced-tools/state-compression',
       features: [
         'Merkle tree management',
@@ -36,7 +36,7 @@ export default function AdvancedToolsPage() {
     },
     {
       title: '🪙 Token Extensions Manager',
-      description: 'Manage Token-2022 extensions, migration plans, và compatibility',
+      description: 'Manage Token-2022 extensions, migration plans, and compatibility',
       href: '/advanced-tools/token-extensions',
       features: [
         'Extension configuration',
@@ -49,7 +49,7 @@ export default function AdvancedToolsPage() {
     },
     {
       title: '🔗 Cross-Chain Bridge Utils',
-      description: 'Manage cross-chain bridges, asset transfers, và monitoring',
+      description: 'Manage cross-chain bridges, asset transfers, and monitoring',
       href: '/advanced-tools/bridge-utils',
       features: [
         'Bridge management',
@@ -62,7 +62,7 @@ export default function AdvancedToolsPage() {
     },
     {
       title: '🏛️ Governance Tools',
-      description: 'SPL Governance management, proposal tracking, và voting analytics',
+      description: 'SPL Governance management, proposal tracking, and voting analytics',
       href: '/advanced-tools/governance',
       features: [
         'Proposal management',
@@ -75,7 +75,7 @@ export default function AdvancedToolsPage() {
     },
     {
       title: '⚡ Performance Optimizer',
-      description: 'Optimize Solana programs, transaction batching, và gas efficiency',
+      description: 'Optimize Solana programs, transaction batching, and gas efficiency',
       href: '/advanced-tools/performance',
       features: [
         'Gas optimization',
@@ -96,8 +96,8 @@ export default function AdvancedToolsPage() {
             🚀 Advanced Solana Tools
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Enterprise-grade tools cho advanced Solana development. Program versioning, 
-            state compression, Token-2022 extensions với comprehensive management capabilities.
+            Enterprise-grade tools for advanced Solana development. Program versioning, 
+            state compression, Token-2022 extensions with comprehensive management capabilities.
           </p>
         </div>
 
@@ -180,7 +180,7 @@ export default function AdvancedToolsPage() {
               <div className="text-3xl mb-3">📊</div>
               <h3 className="text-lg font-semibold text-white mb-2">Advanced Analytics</h3>
               <p className="text-gray-300 text-sm">
-                Deep insights into program usage, performance metrics, và cost optimization
+                Deep insights into program usage, performance metrics, and cost optimization
               </p>
             </div>
 
@@ -188,7 +188,7 @@ export default function AdvancedToolsPage() {
               <div className="text-3xl mb-3">🔧</div>
               <h3 className="text-lg font-semibold text-white mb-2">Version Management</h3>
               <p className="text-gray-300 text-sm">
-                Track program versions, plan upgrades, và manage deployment strategies
+                Track program versions, plan upgrades, and manage deployment strategies
               </p>
             </div>
 
@@ -196,7 +196,7 @@ export default function AdvancedToolsPage() {
               <div className="text-3xl mb-3">🗜️</div>
               <h3 className="text-lg font-semibold text-white mb-2">State Compression</h3>
               <p className="text-gray-300 text-sm">
-                Reduce storage costs với Merkle tree compression và proof validation
+                Reduce storage costs with Merkle tree compression and proof validation
               </p>
             </div>
 
@@ -204,7 +204,7 @@ export default function AdvancedToolsPage() {
               <div className="text-3xl mb-3">🪙</div>
               <h3 className="text-lg font-semibold text-white mb-2">Token Extensions</h3>
               <p className="text-gray-300 text-sm">
-                Configure Token-2022 extensions với advanced features và compatibility
+                Configure Token-2022 extensions with advanced features and compatibility
               </p>
             </div>
           </div>
@@ -265,10 +265,10 @@ export default function AdvancedToolsPage() {
             <div className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 p-6 rounded-lg border border-blue-500/30">
               <h3 className="text-xl font-semibold text-white mb-4">🏦 DeFi Protocols</h3>
               <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Manage token extensions cho yield farming</li>
+                <li>• Manage token extensions for yield farming</li>
                 <li>• Compress large state for lending protocols</li>
-                <li>• Version control cho protocol upgrades</li>
-                <li>• Optimize gas costs cho high-frequency trading</li>
+                <li>• Version control for protocol upgrades</li>
+                <li>• Optimize gas costs for high-frequency trading</li>
                 <li>• Monitor cross-chain bridge operations</li>
               </ul>
             </div>
@@ -276,10 +276,10 @@ export default function AdvancedToolsPage() {
             <div className="bg-gradient-to-br from-green-900/20 to-teal-900/20 p-6 rounded-lg border border-green-500/30">
               <h3 className="text-xl font-semibold text-white mb-4">🎮 Gaming & NFTs</h3>
               <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Compress NFT metadata cho scalability</li>
+                <li>• Compress NFT metadata for scalability</li>
                 <li>• Manage game asset token extensions</li>
-                <li>• Track program versions cho game updates</li>
-                <li>• Optimize storage costs cho large collections</li>
+                <li>• Track program versions for game updates</li>
+                <li>• Optimize storage costs for large collections</li>
                 <li>• Handle complex token mechanics</li>
               </ul>
             </div>
@@ -291,14 +291,14 @@ export default function AdvancedToolsPage() {
                 <li>• Deploy enterprise token standards</li>
                 <li>• Monitor program health & performance</li>
                 <li>• Plan major system upgrades</li>
-                <li>• Ensure compliance với token extensions</li>
+                <li>• Ensure compliance with token extensions</li>
               </ul>
             </div>
 
             <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 p-6 rounded-lg border border-purple-500/30">
               <h3 className="text-xl font-semibold text-white mb-4">🔬 Research & Development</h3>
               <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Experiment với new token extensions</li>
+                <li>• Experiment with new token extensions</li>
                 <li>• Analyze compression efficiency</li>
                 <li>• Test program upgrade strategies</li>
                 <li>• Benchmark performance improvements</li>
@@ -346,8 +346,8 @@ export default function AdvancedToolsPage() {
                 <li>• Validate token extension compatibility before deployment</li>
                 <li>• Monitor compression ratios to optimize storage costs</li>
                 <li>• Plan migration strategies for breaking changes</li>
-                <li>• Use version control cho all program deployments</li>
-                <li>• Document extension configurations cho team collaboration</li>
+                <li>• Use version control for all program deployments</li>
+                <li>• Document extension configurations for team collaboration</li>
               </ul>
             </div>
           </div>

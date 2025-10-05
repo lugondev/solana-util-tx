@@ -56,7 +56,7 @@ export default function TokenAnalysisPage() {
     }
 
     if (!analyticsService) {
-      setError('Chưa kết nối đến Solana network')
+      setError('Not connected to Solana network')
       return
     }
 

@@ -16,8 +16,8 @@ export default function BorshInspectorPage() {
             🔍 Borsh Inspector
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Decode và encode Borsh data với custom schemas. Hỗ trợ đầy đủ các kiểu dữ liệu Borsh 
-            bao gồm structs, enums, vectors, và primitives cho Solana programs.
+            Decode and encode Borsh data with custom schemas. Full support for all Borsh data types 
+            including structs, enums, vectors, and primitives for Solana programs.
           </p>
         </div>
 
@@ -33,8 +33,8 @@ export default function BorshInspectorPage() {
                 📥 Decode Borsh Data
               </h3>
               <p className="text-gray-300 text-sm">
-                Decode binary Borsh data thành human-readable JSON với custom schemas. 
-                Hỗ trợ hex, base64, và UTF-8 input formats.
+                Decode binary Borsh data to human-readable JSON with custom schemas. 
+                Support for hex, base64, and UTF-8 input formats.
               </p>
             </div>
 
@@ -43,8 +43,8 @@ export default function BorshInspectorPage() {
                 📤 Encode to Borsh
               </h3>
               <p className="text-gray-300 text-sm">
-                Encode JSON data thành Borsh binary format. 
-                Generate example data từ schemas và export multiple formats.
+                Encode JSON data to Borsh binary format. 
+                Generate example data from schemas and export multiple formats.
               </p>
             </div>
 
@@ -54,7 +54,7 @@ export default function BorshInspectorPage() {
               </h3>
               <p className="text-gray-300 text-sm">
                 Hỗ trợ đầy đủ Borsh types: structs, enums, arrays, vectors, 
-                options, maps, sets và tất cả primitive types.
+                options, maps, sets and all primitive types.
               </p>
             </div>
 
@@ -63,8 +63,8 @@ export default function BorshInspectorPage() {
                 📋 Common Templates
               </h3>
               <p className="text-gray-300 text-sm">
-                Pre-built schemas cho Token Accounts, User Profiles, 
-                và các data structures phổ biến trong Solana ecosystem.
+                Pre-built schemas for Token Accounts, User Profiles, 
+                and common data structures in the Solana ecosystem.
               </p>
             </div>
 
@@ -74,7 +74,7 @@ export default function BorshInspectorPage() {
               </h3>
               <p className="text-gray-300 text-sm">
                 Copy/paste results, download JSON files, 
-                generate example data, và validate schemas real-time.
+                generate example data, and validate schemas real-time.
               </p>
             </div>
 
@@ -83,8 +83,8 @@ export default function BorshInspectorPage() {
                 ⚡ Performance
               </h3>
               <p className="text-gray-300 text-sm">
-                Optimized cho large data processing với memory-efficient 
-                readers/writers và streaming support.
+                Optimized for large data processing with memory-efficient 
+                readers/writers and streaming support.
               </p>
             </div>
           </div>
@@ -102,7 +102,7 @@ export default function BorshInspectorPage() {
                 <li>Select hoặc create custom schema</li>
                 <li>Choose data format (hex/base64/utf8)</li>
                 <li>Paste raw binary data</li>
-                <li>Click "Decode Data" để view JSON result</li>
+                <li>Click "Decode Data" to view JSON result</li>
               </ul>
             </div>
             <div>
@@ -110,15 +110,15 @@ export default function BorshInspectorPage() {
               <ul className="list-disc list-inside space-y-1 ml-4">
                 <li>Select schema template hoặc create custom</li>
                 <li>Generate example data hoặc input custom JSON</li>
-                <li>Click "Encode Data" để get binary output</li>
+                <li>Click "Encode Data" to get binary output</li>
                 <li>Copy hex/base64 results for use in programs</li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-white mb-2">3. Schema Format:</h4>
               <ul className="list-disc list-inside space-y-1 ml-4">
-                <li>JSON format với name, type, và optional description</li>
-                <li>Support cho nested structs, enums với variants</li>
+                <li>JSON format with name, type, and optional description</li>
+                <li>Support for nested structs, enums with variants</li>
                 <li>Primitives: u8/u16/u32/u64/u128, i8-i128, f32/f64, bool, string, pubkey</li>
                 <li>Collections: arrays (fixed), vectors (dynamic), options, maps, sets</li>
               </ul>

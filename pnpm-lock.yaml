@@ -50,6 +50,9 @@ importers:
       '@solana/web3.js':
         specifier: ^1.98.4
         version: 1.98.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)
+      bip39:
+        specifier: ^3.1.0
+        version: 3.1.0
       bn.js:
         specifier: ^5.2.2
         version: 5.2.2
@@ -62,9 +65,15 @@ importers:
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
+      ed25519-hd-key:
+        specifier: ^1.3.0
+        version: 1.3.0
       jito-ts:
         specifier: ^4.2.1
         version: 4.2.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      js-sha256:
+        specifier: ^0.11.1
+        version: 0.11.1
       lucide-react:
         specifier: ^0.511.0
         version: 0.511.0(react@19.2.0)
@@ -3412,6 +3421,9 @@ packages:
   bip39@3.0.2:
     resolution: {integrity: sha512-J4E1r2N0tUylTKt07ibXvhpT2c5pyAFgvuA5q1H9uDy6dEGpjV8jmymh3MTYJDLCNbIVClSB9FbND49I6N24MQ==}
 
+  bip39@3.1.0:
+    resolution: {integrity: sha512-c9kiwdk45Do5GL0vJMe7tS95VjCii65mYAH7DfWl3uW8AVzXKQVUm64i3hzVybBDMp9r7j9iNxR85+ul8MdN/A==}
+
   bip66@2.0.0:
     resolution: {integrity: sha512-kBG+hSpgvZBrkIm9dt5T1Hd/7xGCPEX2npoxAWZfsK1FvjgaxySEh2WizjyIstWXriKo9K9uJ4u0OnsyLDUPXQ==}
 
@@ -4038,6 +4050,9 @@ packages:
 
   ecdsa-sig-formatter@1.0.11:
     resolution: {integrity: sha512-nagl3RYrbNv6kQkeJIpt6NJZy8twLB/2vtz6yN9Z4vRKHN4/QZJIEbqohALSgwKdnksuY3k5Addp5lg8sVoVcQ==}
+
+  ed25519-hd-key@1.3.0:
+    resolution: {integrity: sha512-IWwAyiiuJQhgu3L8NaHb68eJxTu2pgCwxIBdgpLJdKpYZM46+AXePSVTr7fkNKaUOfOL4IrjEUaQvyVRIDP7fg==}
 
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
@@ -4987,6 +5002,9 @@ packages:
 
   js-base64@3.7.8:
     resolution: {integrity: sha512-hNngCeKxIUQiEUN3GPJOkz4wF/YvdUdbNL9hsBcMQTkKzboD7T/q3OYOuuPZLUE6dBxSGpwhk5mwuDud7JVAow==}
+
+  js-sha256@0.11.1:
+    resolution: {integrity: sha512-o6WSo/LUvY2uC4j7mO50a2ms7E/EAdbP0swigLV+nzHKTTaYnaLIWJ02VdXrsJX0vGedDESQnLsOekr94ryfjg==}
 
   js-sha256@0.9.0:
     resolution: {integrity: sha512-sga3MHh9sgQN2+pJ9VYZ+1LPwXOxuBJBA5nrR5/ofPfuiJBE2hnjsaN8se8JznOmGLN2p49Pe5U/ttafcs/apA==}
@@ -13228,6 +13246,10 @@ snapshots:
       pbkdf2: 3.1.3
       randombytes: 2.1.0
 
+  bip39@3.1.0:
+    dependencies:
+      '@noble/hashes': 1.8.0
+
   bip66@2.0.0: {}
 
   bitcoin-ops@1.4.1: {}
@@ -13625,7 +13647,7 @@ snapshots:
     dependencies:
       cipher-base: 1.0.6
       inherits: 2.0.4
-      ripemd160: 2.0.1
+      ripemd160: 2.0.2
       sha.js: 2.4.12
 
   create-hash@1.2.0:
@@ -13885,6 +13907,11 @@ snapshots:
   ecdsa-sig-formatter@1.0.11:
     dependencies:
       safe-buffer: 5.2.1
+
+  ed25519-hd-key@1.3.0:
+    dependencies:
+      create-hmac: 1.1.7
+      tweetnacl: 1.0.3
 
   ee-first@1.1.1: {}
 
@@ -15149,6 +15176,8 @@ snapshots:
   joycon@3.1.1: {}
 
   js-base64@3.7.8: {}
+
+  js-sha256@0.11.1: {}
 
   js-sha256@0.9.0: {}
 

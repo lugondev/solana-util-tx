@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Data Processing & Analysis Tools | Solana Utility Tools',
-  description: 'Comprehensive suite của data processing và analysis tools cho Solana. Decode Borsh data, parse event logs, inspect binary data, validate schemas.',
+  description: 'Comprehensive suite of data processing and analysis tools for Solana. Decode Borsh data, parse event logs, inspect binary data, validate schemas.',
   keywords: ['solana', 'data processing', 'borsh', 'event logs', 'binary data', 'schemas'],
 }
 
@@ -11,7 +11,7 @@ export default function DataToolsPage() {
   const tools = [
     {
       title: '🔍 Borsh Inspector',
-      description: 'Decode và encode Borsh (Binary Object Representation Serializer for Hashing) data với custom schemas',
+      description: 'Decode and encode Borsh (Binary Object Representation Serializer for Hashing) data with custom schemas',
       href: '/data-tools/borsh-inspector',
       features: [
         'Decode/encode Borsh binary data',
@@ -24,7 +24,7 @@ export default function DataToolsPage() {
     },
     {
       title: '📊 Event Log Parser',
-      description: 'Parse và analyze event logs từ Solana transactions với comprehensive filtering',
+      description: 'Parse and analyze event logs from Solana transactions with comprehensive filtering',
       href: '/data-tools/event-parser',
       features: [
         'Single/multiple transaction parsing',
@@ -37,7 +37,7 @@ export default function DataToolsPage() {
     },
     {
       title: '🏗️ Anchor CPI Helper',
-      description: 'Generate Cross-Program Invocation code cho Anchor programs',
+      description: 'Generate Cross-Program Invocation code for Anchor programs',
       href: '/data-tools/anchor-cpi',
       features: [
         'CPI code generation',
@@ -46,11 +46,11 @@ export default function DataToolsPage() {
         'Error handling',
         'TypeScript support'
       ],
-      status: 'Coming Soon'
+      status: 'Ready'
     },
     {
       title: '📋 Binary Data Viewer',
-      description: 'Visualize và inspect binary data với multiple format interpretations',
+      description: 'Visualize and inspect binary data with multiple format interpretations',
       href: '/data-tools/binary-viewer',
       features: [
         'Multiple format display',
@@ -59,11 +59,11 @@ export default function DataToolsPage() {
         'Search & navigation',
         'Export utilities'
       ],
-      status: 'Coming Soon'
+      status: 'Ready'
     },
     {
       title: '✅ Schema Validator',
-      description: 'Validate data structures against schemas với comprehensive error reporting',
+      description: 'Validate data structures against schemas with comprehensive error reporting',
       href: '/data-tools/schema-validator',
       features: [
         'Schema validation',
@@ -72,11 +72,11 @@ export default function DataToolsPage() {
         'Custom validators',
         'Batch validation'
       ],
-      status: 'Coming Soon'
+      status: 'Ready'
     },
     {
       title: '📈 Data Analytics Dashboard',
-      description: 'Comprehensive analytics cho Solana data patterns và trends',
+      description: 'Comprehensive analytics for Solana data patterns and trends',
       href: '/data-tools/analytics',
       features: [
         'Transaction analytics',
@@ -85,7 +85,7 @@ export default function DataToolsPage() {
         'Custom dashboards',
         'Export reports'
       ],
-      status: 'Coming Soon'
+      status: 'Ready'
     }
   ]
 
@@ -97,19 +97,19 @@ export default function DataToolsPage() {
             📊 Data Processing & Analysis Tools
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Comprehensive suite của tools để process, analyze, và visualize Solana data. 
-            Từ Borsh decoding đến event log analysis và binary data inspection.
+            Comprehensive suite of tools to process, analyze, and visualize Solana data. 
+            From Borsh decoding to event log analysis and binary data inspection.
           </p>
         </div>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
           <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
-            <div className="text-2xl font-bold text-green-400">2</div>
+            <div className="text-2xl font-bold text-green-400">6</div>
             <div className="text-sm text-gray-400">Ready Tools</div>
           </div>
           <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
-            <div className="text-2xl font-bold text-blue-400">4</div>
+            <div className="text-2xl font-bold text-blue-400">0</div>
             <div className="text-sm text-gray-400">Coming Soon</div>
           </div>
           <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
@@ -181,7 +181,7 @@ export default function DataToolsPage() {
               <div className="text-3xl mb-3">🔧</div>
               <h3 className="text-lg font-semibold text-white mb-2">Data Decoding</h3>
               <p className="text-gray-300 text-sm">
-                Decode Borsh, binary data, và custom formats với schema validation
+                Decode Borsh, binary data, and custom formats with schema validation
               </p>
             </div>
 
@@ -189,7 +189,7 @@ export default function DataToolsPage() {
               <div className="text-3xl mb-3">📊</div>
               <h3 className="text-lg font-semibold text-white mb-2">Event Analysis</h3>
               <p className="text-gray-300 text-sm">
-                Parse transaction logs, extract events, và analyze program interactions
+                Parse transaction logs, extract events, and analyze program interactions
               </p>
             </div>
 
@@ -197,7 +197,7 @@ export default function DataToolsPage() {
               <div className="text-3xl mb-3">🎯</div>
               <h3 className="text-lg font-semibold text-white mb-2">Advanced Filtering</h3>
               <p className="text-gray-300 text-sm">
-                Filter by programs, event types, time ranges với granular control
+                Filter by programs, event types, time ranges with granular control
               </p>
             </div>
 
@@ -205,7 +205,7 @@ export default function DataToolsPage() {
               <div className="text-3xl mb-3">💾</div>
               <h3 className="text-lg font-semibold text-white mb-2">Export & Integration</h3>
               <p className="text-gray-300 text-sm">
-                Export results to JSON, CSV, và integrate với external tools
+                Export results to JSON, CSV, and integrate with external tools
               </p>
             </div>
           </div>
@@ -278,13 +278,37 @@ export default function DataToolsPage() {
                     Launch →
                   </Link>
                 </div>
+                <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded border border-gray-600">
+                  <span className="text-gray-300">Anchor CPI Helper</span>
+                  <Link href="/data-tools/anchor-cpi" className="text-blue-400 hover:text-blue-300">
+                    Launch →
+                  </Link>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded border border-gray-600">
+                  <span className="text-gray-300">Binary Data Viewer</span>
+                  <Link href="/data-tools/binary-viewer" className="text-blue-400 hover:text-blue-300">
+                    Launch →
+                  </Link>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded border border-gray-600">
+                  <span className="text-gray-300">Schema Validator</span>
+                  <Link href="/data-tools/schema-validator" className="text-blue-400 hover:text-blue-300">
+                    Launch →
+                  </Link>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded border border-gray-600">
+                  <span className="text-gray-300">Data Analytics Dashboard</span>
+                  <Link href="/data-tools/analytics" className="text-blue-400 hover:text-blue-300">
+                    Launch →
+                  </Link>
+                </div>
               </div>
             </div>
 
             <div>
               <h3 className="text-lg font-semibold text-white mb-4">Quick Tips</h3>
               <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Start với Borsh Inspector để decode binary data</li>
+                <li>• Start with Borsh Inspector to decode binary data</li>
                 <li>• Use Event Log Parser cho transaction analysis</li>
                 <li>• Test với sample data trước khi process large datasets</li>
                 <li>• Export results for further analysis</li>

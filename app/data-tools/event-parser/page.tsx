@@ -3,7 +3,7 @@ import { EventLogParserComponent } from '@/components/data-tools/event-log-parse
 
 export const metadata: Metadata = {
   title: 'Event Log Parser | Solana Utility Tools',
-  description: 'Parse và analyze event logs từ Solana transactions. Extract program invocations, custom events, compute usage, và transaction details with comprehensive filtering.',
+  description: 'Parse and analyze event logs from Solana transactions. Extract program invocations, custom events, compute usage, and transaction details with comprehensive filtering.',
   keywords: ['solana', 'event logs', 'transaction parser', 'program logs', 'solana analytics'],
 }
 
@@ -16,8 +16,8 @@ export default function EventLogParserPage() {
             📊 Event Log Parser
           </h1>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Parse và analyze event logs từ Solana transactions. Extract program invocations, 
-            custom events, compute usage với advanced filtering và statistics.
+            Parse and analyze event logs from Solana transactions. Extract program invocations, 
+            custom events, compute usage with advanced filtering and statistics.
           </p>
         </div>
 
@@ -33,8 +33,8 @@ export default function EventLogParserPage() {
                 🔍 Transaction Analysis
               </h3>
               <p className="text-gray-300 text-sm">
-                Parse single/multiple transactions để extract events, 
-                program invocations, và detailed execution flow.
+                Parse single/multiple transactions to extract events, 
+                program invocations, and detailed execution flow.
               </p>
             </div>
 
@@ -44,7 +44,7 @@ export default function EventLogParserPage() {
               </h3>
               <p className="text-gray-300 text-sm">
                 Tự động detect Jupiter swaps, Orca trades, Raydium AMM, 
-                token transfers với specialized parsing logic.
+                token transfers with specialized parsing logic.
               </p>
             </div>
 
@@ -54,7 +54,7 @@ export default function EventLogParserPage() {
               </h3>
               <p className="text-gray-300 text-sm">
                 Track compute unit usage, program execution costs, 
-                và performance bottlenecks across transactions.
+                and performance bottlenecks across transactions.
               </p>
             </div>
 
@@ -64,7 +64,7 @@ export default function EventLogParserPage() {
               </h3>
               <p className="text-gray-300 text-sm">
                 Filter by programs, event types, include/exclude system programs, 
-                token programs với granular control.
+                token programs with granular control.
               </p>
             </div>
 
@@ -74,7 +74,7 @@ export default function EventLogParserPage() {
               </h3>
               <p className="text-gray-300 text-sm">
                 View program usage statistics, event type distribution, 
-                success/failure rates với visual breakdowns.
+                success/failure rates with visual breakdowns.
               </p>
             </div>
 
@@ -84,7 +84,7 @@ export default function EventLogParserPage() {
               </h3>
               <p className="text-gray-300 text-sm">
                 Export parsed events to JSON, copy individual event data, 
-                và integrate với external analysis tools.
+                and integrate with external analysis tools.
               </p>
             </div>
           </div>
@@ -203,15 +203,15 @@ export default function EventLogParserPage() {
               <ul className="list-disc list-inside space-y-1 ml-4">
                 <li>Paste transaction signature</li>
                 <li>Configure parse options (programs, event types)</li>
-                <li>Click "Parse Transaction" để analyze</li>
-                <li>View events, statistics, và detailed breakdowns</li>
+                <li>Click "Parse Transaction" to analyze</li>
+                <li>View events, statistics, and detailed breakdowns</li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-white mb-2">2. Multiple Transactions Mode:</h4>
               <ul className="list-disc list-inside space-y-1 ml-4">
                 <li>Enter up to 50 transaction signatures (one per line)</li>
-                <li>Batch processing với aggregated statistics</li>
+                <li>Batch processing with aggregated statistics</li>
                 <li>Compare program usage across multiple transactions</li>
                 <li>Export comprehensive analysis results</li>
               </ul>
@@ -220,7 +220,7 @@ export default function EventLogParserPage() {
               <h4 className="font-semibold text-white mb-2">3. Raw Logs Mode:</h4>
               <ul className="list-disc list-inside space-y-1 ml-4">
                 <li>Paste raw transaction logs directly</li>
-                <li>Useful cho offline analysis hoặc custom log sources</li>
+                <li>Useful for offline analysis or custom log sources</li>
                 <li>No blockchain connection required</li>
                 <li>Parse events from any log format</li>
               </ul>
@@ -230,7 +230,7 @@ export default function EventLogParserPage() {
               <ul className="list-disc list-inside space-y-1 ml-4">
                 <li>Include/exclude system programs, token programs</li>
                 <li>Filter by specific program IDs (comma-separated)</li>
-                <li>Enable custom event detection cho DeFi protocols</li>
+                <li>Enable custom event detection for DeFi protocols</li>
                 <li>Toggle unknown program processing</li>
               </ul>
             </div>

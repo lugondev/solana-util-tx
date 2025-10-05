@@ -109,21 +109,16 @@ export class StateCompressionUtils {
     leafHash: string
   ): Promise<CompressedAccount | null> {
     try {
-      // In a real implementation, this would query the compressed account
-      // from the Merkle tree or indexer service
+      // Note: This requires a Solana indexer service like Helius or SimpleHash
+      // For production use, integrate with an indexer API:
+      // - Helius: https://docs.helius.xyz/compression-and-das-api
+      // - SimpleHash: https://docs.simplehash.com/
       
-      // Mock implementation for demo
-      return {
-        hash: leafHash,
-        leafIndex: 0,
-        proof: [],
-        root: '0x' + '0'.repeat(64),
-        dataHash: '0x' + '0'.repeat(64),
-        creatorHash: '0x' + '0'.repeat(64),
-        nonce: 0,
-        owner: '11111111111111111111111111111111',
-        lamports: 0
-      }
+      console.warn('getCompressedAccount requires indexer service integration')
+      console.log('Merkle tree:', merkleTree)
+      console.log('Leaf hash:', leafHash)
+      
+      return null // Return null instead of mock data
     } catch (error) {
       console.error('Error getting compressed account:', error)
       return null
@@ -195,16 +190,11 @@ export class StateCompressionUtils {
         return null
       }
 
-      // In a real implementation, this would generate the actual proof
-      // For demo purposes, return mock proof
-      const leafIndex = Math.floor(Math.random() * tree.totalLeaves)
-      const proof = this.generateMockProof(tree.maxDepth)
-
-      return {
-        proof,
-        leafIndex,
-        root: tree.currentRoot
-      }
+      // Note: Requires indexer service with DAS API support  
+      // For production, use services like Helius, SimpleHash, or run your own indexer
+      console.warn('getMerkleProof requires DAS API integration')
+      
+      return null // Return null instead of mock proof
     } catch (error) {
       console.error('Error generating compression proof:', error)
       return null

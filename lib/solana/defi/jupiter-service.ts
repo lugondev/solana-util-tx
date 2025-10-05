@@ -250,7 +250,7 @@ export class JupiterService {
   }
 
   /**
-   * Get limit orders (simplified implementation)
+   * Get limit orders (using Jupiter DCA/Limit Order APIs)
    */
   async getLimitOrders(
     walletAddress?: string,
@@ -258,12 +258,42 @@ export class JupiterService {
     outputMint?: string
   ): Promise<LimitOrderData[]> {
     try {
-      // Note: Jupiter Limit Orders API might have different endpoints
-      // This is a placeholder implementation
-      console.log('Getting limit orders - feature requires Jupiter Limit Orders integration')
+      if (!walletAddress) {
+        return []
+      }
+
+      // Use Jupiter DCA API for limit orders
+      const response = await fetch(`https://dca-api.jup.ag/v1/dca/${walletAddress}`)
       
-      // Mock response for now
-      return []
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      
+      // Transform DCA orders to limit order format
+      const orders: LimitOrderData[] = data.dcas?.map((dca: any) => ({
+        publicKey: dca.publicKey || '',
+        account: {
+          maker: walletAddress,
+          inputMint: dca.inputMint || '',
+          outputMint: dca.outputMint || '',
+          waiting: dca.status === 'active' ? 'true' : 'false',
+          oriInAmount: dca.inAmount?.toString() || '0',
+          oriOutAmount: dca.outAmount?.toString() || '0',
+          inAmount: dca.inAmountLeft?.toString() || dca.inAmount?.toString() || '0',
+          outAmount: dca.outAmount?.toString() || '0',
+          expiredAt: dca.endAt ? new Date(dca.endAt).getTime().toString() : undefined,
+          base: dca.inputMint || ''
+        }
+      })) || []
+
+      // Filter by mints if specified
+      return orders.filter(order => {
+        if (inputMint && order.account.inputMint !== inputMint) return false
+        if (outputMint && order.account.outputMint !== outputMint) return false
+        return true
+      })
     } catch (error) {
       console.error('Error getting Jupiter limit orders:', error)
       return []
@@ -271,7 +301,7 @@ export class JupiterService {
   }
 
   /**
-   * Create limit order (simplified implementation)
+   * Create limit order (using Jupiter DCA API)
    */
   async createLimitOrder(
     inputMint: string,
@@ -281,35 +311,69 @@ export class JupiterService {
     expiredAt?: number
   ): Promise<{ signature?: string; error?: string }> {
     try {
-      // Note: Jupiter Limit Orders require specific implementation
-      // This is a placeholder for the actual API integration
-      console.log('Creating limit order - feature requires Jupiter Limit Orders integration')
+      // Create DCA order which acts as a limit order with single execution
+      const dcaParams = {
+        inputMint,
+        outputMint,
+        inAmount,
+        outAmount,
+        cycleSecondsApart: 0, // Execute immediately
+        totalCycles: 1, // Single execution (limit order behavior)
+        ...(expiredAt && { endAt: new Date(expiredAt).toISOString() })
+      }
+
+      const response = await fetch('https://dca-api.jup.ag/v1/dca', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dcaParams)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
       
       return {
-        error: 'Limit orders feature requires integration with Jupiter Limit Orders API'
+        signature: data.signature
       }
     } catch (error) {
       console.error('Error creating Jupiter limit order:', error)
       return {
-        error: 'Failed to create limit order'
+        error: error instanceof Error ? error.message : 'Failed to create limit order'
       }
     }
   }
 
   /**
-   * Cancel limit order (simplified implementation)
+   * Cancel limit order (cancel DCA order)
    */
   async cancelLimitOrder(orderPublicKey: string): Promise<{ signature?: string; error?: string }> {
     try {
-      console.log('Canceling limit order - feature requires Jupiter Limit Orders integration')
+      const response = await fetch(`https://dca-api.jup.ag/v1/dca/${orderPublicKey}/cancel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
       
       return {
-        error: 'Limit orders feature requires integration with Jupiter Limit Orders API'
+        signature: data.signature
       }
     } catch (error) {
       console.error('Error canceling Jupiter limit order:', error)
       return {
-        error: 'Failed to cancel limit order'
+        error: error instanceof Error ? error.message : 'Failed to cancel limit order'
       }
     }
   }

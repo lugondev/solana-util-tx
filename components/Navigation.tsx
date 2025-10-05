@@ -264,7 +264,7 @@ export default function Navigation({ isMobileMenuOpen = false, onMobileMenuToggl
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
               className="font-pixel text-xs text-gray-400 hover:text-green-400 p-2"
-              title="Mở rộng menu"
+              title="Expand menu"
             >
               ▶
             </button>

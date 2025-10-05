@@ -86,12 +86,14 @@ export class RaydiumService {
   private cluster: 'mainnet-beta' | 'devnet'
   private programIds: any
   private poolsData: any[]
+  private baseUrl: string
 
   constructor(connection: Connection, cluster: 'mainnet-beta' | 'devnet' = 'mainnet-beta') {
     this.connection = connection
     this.cluster = cluster
     this.programIds = cluster === 'mainnet-beta' ? MAINNET_PROGRAM_ID : DEVNET_PROGRAM_ID
     this.poolsData = []
+    this.baseUrl = 'https://api.raydium.io/v2'
   }
 
   /**
@@ -118,62 +120,88 @@ export class RaydiumService {
     }
 
     try {
-      // For now, return a mock pool for demonstration
-      // Real implementation would search through actual Raydium pools
-      const mockPool: LiquidityPoolData = {
-        poolInfo: {
-          id: 'mock-raydium-pool-id',
-          baseMint: baseToken,
-          quoteMint: quoteToken,
-          baseToken: {
-            symbol: 'TOKEN_A',
-            name: 'Token A',
-            decimals: 6,
-          },
-          quoteToken: {
-            symbol: 'TOKEN_B',
-            name: 'Token B',
-            decimals: 6,
-          },
-          lpMint: 'mock-lp-mint',
-          baseReserve: '1000000000',
-          quoteReserve: '1000000000',
-          lpSupply: '1000000000',
-          startTime: Date.now(),
-          fee: 0.0025,
-          marketId: 'mock-market-id',
-          version: 4,
-          programId: this.programIds.AmmV4.toString(),
-          authority: 'mock-authority',
-          openOrders: 'mock-open-orders',
-          targetOrders: 'mock-target-orders',
-          baseVault: 'mock-base-vault',
-          quoteVault: 'mock-quote-vault',
-          withdrawQueue: 'mock-withdraw-queue',
-          lpVault: 'mock-lp-vault',
-          marketVersion: 3,
-          marketProgramId: 'mock-market-program',
-          marketAuthority: 'mock-market-authority',
-          marketBaseVault: 'mock-market-base-vault',
-          marketQuoteVault: 'mock-market-quote-vault',
-          marketBids: 'mock-market-bids',
-          marketAsks: 'mock-market-asks',
-          marketEventQueue: 'mock-market-event-queue',
-        },
-        lpPrice: 1.0,
-        basePrice: 1.0,
-        quotePrice: 1.0,
-        volume24h: 100000,
-        volume7d: 700000,
-        apy: 15.5,
-        tvl: 2000000,
+      // Search in cached pools data first
+      const matchingPools = this.poolsData.filter(pool => {
+        return (pool.baseMint === baseToken && pool.quoteMint === quoteToken) ||
+               (pool.baseMint === quoteToken && pool.quoteMint === baseToken)
+      })
+
+      if (matchingPools.length > 0) {
+        return matchingPools.map(pool => this.formatPoolData(pool))
       }
 
-      console.log('Raydium search pools - using simplified implementation')
-      return [mockPool]
+      // If not found in cache, fetch fresh data from API
+      const response = await fetch(`${this.baseUrl}/pools/info/mint?mint1=${baseToken}&mint2=${quoteToken}&poolType=all`)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      
+      // Transform API response to our format
+      const pools: LiquidityPoolData[] = data.data?.map((pool: any) => this.formatPoolData(pool)) || []
+      
+      return pools
     } catch (error) {
-      console.error('Error searching pools:', error)
-      throw new Error('Failed to search pools')
+      console.error('Error searching Raydium pools:', error)
+      
+      // Return empty array on error instead of mock data
+      return []
+    }
+  }
+
+  /**
+   * Format pool data from API response
+   */
+  private formatPoolData(pool: any): LiquidityPoolData {
+    return {
+      poolInfo: {
+        id: pool.id || pool.ammId || '',
+        baseMint: pool.baseMint || pool.baseToken?.address || '',
+        quoteMint: pool.quoteMint || pool.quoteToken?.address || '',
+        baseToken: {
+          symbol: pool.baseToken?.symbol || 'UNKNOWN',
+          name: pool.baseToken?.name || 'Unknown Token',
+          decimals: pool.baseToken?.decimals || 6,
+        },
+        quoteToken: {
+          symbol: pool.quoteToken?.symbol || 'UNKNOWN',
+          name: pool.quoteToken?.name || 'Unknown Token',
+          decimals: pool.quoteToken?.decimals || 6,
+        },
+        lpMint: pool.lpMint || '',
+        baseReserve: pool.baseReserve?.toString() || '0',
+        quoteReserve: pool.quoteReserve?.toString() || '0',
+        lpSupply: pool.lpSupply?.toString() || '0',
+        startTime: pool.startTime || Date.now(),
+        fee: pool.feeRate || 0.0025,
+        marketId: pool.marketId || '',
+        version: pool.version || 4,
+        programId: pool.programId || this.programIds.AmmV4.toString(),
+        authority: pool.authority || '',
+        openOrders: pool.openOrders || '',
+        targetOrders: pool.targetOrders || '',
+        baseVault: pool.baseVault || '',
+        quoteVault: pool.quoteVault || '',
+        withdrawQueue: pool.withdrawQueue || '',
+        lpVault: pool.lpVault || '',
+        marketVersion: pool.marketVersion || 3,
+        marketProgramId: pool.marketProgramId || '',
+        marketAuthority: pool.marketAuthority || '',
+        marketBaseVault: pool.marketBaseVault || '',
+        marketQuoteVault: pool.marketQuoteVault || '',
+        marketBids: pool.marketBids || '',
+        marketAsks: pool.marketAsks || '',
+        marketEventQueue: pool.marketEventQueue || '',
+      },
+      lpPrice: pool.lpPrice || 1.0,
+      basePrice: pool.basePrice || 1.0,
+      quotePrice: pool.quotePrice || 1.0,
+      volume24h: pool.volume24h || 0,
+      volume7d: pool.volume7d || 0,
+      apy: pool.apy || 0,
+      tvl: pool.tvl || 0,
     }
   }
 

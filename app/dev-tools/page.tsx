@@ -16,7 +16,9 @@ import {
   Database,
   Zap,
   Brain,
-  Wrench
+  Wrench,
+  Activity,
+  Terminal
 } from 'lucide-react'
 
 export default function DevToolsPage() {
@@ -36,7 +38,7 @@ export default function DevToolsPage() {
       description: 'Generate custom addresses with specific prefixes',
       href: '/dev-tools/vanity-generator',
       icon: Hash,
-      status: 'coming-soon',
+      status: 'active',
       category: 'Address Tools',
       features: ['Custom prefixes', 'Case sensitivity', 'Bulk generation', 'Performance metrics']
     },
@@ -56,7 +58,7 @@ export default function DevToolsPage() {
       description: 'Generate multiple keypairs at once',
       href: '/dev-tools/bulk-keypair',
       icon: Wallet,
-      status: 'coming-soon',
+      status: 'active',
       category: 'Keypair Tools',
       features: ['Batch generation', 'CSV export', 'Progress tracking', 'Custom quantities']
     },
@@ -65,7 +67,7 @@ export default function DevToolsPage() {
       description: 'BIP39/44 hierarchical deterministic wallet support',
       href: '/dev-tools/hd-wallet',
       icon: Database,
-      status: 'coming-soon',
+      status: 'active',
       category: 'Keypair Tools',
       features: ['BIP39 mnemonic', 'BIP44 derivation', 'Multiple accounts', 'Seed phrases']
     },
@@ -74,7 +76,7 @@ export default function DevToolsPage() {
       description: 'Convert between different keypair formats',
       href: '/dev-tools/keypair-converter',
       icon: Code,
-      status: 'coming-soon',
+      status: 'active',
       category: 'Keypair Tools',
       features: ['Base58 ↔ Hex', 'Array formats', 'JSON export', 'Batch conversion']
     },
@@ -91,12 +93,12 @@ export default function DevToolsPage() {
     },
     {
       title: 'IDL Generator',
-      description: 'Auto-generate IDL from deployed programs',
-      href: '/dev-tools/idl-generator',
+      description: 'Auto-generate IDL from Solana programs',
+      href: '/dev-tools/idl',
       icon: FileText,
-      status: 'coming-soon',
+      status: 'active',
       category: 'Program Tools',
-      features: ['Extract IDL', 'Type generation', 'Documentation', 'Anchor support']
+      features: ['Anchor programs', 'Type extraction', 'Auto-discovery', 'Multi-format export']
     },
     {
       title: 'Program Form Generator',
@@ -108,16 +110,34 @@ export default function DevToolsPage() {
       features: ['Dynamic forms', 'Type validation', 'Instruction builder', 'Parameter parsing']
     },
     {
-      title: 'PDA Brute Forcer',
+      title: 'PDA Brute Force',
       description: 'Find PDAs with specific properties',
-      href: '/dev-tools/pda-brute-force',
-      icon: Search,
-      status: 'coming-soon',
+      href: '/dev-tools/pda',
+      icon: Hash,
+      status: 'active',
       category: 'Program Tools',
-      features: ['Pattern matching', 'Prefix search', 'Custom seeds', 'Performance optimized']
+      features: ['Pattern matching', 'Custom seeds', 'Multi-threaded', 'Performance tracking']
+    },
+    {
+      title: 'Program Inspector',
+      description: 'Analyze program bytecode, security, and performance',
+      href: '/dev-tools/inspector',
+      icon: Search,
+      status: 'active',
+      category: 'Program Tools',
+      features: ['Security analysis', 'Bytecode disassembly', 'Performance metrics', 'Instruction extraction']
     },
     
     // Data & Analysis Tools
+    {
+      title: 'RPC Benchmarker',
+      description: 'Test and compare RPC endpoint performance',
+      href: '/dev-tools/rpc',
+      icon: Activity,
+      status: 'active',
+      category: 'Data Tools',
+      features: ['Latency testing', 'Throughput analysis', 'Multi-endpoint comparison', 'Performance metrics']
+    },
     {
       title: 'Borsh Inspector',
       description: 'Decode/encode Borsh data with schemas',
@@ -138,6 +158,15 @@ export default function DevToolsPage() {
     },
     
     // Utilities
+    {
+      title: 'Solana CLI Helper',
+      description: 'Generate and learn Solana CLI commands',
+      href: '/dev-tools/cli',
+      icon: Terminal,
+      status: 'active',
+      category: 'Utilities',
+      features: ['Command generation', 'Parameter assistance', 'Examples & guides', 'Export scripts']
+    },
     {
       title: 'General Utils',
       description: 'Miscellaneous development utilities',
