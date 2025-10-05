@@ -1,9 +1,4 @@
-import { Inter } from 'next/font/google'
 import './globals.css'
-import { WalletProvider } from '@/components/WalletProvider'
-import { NetworkProvider } from '@/contexts/NetworkContext'
-import { TokenProvider } from '@/contexts/TokenContext'
-import { ThemeProvider } from '@/contexts/ThemeContext'
 import ClientLayout from './client-layout'
 import { Press_Start_2P, VT323 } from 'next/font/google'
 import { metadata } from './metadata'
@@ -44,9 +39,9 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
 		<html lang='en' className={`${pressStart2P.variable} ${vt323.variable}`}>
 			<head>
 				<link rel="manifest" href="/manifest.json" />
-				<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-				<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-				<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+				<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+				<link rel="apple-touch-icon" href="/apple-touch-icon.svg" />
+				<link rel="mask-icon" href="/logo.svg" color="#10b981" />
 				<meta name="application-name" content="Solana Utility Tools" />
 				<meta name="apple-mobile-web-app-capable" content="yes" />
 				<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

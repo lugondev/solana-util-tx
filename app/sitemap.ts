@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://solana-util-tx.vercel.app'
+  const baseUrl = 'https://solutil.dev'
   
   // Main pages
   const pages = [

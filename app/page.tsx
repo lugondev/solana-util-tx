@@ -36,7 +36,7 @@ export default function HomePage() {
     "name": "Solana Utility Tools",
     "alternateName": "SolanaUtils",
     "description": "Comprehensive Solana utility platform for token management, DeFi operations, transaction building, Jito bundles, and developer tools",
-    "url": "https://solana-util-tx.vercel.app",
+    "url": "https://solutil.dev",
     "applicationCategory": "FinanceApplication",
     "operatingSystem": "Web",
     "offers": {
@@ -59,7 +59,7 @@ export default function HomePage() {
       "Jito MEV protected bundles",
       "Developer tools and utilities"
     ],
-    "screenshot": "https://solana-util-tx.vercel.app/og-image.png"
+    "screenshot": "https://solutil.dev/og-image.png"
   }
 
   const features = [

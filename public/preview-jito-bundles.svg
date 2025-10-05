@@ -1,0 +1,72 @@
+<svg width="800" height="450" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#111827;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1f2937;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#374151;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4B5563;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="jitoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#A855F7;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="450" fill="url(#bgGradient)"/>
+  
+  <!-- Title -->
+  <text x="400" y="40" font-family="monospace" font-size="24" font-weight="bold" fill="#10b981" text-anchor="middle">
+    JITO MEV PROTECTION BUNDLES
+  </text>
+  
+  <!-- Mock interface -->
+  <rect x="50" y="70" width="700" height="330" fill="url(#cardGradient)" stroke="#10b981" stroke-width="2" rx="8"/>
+  
+  <!-- Bundle status -->
+  <rect x="80" y="100" width="640" height="60" fill="#1f2937" stroke="#374151" stroke-width="1" rx="4"/>
+  <text x="90" y="125" font-family="monospace" font-size="12" fill="#10b981">Bundle Status:</text>
+  <circle cx="200" cy="120" r="8" fill="#10b981"/>
+  <text x="220" y="125" font-family="monospace" font-size="12" fill="#D1D5DB">ACTIVE</text>
+  <text x="90" y="145" font-family="monospace" font-size="10" fill="#9CA3AF">Bundle ID: jt_bundle_7x3k9m2p4q8r1s5t</text>
+  
+  <!-- Transaction list -->
+  <rect x="80" y="180" width="640" height="150" fill="#1f2937" stroke="#374151" stroke-width="1" rx="4"/>
+  <text x="90" y="205" font-family="monospace" font-size="12" fill="#10b981">Bundled Transactions:</text>
+  
+  <!-- Transaction 1 -->
+  <rect x="100" y="215" width="600" height="25" fill="#374151" stroke="#4B5563" stroke-width="1" rx="2"/>
+  <text x="110" y="230" font-family="monospace" font-size="9" fill="#D1D5DB">1. SOL Transfer: 0.5 SOL → 9yMNp...4Def</text>
+  <text x="650" y="230" font-family="monospace" font-size="9" fill="#10b981" text-anchor="end">PENDING</text>
+  
+  <!-- Transaction 2 -->
+  <rect x="100" y="245" width="600" height="25" fill="#374151" stroke="#4B5563" stroke-width="1" rx="2"/>
+  <text x="110" y="260" font-family="monospace" font-size="9" fill="#D1D5DB">2. Token Swap: 100 USDC → SOL via Jupiter</text>
+  <text x="650" y="260" font-family="monospace" font-size="9" fill="#10b981" text-anchor="end">PENDING</text>
+  
+  <!-- Transaction 3 -->
+  <rect x="100" y="275" width="600" height="25" fill="#374151" stroke="#4B5563" stroke-width="1" rx="2"/>
+  <text x="110" y="290" font-family="monospace" font-size="9" fill="#D1D5DB">3. LP Position: Add liquidity to SOL/USDC</text>
+  <text x="650" y="290" font-family="monospace" font-size="9" fill="#10b981" text-anchor="end">PENDING</text>
+  
+  <!-- Bundle info -->
+  <rect x="80" y="350" width="300" height="40" fill="#1f2937" stroke="#374151" stroke-width="1" rx="4"/>
+  <text x="90" y="370" font-family="monospace" font-size="10" fill="#9CA3AF">Priority Fee: 0.001 SOL</text>
+  <text x="90" y="385" font-family="monospace" font-size="10" fill="#9CA3AF">MEV Protection: ✓ Enabled</text>
+  
+  <!-- Submit button -->
+  <rect x="420" y="350" width="300" height="40" fill="url(#jitoGradient)" stroke="#8B5CF6" stroke-width="2" rx="8"/>
+  <text x="570" y="375" font-family="monospace" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">SUBMIT BUNDLE</text>
+  
+  <!-- Protection indicator -->
+  <g transform="translate(650, 110)">
+    <circle cx="0" cy="0" r="15" fill="url(#jitoGradient)" opacity="0.8"/>
+    <text x="0" y="5" font-family="monospace" font-size="12" fill="#ffffff" text-anchor="middle">🛡️</text>
+  </g>
+  
+  <!-- Decorative elements -->
+  <rect x="720" y="80" width="20" height="20" fill="#8B5CF6" opacity="0.6"/>
+  <rect x="60" y="370" width="20" height="20" fill="#10b981" opacity="0.6"/>
+</svg>

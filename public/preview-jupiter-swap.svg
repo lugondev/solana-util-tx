@@ -1,0 +1,69 @@
+<svg width="800" height="450" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#111827;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1f2937;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#374151;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4B5563;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="jupiterGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FCD34D;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="450" fill="url(#bgGradient)"/>
+  
+  <!-- Title -->
+  <text x="400" y="40" font-family="monospace" font-size="24" font-weight="bold" fill="#10b981" text-anchor="middle">
+    JUPITER DEX AGGREGATOR
+  </text>
+  
+  <!-- Mock interface -->
+  <rect x="50" y="70" width="700" height="330" fill="url(#cardGradient)" stroke="#10b981" stroke-width="2" rx="8"/>
+  
+  <!-- From token -->
+  <rect x="80" y="100" width="300" height="80" fill="#1f2937" stroke="#374151" stroke-width="1" rx="4"/>
+  <text x="90" y="125" font-family="monospace" font-size="12" fill="#9CA3AF">From:</text>
+  <circle cx="110" cy="150" r="12" fill="#3B82F6"/>
+  <text x="110" y="155" font-family="monospace" font-size="8" fill="#ffffff" text-anchor="middle">SOL</text>
+  <text x="130" y="155" font-family="monospace" font-size="14" fill="#D1D5DB">Solana</text>
+  <text x="320" y="155" font-family="monospace" font-size="16" fill="#ffffff" text-anchor="end">1.0</text>
+  
+  <!-- Swap arrow -->
+  <g transform="translate(400, 140)">
+    <circle cx="0" cy="0" r="20" fill="url(#jupiterGradient)"/>
+    <path d="M-8 -4 L8 0 L-8 4 Z" fill="#ffffff"/>
+  </g>
+  
+  <!-- To token -->
+  <rect x="420" y="100" width="300" height="80" fill="#1f2937" stroke="#374151" stroke-width="1" rx="4"/>
+  <text x="430" y="125" font-family="monospace" font-size="12" fill="#9CA3AF">To:</text>
+  <circle cx="450" cy="150" r="12" fill="#10b981"/>
+  <text x="450" y="155" font-family="monospace" font-size="8" fill="#ffffff" text-anchor="middle">USDC</text>
+  <text x="470" y="155" font-family="monospace" font-size="14" fill="#D1D5DB">USD Coin</text>
+  <text x="660" y="155" font-family="monospace" font-size="16" fill="#ffffff" text-anchor="end">~85.42</text>
+  
+  <!-- Route information -->
+  <rect x="80" y="200" width="640" height="100" fill="#1f2937" stroke="#374151" stroke-width="1" rx="4"/>
+  <text x="90" y="225" font-family="monospace" font-size="12" fill="#10b981">Best Route Found:</text>
+  <text x="90" y="245" font-family="monospace" font-size="10" fill="#D1D5DB">• Route: SOL → USDC via Orca &amp; Raydium</text>
+  <text x="90" y="260" font-family="monospace" font-size="10" fill="#D1D5DB">• Price Impact: 0.02%</text>
+  <text x="90" y="275" font-family="monospace" font-size="10" fill="#D1D5DB">• Minimum Received: 85.25 USDC</text>
+  <text x="90" y="290" font-family="monospace" font-size="10" fill="#D1D5DB">• Platform Fee: 0.05%</text>
+  
+  <!-- Swap button -->
+  <rect x="300" y="320" width="200" height="50" fill="url(#jupiterGradient)" stroke="#F59E0B" stroke-width="2" rx="8"/>
+  <text x="400" y="350" font-family="monospace" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">EXECUTE SWAP</text>
+  
+  <!-- Stats -->
+  <text x="580" y="340" font-family="monospace" font-size="10" fill="#9CA3AF">Powered by Jupiter</text>
+  <text x="580" y="355" font-family="monospace" font-size="10" fill="#9CA3AF">Best rates guaranteed</text>
+  
+  <!-- Decorative elements -->
+  <rect x="720" y="80" width="20" height="20" fill="#FCD34D" opacity="0.6"/>
+  <rect x="60" y="370" width="20" height="20" fill="#10b981" opacity="0.6"/>
+</svg>

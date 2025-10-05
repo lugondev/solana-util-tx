@@ -1,55 +1,86 @@
 {
-  "name": "Solana Utility Tools",
+  "name": "Solana Utility Tools - All-in-One Platform",
   "short_name": "SolanaUtils",
-  "description": "Comprehensive Solana utility platform for token management, DeFi operations, and developer tools",
+  "description": "Professional 40+ tool platform for Solana blockchain development, DeFi trading, transaction building, and developer utilities",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#111827",
   "theme_color": "#10b981",
   "orientation": "portrait-primary",
-  "categories": ["finance", "utilities", "developer"],
+  "categories": ["finance", "utilities", "developer", "productivity"],
   "lang": "en",
   "scope": "/",
   "icons": [
     {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "src": "/favicon.svg",
+      "sizes": "32x32",
+      "type": "image/svg+xml"
     },
     {
-      "src": "/icon-512.png", 
+      "src": "/icon-192.svg",
+      "sizes": "192x192", 
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.svg",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/svg+xml", 
+      "purpose": "any"
     },
     {
-      "src": "/apple-touch-icon.png",
+      "src": "/apple-touch-icon.svg",
       "sizes": "180x180",
-      "type": "image/png"
+      "type": "image/svg+xml"
     }
   ],
   "shortcuts": [
     {
-      "name": "Token Tools",
-      "short_name": "Tokens",
-      "description": "Access token management tools",
-      "url": "/tokens/mint",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "name": "Transaction Parser",
+      "short_name": "Parser",
+      "description": "Decode and analyze raw transactions",
+      "url": "/dev-tools/transaction-parser",
+      "icons": [{ "src": "/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
     },
     {
-      "name": "DeFi Tools", 
-      "short_name": "DeFi",
-      "description": "Access DeFi operations",
+      "name": "Jupiter DEX Swap", 
+      "short_name": "Swap",
+      "description": "Token swapping with best rates",
       "url": "/defi/swap",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
     },
     {
-      "name": "Transaction Builder",
-      "short_name": "Transactions",
-      "description": "Build and simulate transactions",
-      "url": "/transaction",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "name": "Jito Bundles",
+      "short_name": "MEV",
+      "description": "MEV protected transaction bundles",
+      "url": "/jito/bundle",
+      "icons": [{ "src": "/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Vanity Generator",
+      "short_name": "Vanity",
+      "description": "Generate custom wallet addresses",
+      "url": "/dev-tools/vanity-generator", 
+      "icons": [{ "src": "/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Token Management",
+      "short_name": "Tokens",
+      "description": "Mint, burn, and transfer tokens",
+      "url": "/tokens",
+      "icons": [{ "src": "/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
     }
+  ],
+  "features": [
+    "Transaction Builder & Simulator",
+    "DeFi Trading Integration",
+    "Jito MEV Protection",
+    "40+ Developer Tools",
+    "Token Management Suite",
+    "Address Lookup Tables",
+    "Vanity Address Generator",
+    "Bulk Operations",
+    "Analytics Dashboard",
+    "Multi-wallet Support"
   ]
 }

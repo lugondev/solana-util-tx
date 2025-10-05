@@ -1,181 +1,118 @@
-# Solana Utility Tools
+# Solana Utility Tools - All-in-One Platform
 
-![Solana Utility Tools](./public/og-image.png)
+![Solana Utility Tools Logo](./public/logo.svg)
 
-A comprehensive, pixel-perfect Solana utility platform built with Next.js 15 and React 19. This all-in-one toolkit provides developers and users with essential Solana blockchain operations including token management, DeFi integrations, transaction building, and advanced developer tools.
+**Professional 40+ tool platform for Solana blockchain development, DeFi trading, transaction building, and developer utilities.**
 
-## 🚀 Features
+[![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js%2015-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![React 19](https://img.shields.io/badge/React-19-blue?style=flat-square&logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
+[![Solana](https://img.shields.io/badge/Solana-Web3.js-9945FF?style=flat-square&logo=solana)](https://solana.com/)
 
-### 🪙 Token Management
-- **Token Minting**: Create new SPL tokens with custom metadata
-- **Token Transfer**: Send SPL tokens with priority fee support
-- **Token Burning**: Reduce token supply safely
-- **Bulk Operations**: Perform multiple token operations efficiently
-- **Token Analytics**: Track token performance and metrics
+## 🚀 Live Demo
 
-### 💹 DeFi Operations  
-- **Jupiter Swap Integration**: Best-rate token swapping
-- **Liquidity Management**: Add/remove liquidity from pools
-- **Limit Orders**: Set conditional trades
-- **Real-time Price Feeds**: Live market data integration
+Visit: **[solana-util-tx.vercel.app](https://solana-util-tx.vercel.app)**
 
-### 🔗 Transaction Tools
-- **Transaction Builder**: Visual transaction construction
-- **Simulation Engine**: Test transactions before execution
-- **Priority Fee Optimization**: Dynamic fee calculation
-- **Transaction History**: Comprehensive activity tracking
-- **Batch Processing**: Multiple operations in single transaction
+## ✨ Features Overview
 
-### ⚡ Jito Integration
-- **MEV Protection**: Bundle transactions for MEV protection
-- **Tip Optimization**: Maximize transaction inclusion probability
-- **Bundle Management**: Create and manage transaction bundles
+### 🔧 Core Categories (40+ Tools)
 
-### � Address Lookup Tables (ALT)
-- **ALT Creation**: Create new lookup tables
-- **ALT Management**: Add/remove addresses efficiently
-- **ALT Explorer**: Analyze table contents and benefits
-- **Cost Optimization**: Reduce transaction sizes
+#### Developer Tools (8 tools)
+- **Transaction Parser** - Decode raw transactions to human-readable format
+- **Vanity Address Generator** - Create custom wallet addresses with prefixes
+- **Bulk Keypair Generator** - Generate multiple wallets at once
+- **PDA Finder & Brute Forcer** - Program Derived Address utilities
+- **Program Inspector** - Analyze deployed programs
+- **IDL Generator** - Generate Interface Definition Language files
+- **Solana CLI Helper** - GUI wrapper for CLI commands
+- **RPC Benchmarker** - Test RPC endpoint performance
 
-### 👩‍� Developer Tools
-- **Keypair Generator**: Secure key generation utilities
-- **Program Utilities**: Smart contract interaction tools
-- **Network Utilities**: Connection and RPC management
-- **Account Explorer**: Inspect Solana accounts
-- **PDA Calculator**: Program Derived Address tools
+#### Transaction Management (4 tools)
+- **Transaction Builder** - Build complex transactions with ease
+- **Transaction Simulator** - Test transactions before execution
+- **Enhanced Simulator** - Advanced simulation with detailed analysis
+- **Transaction History** - Track and analyze past transactions
 
-## 🛠 Tech Stack
+#### Token Operations (5 tools)
+- **Token Minting** - Create new SPL tokens
+- **Token Transfer** - Send tokens with batch support
+- **Token Burning** - Burn tokens permanently
+- **Bulk Token Operations** - Mass token operations
+- **Token Analytics** - Token performance analysis
 
-- **Framework**: Next.js 15 (App Router)
-- **Frontend**: React 19, TypeScript
-- **Styling**: Tailwind CSS with pixel-perfect design
-- **Blockchain**: Solana Web3.js, SPL Token
-- **Wallet**: Solana Wallet Adapter
-- **Package Manager**: pnpm
-- **Development**: ESLint, Prettier
+#### DeFi & Trading (3 tools)
+- **Jupiter DEX Aggregator** - Best rates token swapping
+- **Liquidity Management** - Pool creation and management
+- **Limit Orders** - Set up automated trading orders
 
-## � Getting Started
+#### Account & Wallet Tools (5 tools)
+- **Wallet Management** - Multi-wallet support
+- **Multisig Wallet** - Shared wallet management
+- **Account Explorer** - Analyze any Solana account
+- **PDA Explorer** - Program Derived Address inspection
+- **HD Wallet Generator** - Hierarchical deterministic wallets
+
+#### Advanced Solana Features (6 tools)
+- **Address Lookup Tables (ALT)** - Create, manage, and explore ALTs
+- **Program Versioning** - Manage program versions and upgrades
+- **State Compression** - Compressed NFT utilities
+- **Token Extensions** - Advanced token features
+- **Anchor CPI Helper** - Cross-program invocation tools
+- **Schema Validator** - Validate Solana data schemas
+
+#### Data Processing & Analysis (3 tools)
+- **Borsh Inspector** - Decode/encode Borsh data with schemas
+- **Event Log Parser** - Parse transaction logs and events
+- **Binary Data Viewer** - Analyze raw binary data
+- **Data Analytics Dashboard** - Comprehensive analytics
+
+#### Jito MEV Protection (2 tools)
+- **Bundle Transaction Builder** - Create MEV-protected bundles
+- **Tips Calculator** - Optimize Jito tips for best execution
+
+## 🛠️ Technology Stack
+
+### Frontend
+- **Next.js 15** - React framework with App Router
+- **React 19** - Latest React with Server Components
+- **TypeScript 5.8** - Type safety and developer experience
+- **Tailwind CSS** - Utility-first styling
+- **Pixel Art Design** - Retro gaming aesthetic
+
+### Blockchain
+- **Solana Web3.js** - Solana blockchain interaction
+- **Anchor Framework** - Solana program development
+- **Jupiter API** - DEX aggregation
+- **Jito SDK** - MEV protection
+- **Metaplex** - NFT and token standards
+
+### Package Manager
+- **pnpm** - Fast, disk space efficient package manager
+
+## 🚀 Getting Started
 
 ### Prerequisites
-
-- Node.js 18.17+ 
-- pnpm (recommended) or npm
-- Git
+- Node.js 18+ 
+- pnpm (recommended)
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/lugondev/solana-util-tx.git
-   cd solana-util-tx
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/lugondev/solana-util-tx.git
+cd solana-util-tx
 
-2. **Install dependencies**
-   ```bash
-   pnpm install
-   ```
+# Install dependencies
+pnpm install
 
-3. **Start development server**
-   ```bash
-   pnpm dev
-   ```
-
-4. **Open in browser**
-   ```
-   http://localhost:3333
-   ```
-
-### Environment Variables
-
-Create a `.env.local` file with:
-
-```env
-# Solana Network Configuration
-NEXT_PUBLIC_SOLANA_NETWORK=devnet # or mainnet-beta, testnet
-NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
-
-# Jito Configuration (optional)
-NEXT_PUBLIC_JITO_ENDPOINT=https://amsterdam.mainnet.block-engine.jito.wtf
-
-# Jupiter API (optional)
-NEXT_PUBLIC_JUPITER_API=https://quote-api.jup.ag/v6
+# Start development server
+pnpm dev
 ```
 
-## 📁 Project Structure
+Open [http://localhost:3333](http://localhost:3333) to view the application.
 
-```
-├── app/                    # Next.js App Router pages
-│   ├── (features)/        # Feature-based routing
-│   │   ├── tokens/        # Token management pages
-│   │   ├── defi/          # DeFi operation pages
-│   │   ├── transaction/   # Transaction tools
-│   │   ├── jito/          # Jito bundle pages
-│   │   ├── alt/           # ALT management pages
-│   │   ├── accounts/      # Account explorer pages
-│   │   └── dev-tools/     # Developer utilities
-│   ├── layout.tsx         # Root layout
-│   ├── page.tsx           # Homepage
-│   ├── metadata.ts        # SEO metadata
-│   └── globals.css        # Global styles
-├── components/            # Reusable React components
-│   ├── ui/               # UI component library
-│   ├── tokens/           # Token-specific components
-│   ├── jito/             # Jito-specific components
-│   └── alt/              # ALT-specific components
-├── lib/                  # Utility libraries
-│   ├── solana/           # Solana-specific utilities
-│   │   ├── tokens/       # Token operations
-│   │   ├── transactions/ # Transaction builders
-│   │   ├── jito/         # Jito integrations
-│   │   └── alt/          # ALT utilities
-│   └── utils.ts          # General utilities
-├── hooks/                # Custom React hooks
-├── contexts/             # React context providers
-├── types/                # TypeScript type definitions
-└── public/               # Static assets
-```
-
-## 🎨 Design System
-
-The application uses a **pixel-perfect retro aesthetic** with:
-
-- **Pixel Fonts**: Press Start 2P, VT323
-- **Color Scheme**: Dark theme with green accents (#10b981)
-- **UI Components**: Custom pixel-styled components
-- **Animations**: Subtle retro animations and effects
-- **Responsive**: Mobile-first responsive design
-
-## 🔗 Key Integrations
-
-### Solana Web3.js
-- Connection management and RPC optimization
-- Transaction building and simulation
-- Account management and PDA calculations
-
-### Jupiter Protocol
-- Token price feeds and routing
-- Best-rate swap execution
-- Slippage protection
-
-### Jito MEV Protection
-- Bundle creation and submission
-- Tip optimization strategies
-- MEV protection for sensitive transactions
-
-### Wallet Adapters
-- Multi-wallet support (Phantom, Solflare, etc.)
-- Automatic wallet detection
-- Secure transaction signing
-
-## 🚀 Deployment
-
-### Vercel (Recommended)
-
-1. **Connect your repository to Vercel**
-2. **Set environment variables in Vercel dashboard**
-3. **Deploy automatically on push to main branch**
-
-### Manual Deployment
+### Build for Production
 
 ```bash
 # Build the application
@@ -185,40 +122,80 @@ pnpm build
 pnpm start
 ```
 
-## � Performance & SEO
+## 📸 Screenshots
 
-- **Perfect Lighthouse Scores**: Optimized for performance
-- **SEO Optimized**: Complete meta tags, structured data, sitemap
-- **PWA Ready**: Service worker and manifest configured
-- **Server Components**: Optimal loading with React 19
-- **Image Optimization**: Next.js Image component usage
+### Transaction Parser
+![Transaction Parser](./public/preview-transaction-parser.svg)
+
+### Jupiter DEX Aggregator  
+![Jupiter Swap](./public/preview-jupiter-swap.svg)
+
+### Jito MEV Protection
+![Jito Bundles](./public/preview-jito-bundles.svg)
+
+## 🔧 Key Features
+
+### 🎯 Developer-Focused Tools
+- **40+ specialized utilities** for Solana development
+- **Transaction parsing and analysis** with detailed breakdowns
+- **Vanity address generation** with custom prefixes
+- **Bulk operations** for efficiency
+- **Program inspection** and debugging tools
+
+### 🔄 DeFi Integration
+- **Jupiter DEX aggregation** for best swap rates
+- **Jito MEV protection** for secure transactions
+- **Liquidity management** across multiple pools
+- **Limit order** automation
+
+### 🎨 User Experience
+- **Pixel art design** with retro gaming aesthetic
+- **Global search** with hotkey support (/ or Cmd+K)
+- **Responsive design** for all devices
+- **PWA support** for offline usage
+- **Dark theme** optimized for developers
+
+### 🔒 Security & Performance
+- **Client-side processing** for sensitive operations
+- **Multiple RPC endpoints** for reliability
+- **Transaction simulation** before execution
+- **Priority fee optimization**
+
+## 📱 PWA Features
+
+- **Offline functionality** for key tools
+- **Install as app** on desktop and mobile
+- **Push notifications** for transaction updates
+- **Background sync** for data updates
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guidelines](./CONTRIBUTING.md) for details.
+Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details.
 
-### Development Workflow
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push to branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
+### Development Guidelines
+- Follow the established code style
+- Add tests for new features
+- Update documentation
+- Use TypeScript for type safety
 
 ## 📄 License
 
-This project is licensed under the MIT License. See [LICENSE](./LICENSE) for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## � Links
+## 🙏 Acknowledgments
 
-- **Live Demo**: [https://solana-util-tx.vercel.app](https://solana-util-tx.vercel.app)
-- **GitHub**: [https://github.com/lugondev/solana-util-tx](https://github.com/lugondev/solana-util-tx)
-- **Documentation**: [./docs](./docs)
+- **Solana Foundation** - Blockchain infrastructure
+- **Jupiter** - DEX aggregation protocol
+- **Jito Labs** - MEV protection solutions
+- **Metaplex** - NFT and token standards
+- **Anchor** - Solana development framework
 
-## ⚠️ Disclaimer
+## 📞 Support
 
-This is experimental software. Use at your own risk. Always test on devnet before using on mainnet. Never share private keys or seed phrases.
+- **Website**: [solana-util-tx.vercel.app](https://solana-util-tx.vercel.app)
+- **GitHub**: [lugondev/solana-util-tx](https://github.com/lugondev/solana-util-tx)
+- **Issues**: [GitHub Issues](https://github.com/lugondev/solana-util-tx/issues)
 
 ---
 
-**Built with ❤️ by [LugonDev](https://github.com/lugondev)**
+**Built with ❤️ for the Solana ecosystem by [LugonDev](https://github.com/lugondev)**
