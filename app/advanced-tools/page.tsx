@@ -46,45 +46,6 @@ export default function AdvancedToolsPage() {
         'Validation tools'
       ],
       status: 'Ready'
-    },
-    {
-      title: '🔗 Cross-Chain Bridge Utils',
-      description: 'Manage cross-chain bridges, asset transfers, and monitoring',
-      href: '/advanced-tools/bridge-utils',
-      features: [
-        'Bridge management',
-        'Asset tracking',
-        'Fee estimation',
-        'Status monitoring',
-        'Multi-chain support'
-      ],
-      status: 'Coming Soon'
-    },
-    {
-      title: '🏛️ Governance Tools',
-      description: 'SPL Governance management, proposal tracking, and voting analytics',
-      href: '/advanced-tools/governance',
-      features: [
-        'Proposal management',
-        'Voting analytics',
-        'Realm configuration',
-        'Member management',
-        'Treasury tracking'
-      ],
-      status: 'Coming Soon'
-    },
-    {
-      title: '⚡ Performance Optimizer',
-      description: 'Optimize Solana programs, transaction batching, and gas efficiency',
-      href: '/advanced-tools/performance',
-      features: [
-        'Gas optimization',
-        'Transaction batching',
-        'Program analysis',
-        'Performance metrics',
-        'Bottleneck detection'
-      ],
-      status: 'Coming Soon'
     }
   ]
 
@@ -102,14 +63,10 @@ export default function AdvancedToolsPage() {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
             <div className="text-2xl font-bold text-green-400">3</div>
             <div className="text-sm text-gray-400">Ready Tools</div>
-          </div>
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
-            <div className="text-2xl font-bold text-blue-400">3</div>
-            <div className="text-sm text-gray-400">Coming Soon</div>
           </div>
           <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-center">
             <div className="text-2xl font-bold text-purple-400">100+</div>
