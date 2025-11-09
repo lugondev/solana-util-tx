@@ -68,13 +68,20 @@
     box-sizing: border-box;
   }
   
-  /* Headings with better sizing for readability */
-  h1 { font-size: 32px; line-height: 1.3; font-family: var(--font-pixel); }
-  h2 { font-size: 24px; line-height: 1.3; font-family: var(--font-pixel); }
-  h3 { font-size: 18px; line-height: 1.4; font-family: var(--font-pixel); }
-  h4 { font-size: 16px; line-height: 1.4; font-family: var(--font-pixel); }
-  h5 { font-size: 14px; line-height: 1.4; font-family: var(--font-pixel); }
-  h6 { font-size: 12px; line-height: 1.4; font-family: var(--font-pixel); }
+  /* Headings with better sizing for readability - Reduced sizes to prevent overflow */
+  h1 { font-size: 24px; line-height: 1.3; font-family: var(--font-pixel); }
+  h2 { font-size: 18px; line-height: 1.3; font-family: var(--font-pixel); }
+  h3 { font-size: 16px; line-height: 1.4; font-family: var(--font-pixel); }
+  h4 { font-size: 14px; line-height: 1.4; font-family: var(--font-pixel); }
+  h5 { font-size: 12px; line-height: 1.4; font-family: var(--font-pixel); }
+  h6 { font-size: 11px; line-height: 1.4; font-family: var(--font-pixel); }
+  
+  /* Responsive heading sizes for mobile */
+  @media (max-width: 768px) {
+    h1 { font-size: 20px; }
+    h2 { font-size: 16px; }
+    h3 { font-size: 14px; }
+  }
   
   /* Pixel Animations */
   @keyframes pixel-blink {
@@ -480,4 +487,84 @@
 
 ::-webkit-scrollbar-corner {
   background: var(--pixel-bg-primary);
+}
+
+/* Text overflow utilities */
+@layer utilities {
+  /* Text truncation utilities */
+  .text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .text-wrap-balance {
+    text-wrap: balance;
+  }
+  
+  /* Word break utilities for long strings */
+  .word-break-all {
+    word-break: break-all;
+  }
+  
+  .word-break-word {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Container sizing utilities to prevent overflow */
+  .container-safe {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Font size utilities for responsive text */
+  .text-responsive {
+    font-size: clamp(0.75rem, 2vw, 1rem);
+  }
+  
+  .text-responsive-sm {
+    font-size: clamp(0.65rem, 1.5vw, 0.875rem);
+  }
+  
+  .text-responsive-xs {
+    font-size: clamp(0.6rem, 1.2vw, 0.75rem);
+  }
+  
+  /* Pixel font with better size control */
+  .font-pixel-sm {
+    font-family: var(--font-pixel);
+    font-size: clamp(10px, 1.5vw, 12px);
+  }
+  
+  .font-pixel-base {
+    font-family: var(--font-pixel);
+    font-size: clamp(12px, 2vw, 14px);
+  }
+  
+  .font-pixel-lg {
+    font-family: var(--font-pixel);
+    font-size: clamp(14px, 2.5vw, 16px);
+  }
+  
+  .font-pixel-xl {
+    font-family: var(--font-pixel);
+    font-size: clamp(16px, 3vw, 20px);
+  }
+  
+  /* Mono font with better size control */
+  .font-mono-xs {
+    font-family: var(--font-mono);
+    font-size: clamp(9px, 1.2vw, 11px);
+  }
+  
+  .font-mono-sm {
+    font-family: var(--font-mono);
+    font-size: clamp(10px, 1.5vw, 12px);
+  }
+  
+  .font-mono-base {
+    font-family: var(--font-mono);
+    font-size: clamp(11px, 1.8vw, 13px);
+  }
 }
