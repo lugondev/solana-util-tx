@@ -5,7 +5,7 @@ import { PixelCard } from '@/components/ui/pixel-card'
 import { PixelButton } from '@/components/ui/pixel-button'
 import { PixelInput } from '@/components/ui/pixel-input'
 import { TransactionParser, ParsedTransaction } from '@/lib/solana/parsers/transaction-parser'
-import { Copy, Download, Eye, AlertCircle, CheckCircle, Zap } from 'lucide-react'
+import { Copy, Download, Eye, AlertCircle, CheckCircle, Zap, Building2, Coins, Waves, Boxes, Rainbow, Search, Settings } from 'lucide-react'
 import { PixelToast } from '@/components/ui/pixel-toast'
 import { transactionExamples, validateTransactionFormat } from '@/lib/solana/parsers/transaction-parser-test'
 
@@ -99,22 +99,22 @@ export function TransactionParserComponent({ className }: TransactionParserCompo
   const getInstructionIcon = (programName: string) => {
     switch (programName) {
       case 'System Program':
-        return '🏦'
+        return Building2
       case 'SPL Token Program':
       case 'SPL Token-2022 Program':
-        return '🪙'
+        return Coins
       case 'Compute Budget Program':
-        return '⚡'
+        return Zap
       case 'Jupiter V6':
       case 'Jupiter V4':
-        return '🪐'
+        return Zap
       case 'Orca Whirlpool':
-        return '🌊'
+        return Waves
       case 'Raydium AMM V4':
       case 'Raydium CLMM':
-        return '🌈'
+        return Rainbow
       default:
-        return '📦'
+        return Boxes
     }
   }
 
@@ -146,9 +146,12 @@ export function TransactionParserComponent({ className }: TransactionParserCompo
       <PixelCard>
         <div className="space-y-4">
           <div className="border-b-4 border-green-400/20 pb-4">
-            <h2 className="font-pixel text-lg text-green-400 mb-2">
-              🔍 TRANSACTION PARSER
-            </h2>
+            <div className="flex items-center gap-2 mb-2">
+              <Search className="h-5 w-5 text-green-400" />
+              <h2 className="font-pixel text-lg text-green-400">
+                TRANSACTION PARSER
+              </h2>
+            </div>
             <p className="font-mono text-sm text-gray-400">
               Decode raw transactions into human-readable format
             </p>
@@ -326,9 +329,12 @@ export function TransactionParserComponent({ className }: TransactionParserCompo
           <PixelCard>
             <div className="space-y-4">
               <div className="border-b-4 border-green-400/20 pb-4">
-                <h3 className="font-pixel text-lg text-green-400 mb-2">
-                  ⚙️ INSTRUCTIONS ({parsedTx.instructions.length})
-                </h3>
+                <div className="flex items-center gap-2">
+                  <Settings className="h-5 w-5 text-green-400" />
+                  <h3 className="font-pixel text-lg text-green-400">
+                    INSTRUCTIONS ({parsedTx.instructions.length})
+                  </h3>
+                </div>
               </div>
 
               <div className="space-y-4">
@@ -338,7 +344,10 @@ export function TransactionParserComponent({ className }: TransactionParserCompo
                       {/* Instruction Header */}
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2">
-                          <span className="text-2xl">{getInstructionIcon(instruction.programName)}</span>
+                          {(() => {
+                            const IconComponent = getInstructionIcon(instruction.programName)
+                            return <IconComponent className="h-6 w-6" />
+                          })()}
                           <div>
                             <div className="font-pixel text-sm text-white">
                               {index + 1}. {instruction.instructionType}

@@ -5,7 +5,7 @@ import { PixelButton } from '@/components/ui/pixel-button'
 import { PixelCard } from '@/components/ui/pixel-card'
 import { PixelWalletButton } from '@/components/ui/pixel-wallet-button'
 import { useTokenInfo } from '@/contexts/TokenContext'
-import { Wallet, ExternalLink, CheckCircle, AlertCircle, DollarSign, Loader2 } from 'lucide-react'
+import { Wallet, ExternalLink, CheckCircle, AlertCircle, DollarSign, Loader2, RefreshCw, ShieldAlert, Ban } from 'lucide-react'
 import { JupiterQuote } from '@/hooks/useJupiterSwap'
 import { formatTokenAmount } from '@/lib/solana/tokens/token-info'
 
@@ -47,9 +47,9 @@ export function SwapWalletConnector({
 
           <div className="p-4 bg-red-900/20 border-2 border-red-600/30">
             <div className="flex items-start gap-2">
-              <AlertCircle className="h-4 w-4 text-red-400 mt-0.5" />
+              <Ban className="h-4 w-4 text-red-400 mt-0.5 flex-shrink-0" />
               <div className="font-mono text-xs text-red-400">
-                🚫 MetaMask Solana Snap is currently blocked due to critical stability issues that cause transaction failures.
+                MetaMask Solana Snap is currently blocked due to critical stability issues that cause transaction failures.
               </div>
             </div>
           </div>
@@ -278,13 +278,17 @@ export function SwapWalletConnector({
           {quote && (
             <div className={`p-3 border-2 ${loadingSwap ? 'bg-blue-900/20 border-blue-600/30' : 'bg-yellow-900/20 border-yellow-600/30'}`}>
               <div className="flex items-start gap-2">
-                <AlertCircle className={`h-4 w-4 mt-0.5 ${loadingSwap ? 'text-blue-400' : 'text-yellow-400'}`} />
+                {loadingSwap ? (
+                  <RefreshCw className="h-4 w-4 mt-0.5 text-blue-400 animate-spin flex-shrink-0" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 mt-0.5 text-yellow-400 flex-shrink-0" />
+                )}
                 <div className={`font-mono text-xs ${loadingSwap ? 'text-blue-400' : 'text-yellow-400'}`}>
                   {loadingSwap 
-                    ? '🔄 Please confirm the transaction in your wallet popup. This may take a moment...'
+                    ? 'Please confirm the transaction in your wallet popup. This may take a moment...'
                     : isMetaMask 
-                      ? '⚠️ MetaMask detected. If transaction fails, try refreshing page or reconnecting wallet.'
-                      : '⚠️ Review transaction details before signing. Swaps are irreversible.'
+                      ? 'MetaMask detected. If transaction fails, try refreshing page or reconnecting wallet.'
+                      : 'Review transaction details before signing. Swaps are irreversible.'
                   }
                 </div>
               </div>

@@ -8,6 +8,25 @@ import { PixelWalletButton } from '@/components/ui/pixel-wallet-button'
 import { useState, useEffect } from 'react'
 import { useTransactionHistory } from '@/lib/transaction-history'
 import { LAMPORTS_PER_SOL } from '@solana/web3.js'
+import { 
+  Wallet, 
+  Zap, 
+  TestTube, 
+  BarChart3, 
+  Coins, 
+  Clipboard, 
+  Wrench, 
+  Search, 
+  Factory, 
+  Globe, 
+  Hammer, 
+  Sparkles, 
+  Package, 
+  Rocket, 
+  FileText, 
+  Info,
+  LucideIcon
+} from 'lucide-react'
 
 export default function HomePage() {
   const { publicKey, connected } = useWallet()
@@ -62,145 +81,151 @@ export default function HomePage() {
     "screenshot": "https://solutil.dev/og-image.png"
   }
 
-  const features = [
+  const features: Array<{
+    title: string
+    description: string
+    href: string
+    icon: LucideIcon
+    status: 'active' | 'beta' | 'coming-soon'
+  }> = [
     {
       title: 'WALLET',
       description: 'Connect and manage your Solana wallet',
       href: '/wallet',
-      icon: '💰',
+      icon: Wallet,
       status: 'active',
     },
     {
       title: 'SEND SOL',
       description: 'Transfer SOL with priority fees',
       href: '/transaction/send',
-      icon: '⚡',
+      icon: Zap,
       status: 'active',
     },
     {
       title: 'SIMULATE TX',
       description: 'Test transactions before sending',
       href: '/transaction/simulate',
-      icon: '🧪',
+      icon: TestTube,
       status: 'active',
     },
     {
       title: 'TX HISTORY',
       description: 'Track all your transactions',
       href: '/transaction/history',
-      icon: '📊',
+      icon: BarChart3,
       status: 'active',
     },
     {
       title: 'TOKEN TRANSFER',
       description: 'Transfer SPL tokens',
       href: '/tokens/transfer',
-      icon: '🪙',
+      icon: Coins,
       status: 'active',
     },
     {
       title: 'CREATE ALT',
       description: 'Create Address Lookup Tables',
       href: '/alt/create',
-      icon: '📋',
+      icon: Clipboard,
       status: 'active',
     },
     {
       title: 'MANAGE ALT',
       description: 'Track and manage ALTs',
       href: '/alt/manage',
-      icon: '🔧',
+      icon: Wrench,
       status: 'active',
     },
     {
       title: 'ALT EXPLORER',
       description: 'Explore ALT contents and benefits',
       href: '/alt/explorer',
-      icon: '🔍',
+      icon: Search,
       status: 'active',
     },
     {
       title: 'TOKEN MINT',
       description: 'Create new SPL tokens',
       href: '/tokens/mint',
-      icon: '🏭',
+      icon: Factory,
       status: 'active',
     },
     {
       title: 'JUPITER SWAP',
       description: 'Token swapping with best rates',
       href: '/defi/swap',
-      icon: '�',
+      icon: Globe,
       status: 'active',
     },
     {
       title: 'DEV TOOLS',
       description: 'Developer utilities and tools',
       href: '/dev-tools',
-      icon: '🛠️',
+      icon: Hammer,
       status: 'active',
     },
     {
       title: 'TX PARSER',
       description: 'Decode raw transactions to human-readable',
       href: '/dev-tools/transaction-parser',
-      icon: '🔍',
+      icon: Search,
       status: 'active',
     },
     {
       title: 'VANITY ADDRESS',
       description: 'Generate custom addresses with prefixes',
       href: '/dev-tools/vanity-generator',
-      icon: '✨',
+      icon: Sparkles,
       status: 'active',
     },
     {
       title: 'BULK KEYPAIRS',
       description: 'Generate multiple wallets at once',
       href: '/dev-tools/bulk-keypair',
-      icon: '📦',
+      icon: Package,
       status: 'active',
     },
     {
       title: 'JITO BUNDLES',
       description: 'MEV protected transaction bundles',
       href: '/jito/bundle',
-      icon: '🚀',
+      icon: Rocket,
       status: 'active',
     },
     {
       title: 'BORSH INSPECTOR',
       description: 'Decode/encode Borsh data with schemas',
       href: '/data-tools/borsh-inspector',
-      icon: '🔍',
+      icon: Search,
       status: 'active',
     },
     {
       title: 'EVENT LOG PARSER',
       description: 'Parse transaction logs and events',
       href: '/data-tools/event-parser',
-      icon: '📊',
+      icon: BarChart3,
       status: 'active',
     },
     {
       title: 'PROGRAM VERSIONING',
       description: 'Manage program versions and upgrades',
       href: '/advanced-tools/program-versioning',
-      icon: '📝',
+      icon: FileText,
       status: 'active',
     },
     {
       title: 'DATA TOOLS',
       description: 'Data processing and analysis suite',
       href: '/data-tools',
-      icon: '📊',
+      icon: BarChart3,
       status: 'active',
     },
     {
       title: 'ADVANCED TOOLS',
       description: 'Enterprise Solana development tools',
       href: '/advanced-tools',
-      icon: '🚀',
+      icon: Rocket,
       status: 'active',
     },
   ]
@@ -254,9 +279,12 @@ export default function HomePage() {
         <PixelCard>
           <div className="space-y-4">
             <div className="border-b-4 border-green-400/20 pb-3">
-              <h3 className="font-pixel text-sm text-green-400">
-                📊 YOUR ACTIVITY
-              </h3>
+              <div className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-green-400" />
+                <h3 className="font-pixel text-sm text-green-400">
+                  YOUR ACTIVITY
+                </h3>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -300,7 +328,7 @@ export default function HomePage() {
               <div className="flex flex-col h-full">
                 <div className="flex items-start justify-between mb-5">
                   <div className="flex items-center gap-4">
-                    <span className="text-3xl">{feature.icon}</span>
+                    <feature.icon className="h-8 w-8 text-green-400" />
                     <div>
                       <h3 className="font-pixel text-sm text-white mb-2">
                         {feature.title}
@@ -351,9 +379,12 @@ export default function HomePage() {
       <PixelCard>
         <div className="space-y-4">
           <div className="border-b-4 border-green-400/20 pb-3">
-            <h3 className="font-pixel text-sm text-green-400">
-              ℹ️ ABOUT SOLANA DEVELOPER TOOLKIT
-            </h3>
+            <div className="flex items-center gap-2">
+              <Info className="h-4 w-4 text-green-400" />
+              <h3 className="font-pixel text-sm text-green-400">
+                ABOUT SOLANA DEVELOPER TOOLKIT
+              </h3>
+            </div>
           </div>
 
           <div className="space-y-4 font-mono text-xs text-gray-400">

@@ -1,312 +1,259 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { useState } from 'react'
-import { ChevronRight, ChevronDown } from 'lucide-react'
-import { useSafeTheme } from '@/contexts/ThemeContext'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
+import {usePathname} from 'next/navigation'
+import {useState} from 'react'
+import {ChevronRight, ChevronDown, Home, Star, BarChart3, Rocket, Wallet, Zap, Coins, Clipboard, RefreshCw, Wrench, Microscope, Factory, Flame, Package, Users} from 'lucide-react'
+import {useSafeTheme} from '@/contexts/ThemeContext'
+import {ThemeToggle} from '@/components/ui/theme-toggle'
+import {LucideIcon} from 'lucide-react'
 
 interface NavigationItem {
-  label: string
-  href?: string
-  children?: NavigationItem[]
-  icon?: string
-  comingSoon?: boolean
+	label: string
+	href?: string
+	children?: NavigationItem[]
+	icon?: LucideIcon
+	comingSoon?: boolean
 }
 
 const navigationItems: NavigationItem[] = [
-  { 
-    label: 'DASHBOARD', 
-    href: '/', 
-    icon: '🏠' 
-  },
-  { 
-    label: 'FEATURES', 
-    href: '/features', 
-    icon: '⭐' 
-  },
-  { 
-    label: 'DATA TOOLS',
-    href: '/data-tools',
-    icon: '📊'
-  },
-  { 
-    label: 'ADVANCED TOOLS',
-    href: '/advanced-tools',
-    icon: '🚀'
-  },
-  { 
-    label: 'WALLET',
-    icon: '💰',
-    children: [
-      { label: 'Overview', href: '/wallet' },
-      { label: 'Multisig', href: '/wallet/multisig', icon: '�️' },
-    ]
-  },
-  {
-    label: 'TRANSACTIONS',
-    icon: '⚡',
-    children: [
-      { label: 'Send', href: '/transaction/send' },
-      { label: 'Simulate', href: '/transaction/simulate' },
-      { label: 'Enhanced Simulate', href: '/transaction/enhanced-simulate', icon: '🔬' },
-      { label: 'History', href: '/transaction/history' },
-    ]
-  },
-  {
-    label: 'TOKENS',
-    icon: '🪙',
-    children: [
-      { label: 'Transfer', href: '/tokens/transfer', icon: '🔄' },
-      { label: 'Mint', href: '/tokens/mint', icon: '🏭' },
-      { label: 'Burn', href: '/tokens/burn', icon: '🔥' },
-      { label: 'Bulk Operations', href: '/tokens/bulk', icon: '📦' },
-      { label: 'Analytics', href: '/tokens/analytics', icon: '📊' },
-    ]
-  },
-  {
-    label: 'ALT',
-    icon: '📋',
-    children: [
-      { label: 'Create ALT', href: '/alt/create' },
-      { label: 'Manage ALT', href: '/alt/manage' },
-      { label: 'ALT Explorer', href: '/alt/explorer' },
-    ]
-  },
-  {
-    label: 'JITO/MEV',
-    icon: '🚀',
-    children: [
-      { label: 'Bundles', href: '/jito/bundle' },
-      { label: 'Tips', href: '/jito/tips' },
-    ]
-  },
-  {
-    label: 'ACCOUNTS',
-    icon: '📊',
-    children: [
-      { label: 'Explorer', href: '/accounts/explorer' },
-      { label: 'PDA Calculator', href: '/accounts/pda' },
-    ]
-  },
-  {
-    label: 'DEFI',
-    icon: '🔄',
-    children: [
-      { label: 'Swap (Jupiter)', href: '/defi/swap' },
-      { label: 'Liquidity', href: '/defi/liquidity' },
-      { label: 'Limit Orders', href: '/defi/limit-orders' },
-    ]
-  },
-  {
-    label: 'DEV TOOLS',
-    icon: '🛠️',
-    children: [
-      { label: 'Keypair', href: '/dev-tools/keypair' },
-      { label: 'Programs', href: '/dev-tools/programs' },
-      { label: 'Deploy', href: '/dev-tools/deploy', icon: '🚀' },
-      { label: 'Utilities', href: '/dev-tools/utils' },
-    ]
-  },
+	{
+		label: 'DASHBOARD',
+		href: '/',
+		icon: Home,
+	},
+	{
+		label: 'FEATURES',
+		href: '/features',
+		icon: Star,
+	},
+	{
+		label: 'DATA TOOLS',
+		href: '/data-tools',
+		icon: BarChart3,
+	},
+	{
+		label: 'ADVANCED TOOLS',
+		href: '/advanced-tools',
+		icon: Rocket,
+	},
+	{
+		label: 'WALLET',
+		icon: Wallet,
+		children: [
+			{label: 'Overview', href: '/wallet'},
+			{label: 'Multisig', href: '/wallet/multisig', icon: Users},
+		],
+	},
+	{
+		label: 'TRANSACTIONS',
+		icon: Zap,
+		children: [
+			{label: 'Send', href: '/transaction/send'},
+			{label: 'Simulate', href: '/transaction/simulate'},
+			{label: 'Enhanced Simulate', href: '/transaction/enhanced-simulate', icon: Microscope},
+			{label: 'History', href: '/transaction/history'},
+		],
+	},
+	{
+		label: 'TOKENS',
+		icon: Coins,
+		children: [
+			{label: 'Transfer', href: '/tokens/transfer', icon: RefreshCw},
+			{label: 'Mint', href: '/tokens/mint', icon: Factory},
+			{label: 'Burn', href: '/tokens/burn', icon: Flame},
+			{label: 'Bulk Operations', href: '/tokens/bulk', icon: Package},
+			{label: 'Analytics', href: '/tokens/analytics', icon: BarChart3},
+		],
+	},
+	{
+		label: 'ALT',
+		icon: Clipboard,
+		children: [
+			{label: 'Create ALT', href: '/alt/create'},
+			{label: 'Manage ALT', href: '/alt/manage'},
+			{label: 'ALT Explorer', href: '/alt/explorer'},
+		],
+	},
+	{
+		label: 'JITO/MEV',
+		icon: Rocket,
+		children: [
+			{label: 'Bundles', href: '/jito/bundle'},
+			{label: 'Tips', href: '/jito/tips'},
+		],
+	},
+	{
+		label: 'ACCOUNTS',
+		icon: BarChart3,
+		children: [
+			{label: 'Explorer', href: '/accounts/explorer'},
+			{label: 'PDA Calculator', href: '/accounts/pda'},
+		],
+	},
+	{
+		label: 'DEFI',
+		icon: RefreshCw,
+		children: [
+			{label: 'Swap (Jupiter)', href: '/defi/swap'},
+			{label: 'Liquidity', href: '/defi/liquidity'},
+			{label: 'Limit Orders', href: '/defi/limit-orders'},
+		],
+	},
+	{
+		label: 'DEV TOOLS',
+		icon: Wrench,
+		children: [
+			{label: 'Keypair', href: '/dev-tools/keypair'},
+			{label: 'Programs', href: '/dev-tools/programs'},
+			{label: 'Deploy', href: '/dev-tools/deploy', icon: Rocket},
+			{label: 'Utilities', href: '/dev-tools/utils'},
+		],
+	},
 ]
 
 interface NavigationMenuProps {
-  item: NavigationItem
-  level?: number
+	item: NavigationItem
+	level?: number
 }
 
-function NavigationMenu({ item, level = 0 }: NavigationMenuProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const pathname = usePathname()
-  
-  const hasChildren = item.children && item.children.length > 0
-  const isActive = item.href ? pathname === item.href : false
-  const hasActiveChild = item.children?.some(child => pathname === child.href)
-  
-  const paddingClass = level === 0 ? 'pl-6' : 'pl-10'
-  
-  if (hasChildren) {
-    return (
-      <div>
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className={`w-full flex items-center justify-between ${paddingClass} pr-6 py-4 font-pixel text-xs transition-colors ${
-            hasActiveChild 
-              ? 'text-green-400 bg-green-400/10' 
-              : 'text-gray-400 hover:text-green-400'
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            {item.icon && <span className="text-sm">{item.icon}</span>}
-            <span>{item.label}</span>
-          </div>
-          {isOpen ? (
-            <ChevronDown className="h-3 w-3" />
-          ) : (
-            <ChevronRight className="h-3 w-3" />
-          )}
-        </button>
-        
-        {isOpen && (
-          <div className="border-l-4 border-green-400/20 ml-6">
-            {item.children?.map((child, index) => (
-              <NavigationMenu key={index} item={child} level={level + 1} />
-            ))}
-          </div>
-        )}
-      </div>
-    )
-  }
-  
-  const linkContent = (
-    <div className="flex items-center gap-3">
-      {item.icon && <span className="text-sm">{item.icon}</span>}
-      <span>{item.label}</span>
-      {item.comingSoon && (
-        <span className="text-xs px-2 py-0.5 bg-yellow-600/20 text-yellow-400 border border-yellow-600/30">
-          SOON
-        </span>
-      )}
-    </div>
-  )
-  
-  if (item.comingSoon) {
-    return (
-      <div
-        className={`${paddingClass} pr-6 py-4 font-pixel text-xs cursor-not-allowed opacity-50`}
-      >
-        {linkContent}
-      </div>
-    )
-  }
-  
-  return (
-    <Link
-      href={item.href || '#'}
-      className={`block ${paddingClass} pr-6 py-4 font-pixel text-xs transition-colors ${
-        isActive 
-          ? 'text-green-400 bg-green-400/10 border-r-4 border-green-400' 
-          : 'text-gray-400 hover:text-green-400'
-      }`}
-    >
-      {linkContent}
-    </Link>
-  )
+function NavigationMenu({item, level = 0}: NavigationMenuProps) {
+	const [isOpen, setIsOpen] = useState(false)
+	const pathname = usePathname()
+
+	const hasChildren = item.children && item.children.length > 0
+	const isActive = item.href ? pathname === item.href : false
+	const hasActiveChild = item.children?.some((child) => pathname === child.href)
+
+	const paddingClass = level === 0 ? 'pl-6' : 'pl-10'
+
+	if (hasChildren) {
+		return (
+			<div>
+				<button onClick={() => setIsOpen(!isOpen)} className={`w-full flex items-center justify-between ${paddingClass} pr-6 py-4 font-pixel text-xs transition-colors ${hasActiveChild ? 'text-green-400 bg-green-400/10' : 'text-gray-400 hover:text-green-400'}`}>
+					<div className='flex items-center gap-3'>
+						{item.icon && <item.icon className='h-4 w-4' />}
+						<span>{item.label}</span>
+					</div>
+					{isOpen ? <ChevronDown className='h-3 w-3' /> : <ChevronRight className='h-3 w-3' />}
+				</button>
+
+				{isOpen && (
+					<div className='border-l-4 border-green-400/20 ml-6'>
+						{item.children?.map((child, index) => (
+							<NavigationMenu key={index} item={child} level={level + 1} />
+						))}
+					</div>
+				)}
+			</div>
+		)
+	}
+
+	const linkContent = (
+		<div className='flex items-center gap-3'>
+			{item.icon && <item.icon className='h-4 w-4' />}
+			<span>{item.label}</span>
+			{item.comingSoon && <span className='text-xs px-2 py-0.5 bg-yellow-600/20 text-yellow-400 border border-yellow-600/30'>SOON</span>}
+		</div>
+	)
+
+	if (item.comingSoon) {
+		return <div className={`${paddingClass} pr-6 py-4 font-pixel text-xs cursor-not-allowed opacity-50`}>{linkContent}</div>
+	}
+
+	return (
+		<Link href={item.href || '#'} className={`block ${paddingClass} pr-6 py-4 font-pixel text-xs transition-colors ${isActive ? 'text-green-400 bg-green-400/10 border-r-4 border-green-400' : 'text-gray-400 hover:text-green-400'}`}>
+			{linkContent}
+		</Link>
+	)
 }
 
 interface NavigationProps {
-  isMobileMenuOpen?: boolean
-  onMobileMenuToggle?: () => void
-  className?: string
+	isMobileMenuOpen?: boolean
+	onMobileMenuToggle?: () => void
+	className?: string
 }
 
-export default function Navigation({ isMobileMenuOpen = false, onMobileMenuToggle, className = '' }: NavigationProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false)
-  const { isDark } = useSafeTheme()
-  
-  return (
-    <nav className={`h-screen ${
-      isDark ? 'bg-gray-900' : 'bg-gray-50'
-    } border-r-4 border-green-400/20 flex flex-col transition-all duration-300 ${
-      isCollapsed ? 'w-20' : 'w-72'
-    } ${className}`}>
-      {/* Header */}
-      <div className={`${isCollapsed ? 'p-3' : 'p-6'} border-b-4 border-green-400/20`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-green-400 border-4 border-green-400 animate-pulse" />
-            {!isCollapsed && (
-              <div>
-                <h1 className="font-pixel text-base text-green-400">SOLANA</h1>
-                <p className="font-pixel text-xs text-gray-400">UTIL-TX</p>
-              </div>
-            )}
-          </div>
-          
-          {!isCollapsed && (
-            <div className="flex items-center gap-2">
-              <ThemeToggle />
-              <button
-                onClick={() => setIsCollapsed(true)}
-                className={`p-1 rounded ${
-                  isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-200'
-                } transition-colors`}
-                title="Collapse sidebar"
-              >
-                <ChevronRight size={16} className="text-gray-400" />
-              </button>
-            </div>
-          )}
-          
-          {isCollapsed && (
-            <button
-              onClick={() => setIsCollapsed(false)}
-              className={`p-1 rounded ${
-                isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-200'
-              } transition-colors`}
-              title="Expand sidebar"
-            >
-              <ChevronDown size={16} className="text-gray-400" />
-            </button>
-          )}
-          {!isCollapsed && (
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="font-pixel text-xs text-gray-400 hover:text-green-400 p-2"
-            >
-              ◀
-            </button>
-          )}
-        </div>
-        {isCollapsed && (
-          <div className="flex justify-center mt-3">
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="font-pixel text-xs text-gray-400 hover:text-green-400 p-2"
-              title="Expand menu"
-            >
-              ▶
-            </button>
-          </div>
-        )}
-      </div>
-      
-      {/* Navigation Items */}
-      <div className="flex-1 overflow-y-auto">
-        {!isCollapsed && (
-          <div className="py-4">
-            {navigationItems.map((item, index) => (
-              <NavigationMenu key={index} item={item} />
-            ))}
-          </div>
-        )}
-        
-        {isCollapsed && (
-          <div className="py-4 space-y-2">
-            {navigationItems.map((item, index) => (
-              <div key={index} className="px-2 flex justify-center">
-                <div 
-                  className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-green-400 transition-colors cursor-pointer rounded"
-                  title={item.label}
-                >
-                  {item.icon}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-      
-      {/* Footer */}
-      <div className="p-4 border-t-4 border-green-400/20">
-        {!isCollapsed && (
-          <div className="font-mono text-xs text-gray-500">
-            <div>v1.0.0</div>
-            <div>Phase 2</div>
-          </div>
-        )}
-      </div>
-    </nav>
-  )
+export default function Navigation({isMobileMenuOpen = false, onMobileMenuToggle, className = ''}: NavigationProps) {
+	const [isCollapsed, setIsCollapsed] = useState(false)
+	const {isDark} = useSafeTheme()
+
+	return (
+		<nav className={`h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'} border-r-4 border-green-400/20 flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-72'} ${className}`}>
+			{/* Header */}
+			<div className={`${isCollapsed ? 'p-3' : 'p-6'} border-b-4 border-green-400/20`}>
+				<div className='flex items-center justify-between'>
+					<div className='flex items-center gap-4'>
+						<div className='w-10 h-10 bg-green-400 border-4 border-green-400 animate-pulse' />
+						{!isCollapsed && (
+							<div>
+								<h1 className='font-pixel text-base text-green-400'>SOLANA</h1>
+								<p className='font-pixel text-xs text-gray-400'>UTIL-TX</p>
+							</div>
+						)}
+					</div>
+
+					{!isCollapsed && (
+						<div className='flex items-center gap-2'>
+							<ThemeToggle />
+							<button onClick={() => setIsCollapsed(true)} className={`p-1 rounded ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-200'} transition-colors`} title='Collapse sidebar'>
+								<ChevronRight size={16} className='text-gray-400' />
+							</button>
+						</div>
+					)}
+
+					{isCollapsed && (
+						<button onClick={() => setIsCollapsed(false)} className={`p-1 rounded ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-200'} transition-colors`} title='Expand sidebar'>
+							<ChevronDown size={16} className='text-gray-400' />
+						</button>
+					)}
+					{!isCollapsed && (
+						<button onClick={() => setIsCollapsed(!isCollapsed)} className='font-pixel text-xs text-gray-400 hover:text-green-400 p-2'>
+							◀
+						</button>
+					)}
+				</div>
+				{isCollapsed && (
+					<div className='flex justify-center mt-3'>
+						<button onClick={() => setIsCollapsed(!isCollapsed)} className='font-pixel text-xs text-gray-400 hover:text-green-400 p-2' title='Expand menu'>
+							▶
+						</button>
+					</div>
+				)}
+			</div>
+
+			{/* Navigation Items */}
+			<div className='flex-1 overflow-y-auto'>
+				{!isCollapsed && (
+					<div className='py-4'>
+						{navigationItems.map((item, index) => (
+							<NavigationMenu key={index} item={item} />
+						))}
+					</div>
+				)}
+
+				{isCollapsed && (
+					<div className='py-4 space-y-2'>
+						{navigationItems.map((item, index) => (
+							<div key={index} className='px-2 flex justify-center'>
+								<div className='w-10 h-10 flex items-center justify-center text-gray-400 hover:text-green-400 transition-colors cursor-pointer rounded' title={item.label}>
+									{item.icon && <item.icon className='h-5 w-5' />}
+								</div>
+							</div>
+						))}
+					</div>
+				)}
+			</div>
+
+			{/* Footer */}
+			<div className='p-4 border-t-4 border-green-400/20'>
+				{!isCollapsed && (
+					<div className='font-mono text-xs text-gray-500'>
+						<div>v2.0.1</div>
+						<div>WIP</div>
+					</div>
+				)}
+			</div>
+		</nav>
+	)
 }
