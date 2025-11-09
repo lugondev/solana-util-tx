@@ -139,7 +139,7 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.json',
   verification: {
-    google: 'your-google-verification-code', // Thay thế bằng mã verification thực tế
+    google: 'your-google-verification-code', // Replace with actual verification code
   },
   category: 'technology',
   classification: 'Blockchain Development Tools',

@@ -1,6 +1,6 @@
 import { Cluster } from '@solana/web3.js'
 
-// Jito Block Engine endpoints cho từng region
+// Jito Block Engine endpoints for each region
 export const JITO_BLOCK_ENGINES = {
   'mainnet-beta': {
     'ny': {
@@ -17,7 +17,7 @@ export const JITO_BLOCK_ENGINES = {
     },
     'frankfurt': {
       name: 'Frankfurt',
-      endpoint: 'https://frankfurt.mainnet.block-engine.jito.wtf', 
+      endpoint: 'https://frankfurt.mainnet.block-engine.jito.wtf',
       region: 'EU Central',
       flag: '🇩🇪'
     },
@@ -46,21 +46,21 @@ export const getAvailableRegions = (cluster: Cluster = 'mainnet-beta') => {
 }
 
 export const getBlockEngineEndpoint = (
-  region: JitoRegion | string, 
+  region: JitoRegion | string,
   cluster: Cluster = 'mainnet-beta'
 ): string => {
   const engines = getAvailableRegions(cluster)
-  
+
   // Check if it's a predefined region
   if (region in engines) {
     return (engines as any)[region].endpoint
   }
-  
+
   // If it's a custom endpoint, validate and return
   if (region.startsWith('http://') || region.startsWith('https://')) {
     return region
   }
-  
+
   // Default to NY if invalid
   return engines.ny.endpoint
 }
@@ -74,7 +74,7 @@ export const DEFAULT_JITO_CONFIG = {
   skipPreflight: true
 }
 
-// Jito tip amounts (in SOL) và priority levels
+// Jito tip amounts (in SOL) and priority levels
 export const JITO_TIP_PRESETS = {
   economy: {
     amount: 0.001,
@@ -84,7 +84,7 @@ export const JITO_TIP_PRESETS = {
   },
   standard: {
     amount: 0.005,
-    name: 'Standard', 
+    name: 'Standard',
     description: 'Normal priority for most use cases',
     color: 'text-blue-400'
   },

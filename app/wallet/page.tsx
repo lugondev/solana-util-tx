@@ -3,9 +3,11 @@
 import React, {useState, useEffect, useCallback} from 'react'
 import {Copy, ExternalLink, Wallet, RefreshCw, AlertCircle, FileText, Signature} from 'lucide-react'
 import {useWallet, useConnection} from '@solana/wallet-adapter-react'
-import {WalletMultiButton} from '@solana/wallet-adapter-react-ui'
 import {LAMPORTS_PER_SOL, VersionedTransaction, Transaction} from '@solana/web3.js'
 import bs58 from 'bs58'
+import {PixelCard} from '@/components/ui/pixel-card'
+import {PixelButton} from '@/components/ui/pixel-button'
+import {PixelWalletButton} from '@/components/ui/pixel-wallet-button'
 
 /**
  * Wallet information page that displays real wallet connection status
@@ -219,169 +221,262 @@ export default function WalletPage() {
 		}
 	}, [connected, publicKey, fetchBalance])
 
+	// Not connected view
+	if (!connected) {
+		return (
+			<div className='min-h-screen p-4' style={{backgroundColor: 'var(--pixel-bg-primary)'}}>
+				<div className='max-w-2xl mx-auto'>
+					<PixelCard>
+						<div className='text-center py-8'>
+							<span className='text-6xl mb-4 block'>💼</span>
+							<h1 className='font-pixel text-xl mb-2' style={{color: 'var(--pixel-accent)'}}>
+								WALLET NOT CONNECTED
+							</h1>
+							<p className='font-mono text-sm mb-6' style={{color: 'var(--pixel-text-secondary)'}}>
+								Please connect your wallet to view wallet information.
+							</p>
+							<div className='space-y-4'>
+								<PixelWalletButton variant='success' />
+								<PixelButton variant='secondary' onClick={() => (window.location.href = '/')}>
+									[GO TO HOME]
+								</PixelButton>
+							</div>
+						</div>
+					</PixelCard>
+				</div>
+			</div>
+		)
+	}
+
 	return (
-		<div className='min-h-screen bg-gray-50 p-4'>
+		<div className='min-h-screen p-4' style={{backgroundColor: 'var(--pixel-bg-primary)'}}>
 			<div className='max-w-4xl mx-auto space-y-6'>
 				{/* Header */}
-				<div className='bg-white rounded-lg shadow p-6'>
+				<PixelCard>
 					<div className='flex items-center justify-between mb-4'>
 						<div className='flex items-center space-x-3'>
-							<Wallet className='h-8 w-8 text-blue-600' />
-							<h1 className='text-2xl font-bold text-gray-900'>Solana Wallet</h1>
+							<Wallet className='h-8 w-8' style={{color: 'var(--pixel-accent)'}} />
+							<h1 className='font-pixel text-2xl' style={{color: 'var(--pixel-text)'}}>
+								SOLANA WALLET
+							</h1>
 						</div>
-						<WalletMultiButton />
+						<PixelWalletButton variant='primary' />
 					</div>
 
 					{/* Connection Status */}
-					<div className='flex items-center space-x-2 mb-4'>
-						<div className={`w-3 h-3 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-						<span className='text-sm text-gray-600'>{connected ? 'Connected' : 'Not Connected'}</span>
-						{wallet && <span className='text-sm text-blue-600'>({wallet.adapter.name})</span>}
+					<div className='flex items-center space-x-2 mb-4 font-mono text-sm'>
+						<div className={`w-3 h-3 ${connected ? 'bg-green-500' : 'bg-red-500'}`} style={{imageRendering: 'pixelated'}}></div>
+						<span style={{color: 'var(--pixel-text-secondary)'}}>{connected ? 'Connected' : 'Not Connected'}</span>
+						{wallet && <span style={{color: 'var(--pixel-accent)'}}>({wallet.adapter.name})</span>}
 					</div>
 
 					{/* Wallet Info */}
-					{connected && publicKey && (
-						<div className='space-y-4'>
-							{/* Address */}
-							<div className='bg-gray-50 p-4 rounded border'>
-								<div className='flex items-center justify-between'>
-									<div>
-										<p className='text-sm text-gray-600 mb-1'>Wallet Address</p>
-										<p className='font-mono text-sm break-all'>{publicKey.toString()}</p>
-									</div>
-									<button onClick={copyAddress} className='ml-4 p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors' title='Copy address'>
-										{copied ? '✓' : <Copy className='h-4 w-4' />}
-									</button>
+					<div className='space-y-4'>
+						{/* Address */}
+						<div className='p-4' style={{backgroundColor: 'var(--pixel-bg-secondary)', border: '2px solid var(--pixel-border)', imageRendering: 'pixelated'}}>
+							<div className='flex items-center justify-between'>
+								<div className='flex-1'>
+									<p className='font-pixel text-sm mb-2' style={{color: 'var(--pixel-text-secondary)'}}>
+										WALLET ADDRESS
+									</p>
+									<p className='font-mono text-sm break-all' style={{color: 'var(--pixel-text)'}}>
+										{publicKey?.toString()}
+									</p>
 								</div>
+								<PixelButton variant='secondary' size='sm' onClick={copyAddress} className='ml-4'>
+									{copied ? '✓' : <Copy className='h-4 w-4' />}
+								</PixelButton>
 							</div>
-
-							{/* Balance */}
-							<div className='bg-gray-50 p-4 rounded border'>
-								<div className='flex items-center justify-between'>
-									<div>
-										<p className='text-sm text-gray-600 mb-1'>Balance</p>
-										{loading ? (
-											<div className='flex items-center space-x-2'>
-												<RefreshCw className='h-4 w-4 animate-spin' />
-												<span className='text-sm'>Loading...</span>
-											</div>
-										) : balance !== null ? (
-											<p className='text-lg font-semibold'>{balance.toFixed(4)} SOL</p>
-										) : (
-											<p className='text-sm text-gray-500'>Unable to load</p>
-										)}
-									</div>
-									<button onClick={fetchBalance} disabled={loading} className='p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-50' title='Refresh balance'>
-										<RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-									</button>
-								</div>
-							</div>
-
-							{/* Disconnect Button */}
-							<button onClick={handleDisconnect} className='w-full px-4 py-2 text-red-600 border border-red-300 rounded hover:bg-red-50 transition-colors'>
-								Disconnect Wallet
-							</button>
 						</div>
-					)}
+
+						{/* Balance */}
+						<div className='p-4' style={{backgroundColor: 'var(--pixel-bg-secondary)', border: '2px solid var(--pixel-border)', imageRendering: 'pixelated'}}>
+							<div className='flex items-center justify-between'>
+								<div>
+									<p className='font-pixel text-sm mb-2' style={{color: 'var(--pixel-text-secondary)'}}>
+										BALANCE
+									</p>
+									{loading ? (
+										<div className='flex items-center space-x-2 font-mono text-sm'>
+											<RefreshCw className='h-4 w-4 animate-spin' style={{color: 'var(--pixel-accent)'}} />
+											<span style={{color: 'var(--pixel-text)'}}>Loading...</span>
+										</div>
+									) : balance !== null ? (
+										<p className='font-pixel text-lg' style={{color: 'var(--pixel-success)'}}>
+											{balance.toFixed(4)} SOL
+										</p>
+									) : (
+										<p className='font-mono text-sm' style={{color: 'var(--pixel-error)'}}>
+											Unable to load
+										</p>
+									)}
+								</div>
+								<PixelButton variant='secondary' size='sm' onClick={fetchBalance} disabled={loading}>
+									<RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+								</PixelButton>
+							</div>
+						</div>
+
+						{/* Disconnect Button */}
+						<PixelButton variant='danger' onClick={handleDisconnect} className='w-full'>
+							[DISCONNECT WALLET]
+						</PixelButton>
+					</div>
 
 					{/* Error Display */}
 					{error && (
-						<div className='mt-4 bg-red-50 border border-red-200 p-3 rounded'>
+						<div className='mt-4 p-3' style={{backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '2px solid var(--pixel-error)'}}>
 							<div className='flex items-center space-x-2'>
-								<AlertCircle className='h-4 w-4 text-red-600' />
-								<p className='text-sm text-red-800'>{error}</p>
+								<AlertCircle className='h-4 w-4' style={{color: 'var(--pixel-error)'}} />
+								<p className='font-mono text-sm' style={{color: 'var(--pixel-error)'}}>
+									{error}
+								</p>
 							</div>
 						</div>
 					)}
-				</div>
+				</PixelCard>
 
 				{/* Transaction Signing Section */}
-				{connected && (
-					<div className='bg-white rounded-lg shadow p-6'>
-						<h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center space-x-2'>
-							<Signature className='h-5 w-5' />
-							<span>Sign Transaction</span>
-						</h2>
+				<PixelCard>
+					<h2 className='font-pixel text-xl mb-4 flex items-center space-x-2' style={{color: 'var(--pixel-text)'}}>
+						<Signature className='h-5 w-5' style={{color: 'var(--pixel-accent)'}} />
+						<span>SIGN TRANSACTION</span>
+					</h2>
 
-						<div className='space-y-4'>
-							{/* Mode Selection */}
-							<div>
-								<label className='block text-sm font-medium text-gray-700 mb-2'>Operation Mode</label>
-								<select value={broadcastMode} onChange={(e) => setBroadcastMode(e.target.value as 'sign' | 'broadcast')} className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'>
-									<option value='sign'>Sign Only (return serialized transaction)</option>
-									<option value='broadcast'>Sign & Broadcast (send to network)</option>
-								</select>
-							</div>
-
-							{/* Format Selection */}
-							<div>
-								<label className='block text-sm font-medium text-gray-700 mb-2'>Transaction Format</label>
-								<select value={transactionFormat} onChange={(e) => setTransactionFormat(e.target.value as 'base64' | 'hex' | 'base58')} className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'>
-									<option value='base64'>Base64</option>
-									<option value='hex'>Hex</option>
-									<option value='base58'>Base58</option>
-								</select>
-							</div>
-
-							{/* Transaction Input */}
-							<div>
-								<label className='block text-sm font-medium text-gray-700 mb-2'>Raw Transaction Data</label>
-								<textarea value={rawTransaction} onChange={(e) => setRawTransaction(e.target.value)} placeholder='Paste your transaction data here...' className='w-full h-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm' />
-							</div>
-
-							{/* Sign Button */}
-							<button onClick={handleSignTransaction} disabled={signLoading || !rawTransaction.trim()} className='w-full flex items-center justify-center space-x-2 px-4 py-3 text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 rounded-md'>
-								{signLoading ? <RefreshCw className='h-4 w-4 animate-spin' /> : <Signature className='h-4 w-4' />}
-								<span>{signLoading ? (broadcastMode === 'broadcast' ? 'Broadcasting...' : 'Signing...') : broadcastMode === 'broadcast' ? 'Sign & Broadcast' : 'Sign Transaction'}</span>
-							</button>
-
-							{/* Help text */}
-							<div className='text-xs text-gray-500 space-y-1'>
-								<p>💡 Paste your transaction data above and click {broadcastMode === 'broadcast' ? 'Sign & Broadcast' : 'Sign Transaction'}.</p>
-								<p>🎯 Auto-detects transaction type (versioned or legacy).</p>
-								<p>📋 Supports both Creator API (Metaplex) and NFT API (Anchor) transactions.</p>
-								<p>✅ {broadcastMode === 'broadcast' ? 'Signs and broadcasts to Solana network.' : 'Signs transaction and returns serialized data.'}</p>
-							</div>
+					<div className='space-y-4'>
+						{/* Mode Selection */}
+						<div>
+							<label className='block font-pixel text-sm mb-2' style={{color: 'var(--pixel-text-secondary)'}}>
+								OPERATION MODE
+							</label>
+							<select
+								value={broadcastMode}
+								onChange={(e) => setBroadcastMode(e.target.value as 'sign' | 'broadcast')}
+								className='w-full px-3 py-2 font-mono text-sm'
+								style={{
+									backgroundColor: 'var(--pixel-bg-secondary)',
+									color: 'var(--pixel-text)',
+									border: '2px solid var(--pixel-border)',
+									imageRendering: 'pixelated',
+								}}>
+								<option value='sign'>Sign Only (return serialized transaction)</option>
+								<option value='broadcast'>Sign & Broadcast (send to network)</option>
+							</select>
 						</div>
 
-						{/* Error Display */}
-						{signError && (
-							<div className='mt-4 bg-red-50 border border-red-200 p-3 rounded'>
-								<div className='flex items-center space-x-2'>
-									<AlertCircle className='h-4 w-4 text-red-600' />
-									<p className='text-sm text-red-800'>{signError}</p>
-								</div>
-							</div>
-						)}
+						{/* Format Selection */}
+						<div>
+							<label className='block font-pixel text-sm mb-2' style={{color: 'var(--pixel-text-secondary)'}}>
+								TRANSACTION FORMAT
+							</label>
+							<select
+								value={transactionFormat}
+								onChange={(e) => setTransactionFormat(e.target.value as 'base64' | 'hex' | 'base58')}
+								className='w-full px-3 py-2 font-mono text-sm'
+								style={{
+									backgroundColor: 'var(--pixel-bg-secondary)',
+									color: 'var(--pixel-text)',
+									border: '2px solid var(--pixel-border)',
+									imageRendering: 'pixelated',
+								}}>
+								<option value='base64'>Base64</option>
+								<option value='hex'>Hex</option>
+								<option value='base58'>Base58</option>
+							</select>
+						</div>
 
-						{/* Result Display */}
-						{signature && (
-							<div className='mt-4 bg-green-50 border border-green-200 p-4 rounded'>
-								<div className='flex items-center justify-between mb-2'>
-									<h3 className='text-sm font-medium text-green-800'>{broadcastMode === 'broadcast' ? 'Transaction Broadcasted Successfully!' : 'Transaction Signed Successfully!'}</h3>
-									<button onClick={copySignature} className='p-1 text-green-600 hover:bg-green-100 rounded transition-colors' title={broadcastMode === 'broadcast' ? 'Copy transaction signature' : 'Copy serialized transaction'}>
-										{signatureCopied ? '✓' : <Copy className='h-4 w-4' />}
-									</button>
-								</div>
-								<div className='mb-2'>
-									<p className='text-xs text-green-700'>
-										{broadcastMode === 'broadcast' ? (
-											<>
-												🔗 Transaction Signature:{' '}
-												<a href={`https://explorer.solana.com/tx/${signature}`} target='_blank' rel='noopener noreferrer' className='underline hover:text-green-900'>
-													View on Explorer
-												</a>
-											</>
-										) : (
-											'📦 Serialized Signed Transaction (Base64):'
-										)}
-									</p>
-								</div>
-								<div className='bg-white p-3 rounded border break-all font-mono text-xs'>{signature}</div>
-							</div>
-						)}
+						{/* Transaction Input */}
+						<div>
+							<label className='block font-pixel text-sm mb-2' style={{color: 'var(--pixel-text-secondary)'}}>
+								RAW TRANSACTION DATA
+							</label>
+							<textarea
+								value={rawTransaction}
+								onChange={(e) => setRawTransaction(e.target.value)}
+								placeholder='Paste your transaction data here...'
+								className='w-full h-32 px-3 py-2 font-mono text-sm'
+								style={{
+									backgroundColor: 'var(--pixel-bg-secondary)',
+									color: 'var(--pixel-text)',
+									border: '2px solid var(--pixel-border)',
+									imageRendering: 'pixelated',
+								}}
+							/>
+						</div>
+
+						{/* Sign Button */}
+						<PixelButton onClick={handleSignTransaction} disabled={signLoading || !rawTransaction.trim()} variant={broadcastMode === 'broadcast' ? 'success' : 'primary'} className='w-full'>
+							{signLoading ? (
+								<>
+									<RefreshCw className='h-4 w-4 animate-spin inline mr-2' />
+									{broadcastMode === 'broadcast' ? '[BROADCASTING...]' : '[SIGNING...]'}
+								</>
+							) : (
+								<>
+									<Signature className='h-4 w-4 inline mr-2' />
+									{broadcastMode === 'broadcast' ? '[SIGN & BROADCAST]' : '[SIGN TRANSACTION]'}
+								</>
+							)}
+						</PixelButton>
+
+						{/* Help text */}
+						<div className='font-mono text-xs space-y-1' style={{color: 'var(--pixel-text-secondary)'}}>
+							<p>💡 Paste your transaction data above and click {broadcastMode === 'broadcast' ? 'Sign & Broadcast' : 'Sign Transaction'}.</p>
+							<p>🎯 Auto-detects transaction type (versioned or legacy).</p>
+							<p>📋 Supports both Creator API (Metaplex) and NFT API (Anchor) transactions.</p>
+							<p>✅ {broadcastMode === 'broadcast' ? 'Signs and broadcasts to Solana network.' : 'Signs transaction and returns serialized data.'}</p>
+						</div>
 					</div>
-				)}
+
+					{/* Error Display */}
+					{signError && (
+						<div className='mt-4 p-3' style={{backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '2px solid var(--pixel-error)'}}>
+							<div className='flex items-center space-x-2'>
+								<AlertCircle className='h-4 w-4' style={{color: 'var(--pixel-error)'}} />
+								<p className='font-mono text-sm' style={{color: 'var(--pixel-error)'}}>
+									{signError}
+								</p>
+							</div>
+						</div>
+					)}
+
+					{/* Result Display */}
+					{signature && (
+						<div className='mt-4 p-4' style={{backgroundColor: 'rgba(34, 197, 94, 0.1)', border: '2px solid var(--pixel-success)'}}>
+							<div className='flex items-center justify-between mb-2'>
+								<h3 className='font-pixel text-sm' style={{color: 'var(--pixel-success)'}}>
+									{broadcastMode === 'broadcast' ? 'TRANSACTION BROADCASTED!' : 'TRANSACTION SIGNED!'}
+								</h3>
+								<PixelButton variant='success' size='sm' onClick={copySignature}>
+									{signatureCopied ? '✓' : <Copy className='h-4 w-4' />}
+								</PixelButton>
+							</div>
+							<div className='mb-2'>
+								<p className='font-mono text-xs' style={{color: 'var(--pixel-success)'}}>
+									{broadcastMode === 'broadcast' ? (
+										<>
+											🔗 Transaction Signature:{' '}
+											<a href={`https://explorer.solana.com/tx/${signature}`} target='_blank' rel='noopener noreferrer' className='underline' style={{color: 'var(--pixel-accent)'}}>
+												View on Explorer
+											</a>
+										</>
+									) : (
+										'📦 Serialized Signed Transaction (Base64):'
+									)}
+								</p>
+							</div>
+							<div
+								className='p-3 break-all font-mono text-xs'
+								style={{
+									backgroundColor: 'var(--pixel-bg-secondary)',
+									border: '2px solid var(--pixel-border)',
+									color: 'var(--pixel-text)',
+								}}>
+								{signature}
+							</div>
+						</div>
+					)}
+				</PixelCard>
 			</div>
 		</div>
 	)
