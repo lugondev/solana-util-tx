@@ -28,29 +28,6 @@ const navigationItems: NavigationItem[] = [
 		icon: Star,
 	},
 	{
-		label: 'DATA TOOLS',
-		icon: BarChart3,
-		children: [
-			{label: 'Overview', href: '/data-tools'},
-			{label: 'Analytics', href: '/data-tools/analytics'},
-			{label: 'Borsh Inspector', href: '/data-tools/borsh-inspector'},
-			{label: 'Binary Viewer', href: '/data-tools/binary-viewer'},
-			{label: 'Event Parser', href: '/data-tools/event-parser'},
-			{label: 'Anchor CPI', href: '/data-tools/anchor-cpi'},
-			{label: 'Schema Validator', href: '/data-tools/schema-validator'},
-		],
-	},
-	{
-		label: 'ADVANCED TOOLS',
-		icon: Rocket,
-		children: [
-			{label: 'Overview', href: '/advanced-tools'},
-			{label: 'Program Versioning', href: '/advanced-tools/program-versioning'},
-			{label: 'State Compression', href: '/advanced-tools/state-compression'},
-			{label: 'Token Extensions', href: '/advanced-tools/token-extensions'},
-		],
-	},
-	{
 		label: 'WALLET',
 		icon: Wallet,
 		children: [
@@ -80,40 +57,6 @@ const navigationItems: NavigationItem[] = [
 		],
 	},
 	{
-		label: 'ALT',
-		icon: Clipboard,
-		children: [
-			{label: 'Create ALT', href: '/alt/create'},
-			{label: 'Manage ALT', href: '/alt/manage'},
-			{label: 'ALT Explorer', href: '/alt/explorer'},
-		],
-	},
-	{
-		label: 'JITO/MEV',
-		icon: Rocket,
-		children: [
-			{label: 'Bundles', href: '/jito/bundle'},
-			{label: 'Tips', href: '/jito/tips'},
-		],
-	},
-	{
-		label: 'ACCOUNTS',
-		icon: BarChart3,
-		children: [
-			{label: 'Explorer', href: '/accounts/explorer'},
-			{label: 'PDA Calculator', href: '/accounts/pda'},
-		],
-	},
-	{
-		label: 'DEFI',
-		icon: RefreshCw,
-		children: [
-			{label: 'Swap (Jupiter)', href: '/defi/swap'},
-			{label: 'Liquidity', href: '/defi/liquidity'},
-			{label: 'Limit Orders', href: '/defi/limit-orders'},
-		],
-	},
-	{
 		label: 'DEV TOOLS',
 		icon: Wrench,
 		children: [
@@ -135,6 +78,63 @@ const navigationItems: NavigationItem[] = [
 			{label: 'RPC Benchmarker', href: '/dev-tools/rpc'},
 			{label: 'CLI', href: '/dev-tools/cli'},
 			{label: 'Utilities', href: '/dev-tools/utils'},
+		],
+	},
+	{
+		label: 'DEFI',
+		icon: RefreshCw,
+		children: [
+			{label: 'Swap (Jupiter)', href: '/defi/swap'},
+			{label: 'Liquidity', href: '/defi/liquidity'},
+			{label: 'Limit Orders', href: '/defi/limit-orders'},
+		],
+	},
+	{
+		label: 'JITO/MEV',
+		icon: Rocket,
+		children: [
+			{label: 'Bundles', href: '/jito/bundle'},
+			{label: 'Tips', href: '/jito/tips'},
+		],
+	},
+	{
+		label: 'ACCOUNTS',
+		icon: BarChart3,
+		children: [
+			{label: 'Explorer', href: '/accounts/explorer'},
+			{label: 'PDA Calculator', href: '/accounts/pda'},
+		],
+	},
+	{
+		label: 'DATA TOOLS',
+		icon: BarChart3,
+		children: [
+			{label: 'Overview', href: '/data-tools'},
+			{label: 'Analytics', href: '/data-tools/analytics'},
+			{label: 'Borsh Inspector', href: '/data-tools/borsh-inspector'},
+			{label: 'Binary Viewer', href: '/data-tools/binary-viewer'},
+			{label: 'Event Parser', href: '/data-tools/event-parser'},
+			{label: 'Anchor CPI', href: '/data-tools/anchor-cpi'},
+			{label: 'Schema Validator', href: '/data-tools/schema-validator'},
+		],
+	},
+	{
+		label: 'ALT',
+		icon: Clipboard,
+		children: [
+			{label: 'Create ALT', href: '/alt/create'},
+			{label: 'Manage ALT', href: '/alt/manage'},
+			{label: 'ALT Explorer', href: '/alt/explorer'},
+		],
+	},
+	{
+		label: 'ADVANCED TOOLS',
+		icon: Rocket,
+		children: [
+			{label: 'Overview', href: '/advanced-tools'},
+			{label: 'Program Versioning', href: '/advanced-tools/program-versioning'},
+			{label: 'State Compression', href: '/advanced-tools/state-compression'},
+			{label: 'Token Extensions', href: '/advanced-tools/token-extensions'},
 		],
 	},
 ]
