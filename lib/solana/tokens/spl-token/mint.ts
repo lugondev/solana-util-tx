@@ -17,7 +17,7 @@ import {
   MINT_SIZE,
   getMint,
 } from '@solana/spl-token'
-import { Metaplex } from '@metaplex-foundation/js'
+import { createCreateMetadataAccountV3Instruction, PROGRAM_ID as TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata'
 
 /**
  * SPL Token minting utilities
@@ -271,12 +271,8 @@ export async function createTokenAndMint({
   let metadataAddress: PublicKey | undefined
   let totalCost = rentExemption / LAMPORTS_PER_SOL + 0.000005
 
-  // Store metadata info for later creation
-  // Note: Metaplex metadata creation requires separate transaction
-  // This should be handled in the component after mint is created
+  // Create metadata on-chain if provided
   if (metadata) {
-    const TOKEN_METADATA_PROGRAM_ID = new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s')
-
     const [metadataPDA] = PublicKey.findProgramAddressSync(
       [
         Buffer.from('metadata'),
@@ -287,6 +283,35 @@ export async function createTokenAndMint({
     )
 
     metadataAddress = metadataPDA
+
+    // Create metadata account instruction
+    const createMetadataInstruction = createCreateMetadataAccountV3Instruction(
+      {
+        metadata: metadataPDA,
+        mint: mintAddress,
+        mintAuthority: mintAuth,
+        payer: payer,
+        updateAuthority: mintAuth,
+      },
+      {
+        createMetadataAccountArgsV3: {
+          data: {
+            name: metadata.name,
+            symbol: metadata.symbol,
+            uri: metadata.uri || '',
+            sellerFeeBasisPoints: 0,
+            creators: null,
+            collection: null,
+            uses: null,
+          },
+          isMutable: true,
+          collectionDetails: null,
+        },
+      }
+    )
+
+    transaction.add(createMetadataInstruction)
+    totalCost += 0.00144 // Metadata account rent
   }
 
   // Mint initial supply if specified
@@ -336,56 +361,6 @@ export async function createTokenAndMint({
     recipientATA,
     estimatedCost: totalCost,
     metadataAddress,
-  }
-}
-
-/**
- * Create metadata for an existing token mint using Metaplex
- */
-export async function createTokenMetadata({
-  connection,
-  mintAddress,
-  metadata,
-  payer,
-  mintAuthority,
-}: {
-  connection: Connection
-  mintAddress: PublicKey
-  metadata: TokenMetadata
-  payer: PublicKey
-  mintAuthority?: PublicKey
-}): Promise<{
-  signature: string
-  metadataAddress: PublicKey
-}> {
-  const metaplex = Metaplex.make(connection)
-
-  try {
-    // Create NFT metadata for the token
-    const { nft } = await metaplex.nfts().create({
-      name: metadata.name,
-      symbol: metadata.symbol,
-      uri: metadata.uri || '',
-      sellerFeeBasisPoints: 0,
-      useExistingMint: mintAddress,
-    })
-
-    const TOKEN_METADATA_PROGRAM_ID = new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s')
-    const [metadataAddress] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from('metadata'),
-        TOKEN_METADATA_PROGRAM_ID.toBuffer(),
-        mintAddress.toBuffer(),
-      ],
-      TOKEN_METADATA_PROGRAM_ID
-    )
-
-    return {
-      signature: '', // Metaplex handles the transaction
-      metadataAddress,
-    }
-  } catch (error) {
-    throw new Error(`Failed to create token metadata: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
 

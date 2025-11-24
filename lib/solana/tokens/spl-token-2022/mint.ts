@@ -26,6 +26,7 @@ import {
 	createInitializeMetadataPointerInstruction,
 	AccountState,
 } from '@solana/spl-token'
+import { createCreateMetadataAccountV3Instruction, PROGRAM_ID as TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata'
 
 /**
  * SPL Token-2022 Extension Types
@@ -400,9 +401,47 @@ export async function createToken2022AndMint({
 	let metadataAddress: PublicKey | undefined
 	let totalCost = rentExemption / LAMPORTS_PER_SOL
 
-	// Store metadata address if metadata pointer is enabled
-	if (metadata && finalExtensions?.metadataPointer) {
-		metadataAddress = mintAddress // Metadata stored in mint account
+	// Create metadata on-chain if provided
+	if (metadata) {
+		const [metadataPDA] = PublicKey.findProgramAddressSync(
+			[
+				Buffer.from('metadata'),
+				TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+				mintAddress.toBuffer(),
+			],
+			TOKEN_METADATA_PROGRAM_ID
+		)
+
+		metadataAddress = metadataPDA
+
+		// Create metadata account instruction
+		const createMetadataInstruction = createCreateMetadataAccountV3Instruction(
+			{
+				metadata: metadataPDA,
+				mint: mintAddress,
+				mintAuthority: mintAuth,
+				payer: payer,
+				updateAuthority: mintAuth,
+			},
+			{
+				createMetadataAccountArgsV3: {
+					data: {
+						name: metadata.name,
+						symbol: metadata.symbol,
+						uri: metadata.uri || '',
+						sellerFeeBasisPoints: 0,
+						creators: null,
+						collection: null,
+						uses: null,
+					},
+					isMutable: true,
+					collectionDetails: null,
+				},
+			}
+		)
+
+		transaction.add(createMetadataInstruction)
+		totalCost += 0.00144 // Metadata account rent
 	}
 
 	// Mint initial supply if specified
