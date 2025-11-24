@@ -7,7 +7,8 @@ import { Network, DEFAULT_NETWORK, createConnection } from '@/lib/network';
 interface NetworkContextType {
   network: Network;
   connection: Connection;
-  setNetwork: (network: Network) => void;
+  customRpcUrl: string;
+  setNetwork: (network: Network, customRpcUrl?: string) => void;
 }
 
 const NetworkContext = createContext<NetworkContextType | undefined>(undefined);
@@ -18,25 +19,34 @@ interface NetworkProviderProps {
 
 export function NetworkProvider({ children }: NetworkProviderProps) {
   const [network, setNetworkState] = useState<Network>(DEFAULT_NETWORK);
+  const [customRpcUrl, setCustomRpcUrl] = useState<string>('');
   const [connection, setConnection] = useState<Connection>(() => createConnection(DEFAULT_NETWORK));
 
   // Load network from localStorage on client-side
   useEffect(() => {
     const savedNetwork = localStorage.getItem('solana-network') as Network;
-    if (savedNetwork && (savedNetwork === 'devnet' || savedNetwork === 'mainnet-beta')) {
+    const savedCustomRpc = localStorage.getItem('solana-custom-rpc') || '';
+    
+    if (savedNetwork && (savedNetwork === 'devnet' || savedNetwork === 'testnet' || savedNetwork === 'mainnet-beta' || savedNetwork === 'custom')) {
       setNetworkState(savedNetwork);
-      setConnection(createConnection(savedNetwork));
+      setCustomRpcUrl(savedCustomRpc);
+      setConnection(createConnection(savedNetwork, savedCustomRpc));
     }
   }, []);
 
-  const setNetwork = (newNetwork: Network) => {
+  const setNetwork = (newNetwork: Network, newCustomRpcUrl?: string) => {
     setNetworkState(newNetwork);
-    setConnection(createConnection(newNetwork));
+    const rpcUrl = newCustomRpcUrl || customRpcUrl;
+    setCustomRpcUrl(rpcUrl);
+    setConnection(createConnection(newNetwork, rpcUrl));
     localStorage.setItem('solana-network', newNetwork);
+    if (newNetwork === 'custom' && rpcUrl) {
+      localStorage.setItem('solana-custom-rpc', rpcUrl);
+    }
   };
 
   return (
-    <NetworkContext.Provider value={{ network, connection, setNetwork }}>
+    <NetworkContext.Provider value={{ network, connection, customRpcUrl, setNetwork }}>
       {children}
     </NetworkContext.Provider>
   );

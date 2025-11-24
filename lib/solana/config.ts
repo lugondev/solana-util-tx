@@ -49,14 +49,30 @@ export const getEndpoints = (): string[] => {
 
 /**
  * Jito Block Engine endpoints
+ * Note: Jito only supports mainnet-beta and testnet (no devnet)
  */
-export const JITO_BLOCK_ENGINES = [
-  'https://mainnet.block-engine.jito.wtf',
-  'https://amsterdam.mainnet.block-engine.jito.wtf',
-  'https://frankfurt.mainnet.block-engine.jito.wtf',
-  'https://ny.mainnet.block-engine.jito.wtf',
-  'https://tokyo.mainnet.block-engine.jito.wtf',
-]
+export const JITO_BLOCK_ENGINES = {
+  'mainnet-beta': [
+    'https://mainnet.block-engine.jito.wtf',
+    'https://amsterdam.mainnet.block-engine.jito.wtf',
+    'https://frankfurt.mainnet.block-engine.jito.wtf',
+    'https://ny.mainnet.block-engine.jito.wtf',
+    'https://tokyo.mainnet.block-engine.jito.wtf',
+  ],
+  testnet: [
+    'https://testnet.block-engine.jito.wtf',
+    'https://dallas.testnet.block-engine.jito.wtf',
+    'https://ny.testnet.block-engine.jito.wtf',
+  ]
+}
+
+/**
+ * Get Jito endpoints for current network
+ */
+export const getJitoEndpoints = (): string[] => {
+  const network = NETWORK as keyof typeof JITO_BLOCK_ENGINES
+  return JITO_BLOCK_ENGINES[network] || JITO_BLOCK_ENGINES['mainnet-beta']
+}
 
 /**
  * Jupiter API configuration

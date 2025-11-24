@@ -1,6 +1,6 @@
 import { Cluster } from '@solana/web3.js'
 
-// Jito Block Engine endpoints for each region
+// Jito Block Engine endpoints for each network
 export const JITO_BLOCK_ENGINES = {
   'mainnet-beta': {
     'ny': {
@@ -28,10 +28,22 @@ export const JITO_BLOCK_ENGINES = {
       flag: '🇯🇵'
     }
   },
-  'devnet': {
+  'testnet': {
+    'default': {
+      name: 'Testnet',
+      endpoint: 'https://testnet.block-engine.jito.wtf',
+      region: 'Global',
+      flag: '🌍'
+    },
+    'dallas': {
+      name: 'Dallas',
+      endpoint: 'https://dallas.testnet.block-engine.jito.wtf',
+      region: 'US Central',
+      flag: '🇺🇸'
+    },
     'ny': {
-      name: 'New York (Devnet)',
-      endpoint: 'https://ny.devnet.block-engine.jito.wtf',
+      name: 'New York',
+      endpoint: 'https://ny.testnet.block-engine.jito.wtf',
       region: 'US East',
       flag: '🇺🇸'
     }
@@ -71,7 +83,8 @@ export const DEFAULT_JITO_CONFIG = {
   bundleTip: 0.001, // SOL
   defaultRegion: 'ny' as JitoRegion,
   timeout: 30000, // 30 seconds
-  skipPreflight: true
+  skipPreflight: true,
+  encoding: 'base64' as 'base64' | 'base58' // base64 recommended by Jito
 }
 
 // Jito tip amounts (in SOL) and priority levels

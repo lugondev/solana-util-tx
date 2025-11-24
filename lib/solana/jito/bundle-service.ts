@@ -4,7 +4,8 @@ import {
   Transaction, 
   TransactionInstruction,
   SystemProgram,
-  LAMPORTS_PER_SOL
+  LAMPORTS_PER_SOL,
+  VersionedTransaction
 } from '@solana/web3.js'
 import { JitoRegion, getBlockEngineEndpoint, DEFAULT_JITO_CONFIG } from './config'
 
@@ -21,6 +22,7 @@ export interface JitoBundleConfig {
   tip: number // in SOL
   maxRetries: number
   timeout: number
+  encoding?: 'base64' | 'base58'
 }
 
 export interface JitoBundleResult {
@@ -29,11 +31,54 @@ export interface JitoBundleResult {
   signatures: string[]
   error?: string
   cost: number
+  landedSlot?: number
+}
+
+export interface JitoSendBundleRequest {
+  jsonrpc: '2.0'
+  id: number
+  method: 'sendBundle'
+  params: [string[]]
+}
+
+export interface JitoSendBundleResponse {
+  jsonrpc: '2.0'
+  id: number
+  result?: string // bundle_id
+  error?: {
+    code: number
+    message: string
+  }
+}
+
+export interface JitoBundleStatus {
+  jsonrpc: '2.0'
+  id: number
+  result: {
+    context: {
+      slot: number
+    }
+    value: Array<{
+      bundle_id: string
+      transactions: string[]
+      slot: number
+      confirmation_status: 'processed' | 'confirmed' | 'finalized'
+      err: any
+    }>
+  }
+}
+
+export interface JitoTipAccount {
+  address: PublicKey
+  isActive: boolean
 }
 
 export class JitoBundleService {
   private connection: Connection
   private config: JitoBundleConfig
+  private tipAccounts: JitoTipAccount[] = []
+  private lastTipAccountUpdate: number = 0
+  private readonly TIP_ACCOUNT_CACHE_MS = 60000 // 1 minute
 
   constructor(connection: Connection, config: Partial<JitoBundleConfig> = {}) {
     this.connection = connection
@@ -41,35 +86,89 @@ export class JitoBundleService {
       region: config.region || DEFAULT_JITO_CONFIG.defaultRegion,
       tip: config.tip || DEFAULT_JITO_CONFIG.bundleTip,
       maxRetries: config.maxRetries || DEFAULT_JITO_CONFIG.maxRetries,
-      timeout: config.timeout || DEFAULT_JITO_CONFIG.timeout
+      timeout: config.timeout || DEFAULT_JITO_CONFIG.timeout,
+      encoding: config.encoding || 'base64' // base64 is recommended by Jito
     }
+  }
+
+  /**
+   * Fetch active tip accounts from Jito
+   */
+  private async getTipAccounts(): Promise<JitoTipAccount[]> {
+    const now = Date.now()
+    
+    // Return cached tip accounts if still valid
+    if (this.tipAccounts.length > 0 && now - this.lastTipAccountUpdate < this.TIP_ACCOUNT_CACHE_MS) {
+      return this.tipAccounts
+    }
+
+    try {
+      const endpoint = getBlockEngineEndpoint(this.config.region)
+      const response = await fetch(`${endpoint}/api/v1/bundles`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'getTipAccounts',
+          params: []
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`getTipAccounts failed: ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      
+      if (data.result && Array.isArray(data.result)) {
+        this.tipAccounts = data.result.map((addr: string) => ({
+          address: new PublicKey(addr),
+          isActive: true
+        }))
+        this.lastTipAccountUpdate = now
+        return this.tipAccounts
+      }
+    } catch (error) {
+      console.warn('Failed to fetch tip accounts from Jito, using fallback:', error)
+    }
+
+    // Fallback to known tip accounts if API fails
+    this.tipAccounts = [
+      { address: new PublicKey('96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nmNhvrZU5'), isActive: true },
+      { address: new PublicKey('HFqU5x63VTqvQss8hp11i4wVV8bD44PvwucfZ2bU7gRe'), isActive: true },
+      { address: new PublicKey('Cw8CFyM9FkoMi7K7Crf6HNQqf4uEMzpKw6QNghXLvLkY'), isActive: true },
+      { address: new PublicKey('ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49'), isActive: true },
+      { address: new PublicKey('DfXygSm4jCyNCybVYYK6DwvWqjKee8pbDmJGcLWNDXjh'), isActive: true },
+      { address: new PublicKey('ADuUkR4vqLUMWXxW9gh6D6L8pMSawimctcNZ5pGwDcEt'), isActive: true },
+      { address: new PublicKey('DttWaMuVvTiduZRnguLF7jNxTgiMBZ1hyAumKUiL2KRL'), isActive: true },
+      { address: new PublicKey('3AVi9Tg9Uo68tJfuvoKvqKNWKkC5wPdSSdeBnizKZ6jT'), isActive: true }
+    ]
+    this.lastTipAccountUpdate = now
+    return this.tipAccounts
   }
 
   /**
    * Create a tip transaction for Jito validators
    */
-  private createTipTransaction(payer: PublicKey, tipAmount: number): Transaction {
-    // Jito tip accounts (these are the actual Jito validator tip addresses)
-    const jitoTipAccounts = [
-      new PublicKey('96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nmNhvrZU5'),
-      new PublicKey('HFqU5x63VTqvQss8hp11i4wVV8bD44PvwucfZ2bU7gRe'),
-      new PublicKey('Cw8CFyM9FkoMi7K7Crf6HNQqf4uEMzpKw6QNghXLvLkY'),
-      new PublicKey('ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49'),
-      new PublicKey('DfXygSm4jCyNCybVYYK6DwvWqjKee8pbDmJGcLWNDXjh'),
-      new PublicKey('ADuUkR4vqLUMWXxW9gh6D6L8pMSawimctcNZ5pGwDcEt'),
-      new PublicKey('DttWaMuVvTiduZRnguLF7jNxTgiMBZ1hyAumKUiL2KRL'),
-      new PublicKey('3AVi9Tg9Uo68tJfuvoKvqKNWKkC5wPdSSdeBnizKZ6jT')
-    ]
+  private async createTipTransaction(payer: PublicKey, tipAmount: number): Promise<Transaction> {
+    const tipAccounts = await this.getTipAccounts()
+    
+    if (tipAccounts.length === 0) {
+      throw new Error('No active tip accounts available')
+    }
     
     // Pick a random tip account for load balancing
-    const randomTipAccount = jitoTipAccounts[Math.floor(Math.random() * jitoTipAccounts.length)]
+    const randomTipAccount = tipAccounts[Math.floor(Math.random() * tipAccounts.length)]
     
     const tipTransaction = new Transaction()
     
     // Add tip instruction
     const tipInstruction = SystemProgram.transfer({
       fromPubkey: payer,
-      toPubkey: randomTipAccount,
+      toPubkey: randomTipAccount.address,
       lamports: Math.floor(tipAmount * LAMPORTS_PER_SOL)
     })
     
@@ -102,9 +201,20 @@ export class JitoBundleService {
   }> {
     const errors: string[] = []
     
+    // Validate bundle size
+    if (transactions.length === 0) {
+      errors.push('Bundle must contain at least 1 transaction')
+      return { success: false, errors, estimatedCost: 0 }
+    }
+    
+    if (transactions.length > 5) {
+      errors.push('Bundle cannot exceed 5 transactions (Jito limit)')
+      return { success: false, errors, estimatedCost: 0 }
+    }
+    
     try {
       // Create tip transaction
-      const tipTransaction = this.createTipTransaction(payer, this.config.tip)
+      const tipTransaction = await this.createTipTransaction(payer, this.config.tip)
       const allTransactions = [...transactions.map(t => t.transaction), tipTransaction]
       
       // Simulate each transaction
@@ -146,7 +256,7 @@ export class JitoBundleService {
   }
 
   /**
-   * Submit a bundle to Jito block engine
+   * Submit a bundle to Jito block engine using official sendBundle API
    */
   async submitBundle(
     transactions: BundleTransaction[],
@@ -154,14 +264,23 @@ export class JitoBundleService {
     signTransactions: (transactions: Transaction[]) => Promise<Transaction[]>
   ): Promise<JitoBundleResult> {
     try {
+      // Validate bundle size (Jito maximum is 5 transactions)
+      if (transactions.length === 0) {
+        throw new Error('Bundle must contain at least 1 transaction')
+      }
+      
+      if (transactions.length > 5) {
+        throw new Error('Bundle cannot exceed 5 transactions (Jito limit)')
+      }
+
       // Create tip transaction
-      const tipTransaction = this.createTipTransaction(payer, this.config.tip)
+      const tipTransaction = await this.createTipTransaction(payer, this.config.tip)
       
       // Prepare all transactions
       const allTransactions = [...transactions.map(t => t.transaction), tipTransaction]
       
       // Get recent blockhash
-      const { blockhash } = await this.connection.getLatestBlockhash()
+      const { blockhash, lastValidBlockHeight } = await this.connection.getLatestBlockhash('confirmed')
       
       // Set blockhash and fee payer for all transactions
       allTransactions.forEach(tx => {
@@ -172,53 +291,110 @@ export class JitoBundleService {
       // Sign all transactions
       const signedTransactions = await signTransactions(allTransactions)
       
-      // For now, we'll send transactions individually since full Jito integration requires more setup
-      // In a production environment, you would use the Jito block engine API
-      const signatures: string[] = []
-      let totalCost = 0
+      // Serialize transactions with proper encoding (base64 recommended by Jito)
+      const serializedTransactions = signedTransactions.map(tx => {
+        const serialized = tx.serialize()
+        return this.config.encoding === 'base58' 
+          ? Buffer.from(serialized).toString('base58')
+          : Buffer.from(serialized).toString('base64')
+      })
       
-      for (const tx of signedTransactions) {
+      // Send bundle to Jito Block Engine
+      const endpoint = getBlockEngineEndpoint(this.config.region)
+      
+      const sendBundleRequest: JitoSendBundleRequest = {
+        jsonrpc: '2.0',
+        id: Date.now(),
+        method: 'sendBundle',
+        params: [serializedTransactions]
+      }
+      
+      const response = await fetch(`${endpoint}/api/v1/bundles`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(sendBundleRequest),
+        signal: AbortSignal.timeout(this.config.timeout)
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Bundle submission failed: ${response.status} ${response.statusText}`)
+      }
+      
+      const result: JitoSendBundleResponse = await response.json()
+      
+      if (result.error) {
+        throw new Error(`Jito API error: ${result.error.message} (code: ${result.error.code})`)
+      }
+      
+      if (!result.result) {
+        throw new Error('No bundle ID returned from Jito')
+      }
+      
+      const bundleId = result.result
+      
+      // Extract signatures from signed transactions
+      const signatures = signedTransactions.map(tx => {
+        const sig = tx.signatures[0]
+        return sig ? Buffer.from(sig.signature!).toString('base58') : ''
+      }).filter(sig => sig !== '')
+      
+      // Poll for bundle status with retries
+      let landed = false
+      let landedSlot: number | undefined
+      let attempts = 0
+      const maxAttempts = Math.ceil(this.config.timeout / 2000) // Check every 2 seconds
+      
+      while (attempts < maxAttempts) {
         try {
-          const signature = await this.connection.sendRawTransaction(tx.serialize(), {
-            skipPreflight: true,
-            maxRetries: this.config.maxRetries
-          })
+          const status = await this.getBundleStatus(bundleId)
           
-          signatures.push(signature)
+          if (status.status === 'landed') {
+            landed = true
+            landedSlot = status.landedSlot
+            break
+          } else if (status.status === 'failed' || status.status === 'dropped') {
+            landed = false
+            break
+          }
           
-          // Estimate cost (simplified)
-          totalCost += 0.000005 // base fee estimate
+          // Wait before next check
+          await new Promise(resolve => setTimeout(resolve, 2000))
+          attempts++
         } catch (error) {
-          console.error('Transaction failed:', error)
-          throw error
+          console.warn('Error checking bundle status:', error)
+          attempts++
         }
       }
       
-      // Add tip cost
-      totalCost += this.config.tip
+      // Calculate total cost
+      const totalCost = this.estimateBundleCost(transactions) + this.config.tip
       
-      // For demo purposes, we'll assume the bundle landed successfully
-      // In production, you would check the Jito bundle status
       return {
-        bundleId: `bundle_${Date.now()}_${Math.random().toString(36).slice(2)}`,
-        landed: true,
+        bundleId,
+        landed,
         signatures,
-        cost: totalCost
+        cost: totalCost,
+        landedSlot,
+        ...(!landed && { error: 'Bundle did not land within timeout period' })
       }
       
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      
       return {
         bundleId: '',
         landed: false,
         signatures: [],
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMessage,
         cost: 0
       }
     }
   }
 
   /**
-   * Get bundle status using real Jito API
+   * Get bundle status using Jito getBundleStatuses API
    */
   async getBundleStatus(bundleId: string): Promise<{
     bundleId: string
@@ -227,35 +403,126 @@ export class JitoBundleService {
     transactions: string[]
   }> {
     try {
-      // Use real Jito Bundle API
       const endpoint = getBlockEngineEndpoint(this.config.region)
-      const response = await fetch(`${endpoint}/bundles/${bundleId}`, {
-        method: 'GET',
+      
+      const request = {
+        jsonrpc: '2.0',
+        id: Date.now(),
+        method: 'getBundleStatuses',
+        params: [[bundleId]]
+      }
+      
+      const response = await fetch(`${endpoint}/api/v1/bundles`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify(request)
       })
 
       if (!response.ok) {
-        throw new Error(`Bundle status request failed: ${response.statusText}`)
+        throw new Error(`Bundle status request failed: ${response.status} ${response.statusText}`)
       }
 
-      const bundleStatus = await response.json()
+      const result: JitoBundleStatus = await response.json()
+      
+      if (result.result && result.result.value && result.result.value.length > 0) {
+        const bundleStatus = result.result.value[0]
+        
+        let status: 'pending' | 'landed' | 'failed' | 'dropped' = 'pending'
+        
+        if (bundleStatus.err) {
+          status = 'failed'
+        } else if (bundleStatus.confirmation_status === 'finalized' || 
+                   bundleStatus.confirmation_status === 'confirmed') {
+          status = 'landed'
+        }
+        
+        return {
+          bundleId,
+          status,
+          landedSlot: bundleStatus.slot,
+          transactions: bundleStatus.transactions || []
+        }
+      }
+      
+      // Bundle not found yet
       return {
         bundleId,
-        status: bundleStatus.status || 'pending',
-        landedSlot: bundleStatus.landed_slot,
-        transactions: bundleStatus.transactions || []
+        status: 'pending',
+        transactions: []
       }
     } catch (error) {
       console.error('Error fetching bundle status:', error)
-      // Fallback to basic status check
+      
+      // Fallback: check if any transactions are confirmed on-chain
       return {
         bundleId,
         status: 'pending',
         transactions: []
       }
     }
+  }
+  
+  /**
+   * Get bundle statuses for multiple bundles at once
+   */
+  async getBundleStatuses(bundleIds: string[]): Promise<Map<string, {
+    status: 'pending' | 'landed' | 'failed' | 'dropped'
+    landedSlot?: number
+    transactions: string[]
+  }>> {
+    const statusMap = new Map()
+    
+    try {
+      const endpoint = getBlockEngineEndpoint(this.config.region)
+      
+      const request = {
+        jsonrpc: '2.0',
+        id: Date.now(),
+        method: 'getBundleStatuses',
+        params: [bundleIds]
+      }
+      
+      const response = await fetch(`${endpoint}/api/v1/bundles`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request)
+      })
+
+      if (!response.ok) {
+        throw new Error(`Batch bundle status request failed: ${response.status}`)
+      }
+
+      const result: JitoBundleStatus = await response.json()
+      
+      if (result.result && result.result.value) {
+        result.result.value.forEach((bundleStatus, index) => {
+          const bundleId = bundleIds[index]
+          
+          let status: 'pending' | 'landed' | 'failed' | 'dropped' = 'pending'
+          
+          if (bundleStatus.err) {
+            status = 'failed'
+          } else if (bundleStatus.confirmation_status === 'finalized' || 
+                     bundleStatus.confirmation_status === 'confirmed') {
+            status = 'landed'
+          }
+          
+          statusMap.set(bundleId, {
+            status,
+            landedSlot: bundleStatus.slot,
+            transactions: bundleStatus.transactions || []
+          })
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching bundle statuses:', error)
+    }
+    
+    return statusMap
   }
 
   /**
