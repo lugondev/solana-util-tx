@@ -15,14 +15,14 @@ interface PixelCardProps {
 export function PixelCard({children, className, header, footer}: PixelCardProps) {
 	return (
 		<div
-			className={cn('border-4 p-4 md:p-6', 'shadow-[4px_4px_0_var(--pixel-shadow),8px_8px_0_rgba(0,0,0,0.3)]', 'overflow-hidden', className)}
+			className={cn('border-2 p-4 md:p-6', 'shadow-[2px_2px_0_var(--pixel-shadow),4px_4px_0_rgba(0,0,0,0.3)]', 'overflow-hidden', className)}
 			style={{
 				borderColor: 'var(--pixel-border-primary)',
 				backgroundColor: 'var(--pixel-bg-secondary)',
 				color: 'var(--pixel-text-primary)',
 			}}>
 			{header && (
-				<div className='border-b-4 pb-3 md:pb-4 mb-4 md:mb-5' style={{borderColor: 'var(--pixel-border-primary)'}}>
+				<div className='border-b-2 pb-3 md:pb-4 mb-4 md:mb-5' style={{borderColor: 'var(--pixel-border-primary)'}}>
 					{typeof header === 'string' ? (
 						<h3 className='font-pixel text-xs md:text-sm uppercase word-break-word' style={{color: 'var(--pixel-accent)'}}>
 							{header}
@@ -34,7 +34,7 @@ export function PixelCard({children, className, header, footer}: PixelCardProps)
 			)}
 			<div className='min-w-0'>{children}</div>
 			{footer && (
-				<div className='border-t-4 pt-3 md:pt-4 mt-4 md:mt-5' style={{borderColor: 'var(--pixel-border-primary)'}}>
+				<div className='border-t-2 pt-3 md:pt-4 mt-4 md:mt-5' style={{borderColor: 'var(--pixel-border-primary)'}}>
 					{footer}
 				</div>
 			)}

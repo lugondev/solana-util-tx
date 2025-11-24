@@ -6,7 +6,9 @@ import { PixelButton } from '@/components/ui/pixel-button'
 import { PixelInput } from '@/components/ui/pixel-input'
 import { BundleTransaction } from '@/lib/solana/jito/bundle-service'
 import { SystemProgram, PublicKey, Transaction } from '@solana/web3.js'
-import { Package, Trash2, Plus, Settings, Zap } from 'lucide-react'
+import { Package, Trash2, Plus, Settings, Zap, AlertTriangle } from 'lucide-react'
+
+const MAX_BUNDLE_SIZE = 5 // Jito bundle maximum size
 
 interface BundleTransactionBuilderProps {
   transactions: BundleTransaction[]
@@ -65,6 +67,11 @@ export function BundleTransactionBuilder({
   const [formData, setFormData] = useState<Record<string, any>>({})
 
   const addTransaction = () => {
+    // Check max bundle size
+    if (transactions.length >= MAX_BUNDLE_SIZE) {
+      return // Cannot add more transactions
+    }
+
     const template = TRANSACTION_TEMPLATES[selectedTemplate]
     const newTransaction: BundleTransaction = {
       id: `tx_${Date.now()}_${Math.random().toString(36).slice(2)}`,
@@ -100,6 +107,11 @@ export function BundleTransactionBuilder({
   }
 
   const duplicateTransaction = (id: string) => {
+    // Check max bundle size
+    if (transactions.length >= MAX_BUNDLE_SIZE) {
+      return // Cannot duplicate more transactions
+    }
+
     const txToDuplicate = transactions.find(tx => tx.id === id)
     if (txToDuplicate) {
       const duplicated: BundleTransaction = {
@@ -200,15 +212,33 @@ export function BundleTransactionBuilder({
               </div>
             </div>
 
+            {/* Max Bundle Size Warning */}
+            {transactions.length >= MAX_BUNDLE_SIZE && (
+              <div className="p-3 bg-yellow-600/10 border-4 border-yellow-600/20">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
+                  <div className="font-mono text-xs text-yellow-400">
+                    <strong>Bundle Full:</strong> Maximum {MAX_BUNDLE_SIZE} transactions reached. Remove a transaction to add more.
+                  </div>
+                </div>
+              </div>
+            )}
+
             <PixelButton
               onClick={addTransaction}
               className="w-full"
-              disabled={!TRANSACTION_TEMPLATES[selectedTemplate].fields.every(field => 
-                !field.required || formData[field.name]
-              )}
+              disabled={
+                transactions.length >= MAX_BUNDLE_SIZE ||
+                !TRANSACTION_TEMPLATES[selectedTemplate].fields.every(field => 
+                  !field.required || formData[field.name]
+                )
+              }
             >
               <Plus className="h-4 w-4" />
-              [ADD TO BUNDLE]
+              {transactions.length >= MAX_BUNDLE_SIZE 
+                ? `[BUNDLE FULL (${MAX_BUNDLE_SIZE}/${MAX_BUNDLE_SIZE})]`
+                : `[ADD TO BUNDLE]`
+              }
             </PixelButton>
           </div>
         </div>
@@ -220,12 +250,17 @@ export function BundleTransactionBuilder({
           <div className="border-b-4 border-green-400/20 pb-3 flex items-center justify-between">
             <h3 className="font-pixel text-sm text-green-400 flex items-center gap-2">
               <Package className="h-4 w-4" />
-              BUNDLE TRANSACTIONS ({transactions.length})
+              BUNDLE TRANSACTIONS ({transactions.length}/{MAX_BUNDLE_SIZE})
             </h3>
             <div className="flex items-center gap-4">
               <div className="font-mono text-xs text-gray-400">
                 Total CU: <span className="text-white">{getTotalCU().toLocaleString()}</span>
               </div>
+              {transactions.length >= MAX_BUNDLE_SIZE && (
+                <div className="px-2 py-1 bg-yellow-600/20 border-2 border-yellow-600/40">
+                  <span className="font-pixel text-xs text-yellow-400">MAX</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -244,8 +279,13 @@ export function BundleTransactionBuilder({
                   <div className="flex gap-2">
                     <button
                       onClick={() => duplicateTransaction(tx.id)}
-                      className="text-blue-400 hover:text-blue-300 font-pixel text-xs"
-                      title="Duplicate"
+                      disabled={transactions.length >= MAX_BUNDLE_SIZE}
+                      className={`font-pixel text-xs ${
+                        transactions.length >= MAX_BUNDLE_SIZE
+                          ? 'text-gray-600 cursor-not-allowed'
+                          : 'text-blue-400 hover:text-blue-300'
+                      }`}
+                      title={transactions.length >= MAX_BUNDLE_SIZE ? 'Bundle full' : 'Duplicate'}
                     >
                       [COPY]
                     </button>
@@ -335,8 +375,16 @@ export function BundleTransactionBuilder({
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center p-3 bg-gray-800 border-2 border-gray-700">
-                <div className="font-mono text-lg text-white">{transactions.length}</div>
+              <div className={`text-center p-3 border-2 ${
+                transactions.length >= MAX_BUNDLE_SIZE 
+                  ? 'bg-yellow-600/10 border-yellow-600/30' 
+                  : 'bg-gray-800 border-gray-700'
+              }`}>
+                <div className={`font-mono text-lg ${
+                  transactions.length >= MAX_BUNDLE_SIZE ? 'text-yellow-400' : 'text-white'
+                }`}>
+                  {transactions.length}/{MAX_BUNDLE_SIZE}
+                </div>
                 <div className="font-mono text-xs text-gray-400">Transactions</div>
               </div>
               <div className="text-center p-3 bg-gray-800 border-2 border-gray-700">

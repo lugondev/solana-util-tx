@@ -15,12 +15,12 @@ interface PixelButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
  * Supports multiple variants and sizes with retro gaming aesthetic
  */
 export function PixelButton({variant = 'primary', size = 'md', children, isLoading = false, className, disabled, ...props}: PixelButtonProps) {
-	const baseStyles = 'font-pixel inline-flex items-center justify-center gap-2 border-4 transition-none relative uppercase cursor-pointer word-break-word'
+	const baseStyles = 'font-pixel inline-flex items-center justify-center gap-2 border-2 transition-none relative uppercase cursor-pointer word-break-word'
 
 	const sizes = {
-		sm: 'text-[10px] md:text-xs px-3 md:px-4 py-2 md:py-3 min-h-[40px] md:min-h-[44px]',
-		md: 'text-xs md:text-sm px-4 md:px-6 py-3 md:py-4 min-h-[44px] md:min-h-[48px]',
-		lg: 'text-sm md:text-base px-5 md:px-8 py-4 md:py-5 min-h-[48px] md:min-h-[52px]',
+		sm: 'text-[10px] md:text-xs px-2 md:px-3 py-1.5 md:py-2 min-h-[32px] md:min-h-[36px]',
+		md: 'text-xs md:text-sm px-3 md:px-4 py-2 md:py-2.5 min-h-[40px] md:min-h-[44px]',
+		lg: 'text-sm md:text-base px-4 md:px-6 py-3 md:py-4 min-h-[48px] md:min-h-[52px]',
 	}
 
 	const getVariantStyles = () => {
@@ -30,28 +30,28 @@ export function PixelButton({variant = 'primary', size = 'md', children, isLoadi
 					borderColor: 'var(--pixel-accent)',
 					backgroundColor: 'var(--pixel-bg-secondary)',
 					color: 'var(--pixel-accent)',
-					boxShadow: '4px 4px 0 var(--pixel-accent-dark), 8px 8px 0 var(--pixel-shadow)',
+					boxShadow: '2px 2px 0 var(--pixel-accent-dark), 4px 4px 0 var(--pixel-shadow)',
 				}
 			case 'secondary':
 				return {
 					borderColor: 'var(--pixel-border-primary)',
 					backgroundColor: 'var(--pixel-bg-tertiary)',
 					color: 'var(--pixel-text-primary)',
-					boxShadow: '4px 4px 0 var(--pixel-border-secondary), 8px 8px 0 var(--pixel-shadow)',
+					boxShadow: '2px 2px 0 var(--pixel-border-secondary), 4px 4px 0 var(--pixel-shadow)',
 				}
 			case 'danger':
 				return {
 					borderColor: 'var(--pixel-error)',
 					backgroundColor: 'var(--pixel-bg-secondary)',
 					color: 'var(--pixel-error)',
-					boxShadow: '4px 4px 0 #cc0044, 8px 8px 0 var(--pixel-shadow)',
+					boxShadow: '2px 2px 0 #cc0044, 4px 4px 0 var(--pixel-shadow)',
 				}
 			case 'success':
 				return {
 					borderColor: 'var(--pixel-success)',
 					backgroundColor: 'var(--pixel-bg-secondary)',
 					color: 'var(--pixel-success)',
-					boxShadow: '4px 4px 0 var(--pixel-accent-dark), 8px 8px 0 var(--pixel-shadow)',
+					boxShadow: '2px 2px 0 var(--pixel-accent-dark), 4px 4px 0 var(--pixel-shadow)',
 				}
 		}
 	}
@@ -63,7 +63,7 @@ export function PixelButton({variant = 'primary', size = 'md', children, isLoadi
 			case 'primary':
 				e.currentTarget.style.backgroundColor = 'var(--pixel-accent)'
 				e.currentTarget.style.color = 'var(--pixel-bg-primary)'
-				e.currentTarget.style.boxShadow = '4px 4px 0 var(--pixel-accent-bright), 8px 8px 0 var(--pixel-accent-dim)'
+				e.currentTarget.style.boxShadow = '2px 2px 0 var(--pixel-accent-bright), 4px 4px 0 var(--pixel-accent-dim)'
 				break
 			case 'secondary':
 				e.currentTarget.style.borderColor = 'var(--pixel-text-secondary)'

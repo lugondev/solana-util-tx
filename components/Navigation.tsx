@@ -189,7 +189,7 @@ function NavigationMenu({item, level = 0}: NavigationMenuProps) {
 	}
 
 	return (
-		<Link href={item.href || '#'} className={`block ${paddingClass} pr-4 py-2 font-pixel text-xs transition-colors ${isActive ? 'text-green-400 bg-green-400/10 border-r-4 border-green-400' : 'text-gray-400 hover:text-green-400'}`}>
+		<Link href={item.href || '#'} className={`block ${paddingClass} pr-4 py-2 font-pixel text-xs transition-colors ${isActive ? 'text-green-400 bg-green-400/10 border-r-2 border-green-400' : 'text-gray-400 hover:text-green-400'}`}>
 			{linkContent}
 		</Link>
 	)
@@ -206,12 +206,12 @@ export default function Navigation({isMobileMenuOpen = false, onMobileMenuToggle
 	const {isDark} = useSafeTheme()
 
 	return (
-		<nav className={`h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'} border-r-4 border-green-400/20 flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-72'} ${className}`}>
+		<nav className={`h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'} border-r-2 border-green-400/20 flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-72'} ${className}`}>
 			{/* Header */}
-			<div className={`${isCollapsed ? 'p-3' : 'p-6'} border-b-4 border-green-400/20`}>
+			<div className={`${isCollapsed ? 'p-3' : 'p-6'} border-b-2 border-green-400/20`}>
 				<div className='flex items-center justify-between'>
 					<div className='flex items-center gap-4'>
-						<div className='w-10 h-10 bg-green-400 border-4 border-green-400 animate-pulse' />
+						<div className='w-10 h-10 bg-green-400 border-2 border-green-400 animate-pulse' />
 						{!isCollapsed && (
 							<div>
 								<h1 className='font-pixel text-base text-green-400'>SOLANA</h1>
@@ -273,7 +273,7 @@ export default function Navigation({isMobileMenuOpen = false, onMobileMenuToggle
 			</div>
 
 			{/* Footer */}
-			<div className='p-4 border-t-4 border-green-400/20'>
+			<div className='p-4 border-t-2 border-green-400/20'>
 				{!isCollapsed && (
 					<div className='font-mono text-xs text-gray-500'>
 						<div>v2.0.1</div>

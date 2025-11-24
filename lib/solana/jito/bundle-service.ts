@@ -7,6 +7,7 @@ import {
   LAMPORTS_PER_SOL,
   VersionedTransaction
 } from '@solana/web3.js'
+import bs58 from 'bs58'
 import { JitoRegion, getBlockEngineEndpoint, DEFAULT_JITO_CONFIG } from './config'
 
 export interface BundleTransaction {
@@ -294,9 +295,10 @@ export class JitoBundleService {
       // Serialize transactions with proper encoding (base64 recommended by Jito)
       const serializedTransactions = signedTransactions.map(tx => {
         const serialized = tx.serialize()
-        return this.config.encoding === 'base58' 
-          ? Buffer.from(serialized).toString('base58')
-          : Buffer.from(serialized).toString('base64')
+        if (this.config.encoding === 'base58') {
+          return bs58.encode(serialized)
+        }
+        return Buffer.from(serialized).toString('base64')
       })
       
       // Send bundle to Jito Block Engine
@@ -337,7 +339,7 @@ export class JitoBundleService {
       // Extract signatures from signed transactions
       const signatures = signedTransactions.map(tx => {
         const sig = tx.signatures[0]
-        return sig ? Buffer.from(sig.signature!).toString('base58') : ''
+        return sig ? bs58.encode(sig.signature!) : ''
       }).filter(sig => sig !== '')
       
       // Poll for bundle status with retries

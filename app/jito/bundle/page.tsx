@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
+import { useNetwork } from '@/contexts/NetworkContext'
 import { PixelCard } from '@/components/ui/pixel-card'
 import { PixelButton } from '@/components/ui/pixel-button'
 import { PixelWalletButton } from '@/components/ui/pixel-wallet-button'
@@ -24,6 +25,7 @@ import {
 
 export default function JitoBundlePage() {
   const { connected, publicKey } = useWallet()
+  const { network } = useNetwork()
   const [transactions, setTransactions] = useState<BundleTransaction[]>([])
   const [selectedTipPreset, setSelectedTipPreset] = useState<JitoTipPreset>('standard')
   const [customTip, setCustomTip] = useState('')
@@ -42,6 +44,9 @@ export default function JitoBundlePage() {
     estimateCost,
     reset
   } = useJitoBundle()
+
+  // Check if Jito is supported on current network
+  const isJitoSupported = network === 'mainnet-beta' || network === 'testnet'
 
   const currentTip = useCustomTip 
     ? parseFloat(customTip) || 0
@@ -125,6 +130,29 @@ export default function JitoBundlePage() {
         </div>
       )}
 
+      {!isJitoSupported && (
+        <div className="mb-8">
+          <PixelCard>
+            <div className="p-4 bg-yellow-600/10 border-4 border-yellow-600/30">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-6 w-6 text-yellow-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h3 className="font-pixel text-sm text-yellow-400 mb-2">
+                    ⚠️ JITO NOT AVAILABLE ON {network.toUpperCase()}
+                  </h3>
+                  <p className="font-mono text-xs text-yellow-300 mb-3">
+                    Jito MEV bundles are only supported on Mainnet Beta and Testnet networks.
+                  </p>
+                  <p className="font-mono text-xs text-gray-400">
+                    Please switch to Mainnet Beta or Testnet to use Jito bundle features.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </PixelCard>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Left Column: Configuration */}
         <div className="xl:col-span-1 space-y-6">
@@ -146,31 +174,41 @@ export default function JitoBundlePage() {
                 </h3>
               </div>
 
-              <div className="space-y-3">
+              {!isJitoSupported && (
+                <div className="p-3 bg-red-600/10 border-4 border-red-600/20">
+                  <div className="font-mono text-xs text-red-400 text-center">
+                    ⚠️ Feature disabled on {network}
+                  </div>
+                </div>
+              )}
+
+              <div className={`space-y-2 ${!isJitoSupported ? 'opacity-50 pointer-events-none' : ''}`}>
                 {/* Tip Presets */}
-                <div className="grid grid-cols-2 gap-2">
-                  {Object.entries(JITO_TIP_PRESETS).map(([key, preset]) => (
-                    <button
-                      key={key}
-                      onClick={() => handleTipPresetChange(key as JitoTipPreset)}
-                      className={`p-3 border-4 transition-colors text-left ${
-                        !useCustomTip && selectedTipPreset === key
-                          ? 'border-green-400 bg-green-400/10'
-                          : 'border-gray-700 hover:border-green-400/50'
-                      }`}
-                    >
-                      <div className={`font-pixel text-xs ${preset.color} mb-1`}>
-                        {preset.name}
+                {Object.entries(JITO_TIP_PRESETS).map(([key, preset]) => (
+                  <button
+                    key={key}
+                    onClick={() => handleTipPresetChange(key as JitoTipPreset)}
+                    className={`w-full p-3 border-4 transition-colors ${
+                      !useCustomTip && selectedTipPreset === key
+                        ? 'border-green-400 bg-green-400/10'
+                        : 'border-gray-700 hover:border-green-400/50'
+                    }`}
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className={`font-pixel text-xs ${preset.color}`}>
+                          {preset.name}
+                        </div>
+                        <div className="font-mono text-xs text-white">
+                          {preset.amount} SOL
+                        </div>
                       </div>
-                      <div className="font-mono text-xs text-white">
-                        {preset.amount} SOL
-                      </div>
-                      <div className="font-mono text-xs text-gray-400 mt-1">
+                      <div className="font-mono text-xs text-gray-400 text-left">
                         {preset.description}
                       </div>
-                    </button>
-                  ))}
-                </div>
+                    </div>
+                  </button>
+                ))}
 
                 {/* Custom Tip */}
                 <div className="space-y-2">
@@ -245,8 +283,16 @@ export default function JitoBundlePage() {
 
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="text-center p-3 bg-gray-800 border-2 border-gray-700">
-                    <div className="font-mono text-lg text-white">{transactions.length}</div>
+                  <div className={`text-center p-3 border-2 ${
+                    transactions.length >= 5
+                      ? 'bg-yellow-600/10 border-yellow-600/30'
+                      : 'bg-gray-800 border-gray-700'
+                  }`}>
+                    <div className={`font-mono text-lg ${
+                      transactions.length >= 5 ? 'text-yellow-400' : 'text-white'
+                    }`}>
+                      {transactions.length}/5
+                    </div>
                     <div className="font-mono text-xs text-gray-400">Transactions</div>
                   </div>
                   <div className="text-center p-3 bg-gray-800 border-2 border-gray-700">
@@ -258,14 +304,20 @@ export default function JitoBundlePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center py-1 border-b border-gray-700">
                     <span className="font-mono text-xs text-gray-400">Bundle Tip:</span>
-                    <span className="font-mono text-xs text-white">{currentTip.toFixed(6)} SOL</span>
+                    <span className="font-mono text-xs text-green-400">{currentTip.toFixed(6)} SOL</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="font-mono text-xs text-gray-400">Est. Fees:</span>
+                  <div className="flex justify-between items-center py-1 border-b border-gray-700">
+                    <span className="font-mono text-xs text-gray-400">Est. Transaction Fees:</span>
                     <span className="font-mono text-xs text-white">
                       ~{(getTotalCost() - currentTip).toFixed(6)} SOL
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-1 font-semibold">
+                    <span className="font-mono text-xs text-gray-300">Total Cost:</span>
+                    <span className="font-mono text-sm text-green-400">
+                      ~{getTotalCost().toFixed(6)} SOL
                     </span>
                   </div>
                 </div>
@@ -274,7 +326,7 @@ export default function JitoBundlePage() {
                 <div className="space-y-2">
                   <PixelButton
                     onClick={handleSimulate}
-                    disabled={!connected || transactions.length === 0 || isSimulating}
+                    disabled={!connected || !isJitoSupported || transactions.length === 0 || transactions.length > 5 || isSimulating}
                     className="w-full text-xs"
                     variant="secondary"
                   >
@@ -293,7 +345,7 @@ export default function JitoBundlePage() {
 
                   <PixelButton
                     onClick={handleSubmit}
-                    disabled={!connected || transactions.length === 0 || isSubmitting}
+                    disabled={!connected || !isJitoSupported || transactions.length === 0 || transactions.length > 5 || isSubmitting}
                     className="w-full text-xs"
                   >
                     {isSubmitting ? (
@@ -308,6 +360,14 @@ export default function JitoBundlePage() {
                       </>
                     )}
                   </PixelButton>
+
+                  {transactions.length > 5 && (
+                    <div className="p-2 bg-red-600/10 border-2 border-red-600/30">
+                      <div className="font-mono text-xs text-red-400 text-center">
+                        ⚠️ Maximum 5 transactions per bundle
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -401,6 +461,10 @@ export default function JitoBundlePage() {
               </div>
 
               <div className="space-y-3 font-mono text-xs text-gray-400">
+                <div className="flex items-start gap-2">
+                  <span className="text-green-400 mt-0.5">▸</span>
+                  <span><strong>Bundle Size:</strong> Maximum 5 transactions per bundle (Jito network limit)</span>
+                </div>
                 <div className="flex items-start gap-2">
                   <span className="text-green-400 mt-0.5">▸</span>
                   <span><strong>MEV Protection:</strong> Bundle transactions for atomic execution without front-running</span>

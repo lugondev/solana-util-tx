@@ -216,7 +216,7 @@ export default function HomePage() {
 				{/* Hero Section */}
 				<div className='text-center py-16'>
 					<div className='flex items-center justify-center mb-8'>
-						<div className='w-20 h-20 bg-green-400 border-8 border-green-400 animate-pulse mr-6' />
+						<div className='w-20 h-20 bg-green-400 border-4 border-green-400 animate-pulse mr-6' />
 						<div>
 							<h1 className='font-pixel text-4xl text-green-400 mb-3'>SOLANA UTIL-TX</h1>
 							<p className='font-mono text-lg text-gray-400'>Ultimate Solana transaction utility toolkit</p>
@@ -240,7 +240,7 @@ export default function HomePage() {
 				{connected && stats && stats.total > 0 && (
 					<PixelCard>
 						<div className='space-y-4'>
-							<div className='border-b-4 border-green-400/20 pb-3'>
+							<div className='border-b-2 border-green-400/20 pb-3'>
 								<div className='flex items-center gap-2'>
 									<BarChart3 className='h-4 w-4 text-green-400' />
 									<h3 className='font-pixel text-sm text-green-400'>YOUR ACTIVITY</h3>
@@ -315,7 +315,7 @@ export default function HomePage() {
 				{/* About Section */}
 				<PixelCard>
 					<div className='space-y-4'>
-						<div className='border-b-4 border-green-400/20 pb-3'>
+						<div className='border-b-2 border-green-400/20 pb-3'>
 							<div className='flex items-center gap-2'>
 								<Info className='h-4 w-4 text-green-400' />
 								<h3 className='font-pixel text-sm text-green-400'>ABOUT SOLANA DEVELOPER TOOLKIT</h3>
@@ -411,7 +411,7 @@ export default function HomePage() {
 								</div>
 							</div>
 
-							<div className='pt-4 border-t-4 border-gray-700'>
+							<div className='pt-4 border-t-2 border-gray-700'>
 								<p className='text-center'>
 									<span className='text-green-400'>SOLANA DEVELOPER TOOLKIT</span> - Built with Next.js 15, React 19, and pixel-perfect design. Your comprehensive 40+ tool platform for professional Solana blockchain development.
 								</p>

@@ -40,7 +40,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
         {/* Main Content */}
         <div className='flex-1 flex flex-col overflow-hidden'>
           {/* Top Bar */}
-          <header className='h-20 bg-gray-800 border-b-4 border-green-400/20 flex items-center justify-between px-4 lg:px-8'>
+          <header className='h-20 bg-gray-800 border-b-2 border-green-400/20 flex items-center justify-between px-4 lg:px-8'>
             <div className='flex items-center gap-4 lg:gap-6'>
               {/* Mobile menu button - visible only on mobile */}
               <button 

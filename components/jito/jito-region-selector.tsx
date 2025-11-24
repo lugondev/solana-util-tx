@@ -28,7 +28,9 @@ export function JitoRegionSelector({
     [key: string]: 'checking' | 'online' | 'offline'
   }>({})
 
-  const availableRegions = getAvailableRegions(network)
+  const availableRegions = getAvailableRegions(
+    (network === 'mainnet-beta' || network === 'testnet') ? network : 'mainnet-beta'
+  )
 
   const handleRegionSelect = (region: JitoRegion) => {
     setUseCustom(false)
@@ -111,7 +113,7 @@ export function JitoRegionSelector({
 
         <div className="space-y-3">
           {/* Predefined Regions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3">
             {Object.entries(availableRegions).map(([key, region]) => {
               const isSelected = !useCustom && selectedRegion === key
               

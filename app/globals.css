@@ -4,6 +4,7 @@
 
 /* Pixel Art Base Styles */
 @layer base {
+
   /* Pixel Color Palette - Dark Theme */
   :root {
     /* Background Colors - Darker for consistency */
@@ -11,37 +12,37 @@
     --pixel-bg-secondary: #111116;
     --pixel-bg-tertiary: #1a1a20;
     --pixel-bg-quaternary: #242430;
-    
+
     /* Accent Colors - Matrix Green */
     --pixel-accent: #00ff41;
     --pixel-accent-dim: #00cc33;
     --pixel-accent-bright: #00ff88;
     --pixel-accent-dark: #009922;
-    
+
     /* Status Colors */
     --pixel-success: #00ff41;
     --pixel-warning: #ffaa00;
     --pixel-error: #ff3366;
     --pixel-info: #00aaff;
-    
+
     /* Text Colors - Better contrast */
     --pixel-text-primary: #ffffff;
     --pixel-text-secondary: #cccccc;
     --pixel-text-tertiary: #999999;
     --pixel-text-quaternary: #666666;
     --pixel-text-accent: #00ff41;
-    
+
     /* Border & Shadow - Darker */
     --pixel-border-primary: #333333;
     --pixel-border-secondary: #444444;
     --pixel-border-accent: #00ff41;
     --pixel-shadow: #000000;
-    
+
     /* Input & Form Colors */
     --pixel-input-bg: #1a1a20;
     --pixel-input-border: #333333;
     --pixel-input-focus: #00ff41;
-    
+
     /* Special Effects */
     --pixel-glow: #00ff41;
     --pixel-scanline: rgba(0, 0, 0, 0.1);
@@ -49,86 +50,179 @@
 
   html {
     scroll-behavior: smooth;
-    font-size: 16px; /* Base font size */
+    font-size: 16px;
+    /* Base font size */
   }
-  
+
   body {
     background-color: var(--pixel-bg-primary);
     color: var(--pixel-text-primary);
     font-family: var(--font-mono);
-    font-size: 14px; /* Increased base size for better readability */
-    line-height: 1.5; /* Better line spacing */
+    font-size: 14px;
+    /* Increased base size for better readability */
+    line-height: 1.5;
+    /* Better line spacing */
     image-rendering: pixelated;
     -webkit-font-smoothing: none;
     -moz-osx-font-smoothing: grayscale;
   }
-  
+
   * {
     image-rendering: pixelated;
     box-sizing: border-box;
   }
-  
+
   /* Headings with better sizing for readability - Reduced sizes to prevent overflow */
-  h1 { font-size: 24px; line-height: 1.3; font-family: var(--font-pixel); }
-  h2 { font-size: 18px; line-height: 1.3; font-family: var(--font-pixel); }
-  h3 { font-size: 16px; line-height: 1.4; font-family: var(--font-pixel); }
-  h4 { font-size: 14px; line-height: 1.4; font-family: var(--font-pixel); }
-  h5 { font-size: 12px; line-height: 1.4; font-family: var(--font-pixel); }
-  h6 { font-size: 11px; line-height: 1.4; font-family: var(--font-pixel); }
-  
+  h1 {
+    font-size: 24px;
+    line-height: 1.3;
+    font-family: var(--font-pixel);
+  }
+
+  h2 {
+    font-size: 18px;
+    line-height: 1.3;
+    font-family: var(--font-pixel);
+  }
+
+  h3 {
+    font-size: 16px;
+    line-height: 1.4;
+    font-family: var(--font-pixel);
+  }
+
+  h4 {
+    font-size: 14px;
+    line-height: 1.4;
+    font-family: var(--font-pixel);
+  }
+
+  h5 {
+    font-size: 12px;
+    line-height: 1.4;
+    font-family: var(--font-pixel);
+  }
+
+  h6 {
+    font-size: 11px;
+    line-height: 1.4;
+    font-family: var(--font-pixel);
+  }
+
   /* Responsive heading sizes for mobile */
   @media (max-width: 768px) {
-    h1 { font-size: 20px; }
-    h2 { font-size: 16px; }
-    h3 { font-size: 14px; }
+    h1 {
+      font-size: 20px;
+    }
+
+    h2 {
+      font-size: 16px;
+    }
+
+    h3 {
+      font-size: 14px;
+    }
   }
-  
+
   /* Pixel Animations */
   @keyframes pixel-blink {
-    0%, 49% { opacity: 1; }
-    50%, 100% { opacity: 0; }
+
+    0%,
+    49% {
+      opacity: 1;
+    }
+
+    50%,
+    100% {
+      opacity: 0;
+    }
   }
 
   @keyframes pixel-loading {
-    0% { content: '.'; }
-    33% { content: '..'; }
-    66% { content: '...'; }
-    100% { content: '.'; }
+    0% {
+      content: '.';
+    }
+
+    33% {
+      content: '..';
+    }
+
+    66% {
+      content: '...';
+    }
+
+    100% {
+      content: '.';
+    }
   }
 
   @keyframes pixel-slide-in {
-    from { transform: translateX(-100%); }
-    to { transform: translateX(0); }
+    from {
+      transform: translateX(-100%);
+    }
+
+    to {
+      transform: translateX(0);
+    }
   }
 
   @keyframes pixel-slide-in-right {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
   }
 
   @keyframes pixel-slide-up {
-    from { transform: translateY(100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
   }
 
   @keyframes pixel-spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
   }
 
   @keyframes pixel-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.5;
+    }
   }
 
   @keyframes pixel-glow {
-    0%, 100% {
-      text-shadow: 
+
+    0%,
+    100% {
+      text-shadow:
         0 0 2px var(--pixel-glow),
         0 0 4px var(--pixel-glow);
     }
+
     50% {
-      text-shadow: 
+      text-shadow:
         0 0 4px var(--pixel-glow),
         0 0 8px var(--pixel-glow),
         0 0 12px var(--pixel-glow);
@@ -138,61 +232,67 @@
 
 /* Pixel Art Component Styles */
 @layer components {
+
   /* Pixel Button Base - Better touch targets and sizing */
   .pixel-btn {
     font-family: var(--font-pixel);
-    border: 4px solid var(--pixel-border-primary);
+    border: 2px solid var(--pixel-border-primary);
     background: var(--pixel-bg-secondary);
     color: var(--pixel-text-primary);
-    padding: 16px 24px; /* Increased padding for better touch targets */
-    font-size: 12px; /* Slightly larger for readability */
+    padding: 10px 16px;
+    /* Reduced padding */
+    font-size: 12px;
     line-height: 1.2;
     cursor: pointer;
     transition: none;
     image-rendering: pixelated;
     position: relative;
     text-transform: uppercase;
-    box-shadow: 4px 4px 0 var(--pixel-shadow);
-    min-height: 48px; /* Ensure minimum touch target size */
+    box-shadow: 2px 2px 0 var(--pixel-shadow);
+    min-height: 40px;
+    /* Reduced min-height */
   }
-  
+
   .pixel-btn:hover {
     border-color: var(--pixel-accent);
     color: var(--pixel-accent);
-    box-shadow: 4px 4px 0 var(--pixel-accent-dark);
+    box-shadow: 2px 2px 0 var(--pixel-accent-dark);
   }
-  
+
   /* Pixel Card - Consistent dark theme */
   .pixel-card {
-    border: 4px solid var(--pixel-border-primary);
+    border: 2px solid var(--pixel-border-primary);
     background: var(--pixel-bg-secondary);
     color: var(--pixel-text-primary);
     padding: 20px;
-    box-shadow: 
-      4px 4px 0 var(--pixel-shadow),
-      8px 8px 0 rgba(0, 0, 0, 0.3);
+    box-shadow:
+      2px 2px 0 var(--pixel-shadow),
+      4px 4px 0 rgba(0, 0, 0, 0.3);
   }
-  
+
   /* Pixel Input - Better spacing and sizing */
   .pixel-input {
     font-family: var(--font-mono);
     background: var(--pixel-input-bg);
-    border: 4px solid var(--pixel-input-border);
+    border: 2px solid var(--pixel-input-border);
     color: var(--pixel-text-primary);
-    padding: 16px 20px; /* Increased padding */
-    font-size: 14px; /* Larger font for better readability */
+    padding: 8px 12px;
+    /* Further reduced padding */
+    font-size: 13px;
+    /* Slightly smaller font */
     line-height: 1.4;
     transition: none;
     image-rendering: pixelated;
-    min-height: 52px; /* Consistent input height */
+    min-height: 36px;
+    /* Further reduced min-height */
   }
-  
+
   .pixel-input:focus {
     outline: none;
     border-color: var(--pixel-input-focus);
     box-shadow: 0 0 0 2px var(--pixel-accent-dark);
   }
-  
+
   .pixel-input::placeholder {
     color: var(--pixel-text-quaternary);
   }
@@ -202,105 +302,107 @@
     font-family: var(--font-pixel) !important;
     background-color: var(--pixel-bg-secondary) !important;
     color: var(--pixel-accent) !important;
-    border: 4px solid var(--pixel-accent) !important;
+    border: 2px solid var(--pixel-accent) !important;
     padding: 12px 24px !important;
     font-size: 10px !important;
     text-transform: uppercase !important;
     transition: none !important;
     border-radius: 0 !important;
-    box-shadow: 4px 4px 0 var(--pixel-accent-dim), 8px 8px 0 var(--pixel-shadow) !important;
+    box-shadow: 2px 2px 0 var(--pixel-accent-dim), 4px 4px 0 var(--pixel-shadow) !important;
   }
-  
+
   .wallet-adapter-button:not([disabled]):hover {
     background-color: var(--pixel-accent) !important;
     color: var(--pixel-bg-primary) !important;
-    box-shadow: 4px 4px 0 var(--pixel-accent-bright), 8px 8px 0 var(--pixel-accent-dim) !important;
+    box-shadow: 2px 2px 0 var(--pixel-accent-bright), 4px 4px 0 var(--pixel-accent-dim) !important;
   }
-  
+
   .wallet-adapter-button[disabled] {
     opacity: 0.5 !important;
     cursor: not-allowed !important;
   }
-  
+
   /* Wallet adapter modal customization - Pixel Style */
   .wallet-adapter-modal {
     background-color: var(--pixel-bg-secondary) !important;
     font-family: var(--font-pixel) !important;
-    border: 4px solid var(--pixel-accent) !important;
+    border: 2px solid var(--pixel-accent) !important;
     border-radius: 0 !important;
-    box-shadow: 8px 8px 0 var(--pixel-shadow), 16px 16px 0 rgba(0, 0, 0, 0.5) !important;
+    box-shadow: 4px 4px 0 var(--pixel-shadow), 8px 8px 0 rgba(0, 0, 0, 0.5) !important;
   }
-  
+
   .wallet-adapter-modal-title {
     font-family: var(--font-pixel) !important;
     color: var(--pixel-accent) !important;
     font-size: 14px !important;
     text-transform: uppercase !important;
   }
-  
+
   .wallet-adapter-modal-list {
     display: flex !important;
     flex-direction: column !important;
     gap: 8px !important;
   }
-  
+
   .wallet-adapter-modal-list-item {
     padding: 12px !important;
     background-color: var(--pixel-bg-tertiary) !important;
     color: var(--pixel-text-primary) !important;
-    border: 4px solid var(--pixel-border-primary) !important;
+    border: 2px solid var(--pixel-border-primary) !important;
     border-radius: 0 !important;
     transition: none !important;
     cursor: pointer !important;
   }
-  
+
   .wallet-adapter-modal-list-item:hover {
     border-color: var(--pixel-accent) !important;
     background-color: var(--pixel-bg-primary) !important;
   }
-  
+
   /* Pixel Form Components */
   .pixel-label {
     font-family: var(--font-pixel);
     color: var(--pixel-text-secondary);
-    font-size: 12px; /* Larger for better readability */
+    font-size: 12px;
+    /* Larger for better readability */
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 12px; /* More spacing */
+    margin-bottom: 12px;
+    /* More spacing */
     display: block;
   }
-  
+
   .pixel-error {
     font-family: var(--font-mono);
     color: var(--pixel-error);
     font-size: 10px;
     margin-top: 4px;
   }
-  
+
   /* Pixel Alert Styles */
   .pixel-alert {
-    border: 4px solid;
+    border: 2px solid;
     padding: 16px;
     font-family: var(--font-mono);
     font-size: 11px;
     background: var(--pixel-bg-tertiary);
   }
-  
+
   .pixel-alert-success {
     border-color: var(--pixel-success);
     color: var(--pixel-success);
   }
-  
+
   .pixel-alert-error {
     border-color: var(--pixel-error);
     color: var(--pixel-error);
   }
-  
+
   .pixel-alert-warning {
     border-color: var(--pixel-warning);
     color: var(--pixel-warning);
   }
-  
+
   .pixel-alert-info {
     border-color: var(--pixel-info);
     color: var(--pixel-info);
@@ -309,45 +411,70 @@
 
 /* Pixel Utility Classes */
 @layer utilities {
+
   /* Text utilities */
-  .text-pixel-primary { color: var(--pixel-text-primary); }
-  .text-pixel-secondary { color: var(--pixel-text-secondary); }
-  .text-pixel-tertiary { color: var(--pixel-text-tertiary); }
-  .text-pixel-accent { color: var(--pixel-text-accent); }
-  
+  .text-pixel-primary {
+    color: var(--pixel-text-primary);
+  }
+
+  .text-pixel-secondary {
+    color: var(--pixel-text-secondary);
+  }
+
+  .text-pixel-tertiary {
+    color: var(--pixel-text-tertiary);
+  }
+
+  .text-pixel-accent {
+    color: var(--pixel-text-accent);
+  }
+
   /* Background utilities */
-  .bg-pixel-primary { background-color: var(--pixel-bg-primary); }
-  .bg-pixel-secondary { background-color: var(--pixel-bg-secondary); }
-  .bg-pixel-tertiary { background-color: var(--pixel-bg-tertiary); }
-  
+  .bg-pixel-primary {
+    background-color: var(--pixel-bg-primary);
+  }
+
+  .bg-pixel-secondary {
+    background-color: var(--pixel-bg-secondary);
+  }
+
+  .bg-pixel-tertiary {
+    background-color: var(--pixel-bg-tertiary);
+  }
+
   /* Border utilities */
-  .border-pixel { border-color: var(--pixel-border-primary); }
-  .border-pixel-accent { border-color: var(--pixel-border-accent); }
-  
+  .border-pixel {
+    border-color: var(--pixel-border-primary);
+  }
+
+  .border-pixel-accent {
+    border-color: var(--pixel-border-accent);
+  }
+
   /* Pixel shadows */
   .shadow-pixel {
-    box-shadow: 4px 4px 0 var(--pixel-shadow);
+    box-shadow: 2px 2px 0 var(--pixel-shadow);
   }
-  
+
   .shadow-pixel-lg {
-    box-shadow: 
-      4px 4px 0 var(--pixel-shadow),
-      8px 8px 0 rgba(0, 0, 0, 0.3);
+    box-shadow:
+      2px 2px 0 var(--pixel-shadow),
+      4px 4px 0 rgba(0, 0, 0, 0.3);
   }
-  
+
   /* Animation utilities */
   .animate-pixel-blink {
     animation: pixel-blink 1s infinite;
   }
-  
+
   .animate-pixel-pulse {
     animation: pixel-pulse 2s infinite;
   }
-  
+
   .animate-pixel-glow {
     animation: pixel-glow 2s infinite;
   }
-  
+
   .animate-pixel-spin {
     animation: pixel-spin 1s linear infinite;
   }
@@ -358,6 +485,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -368,6 +496,7 @@
     transform: translateY(20px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -379,12 +508,15 @@
     transform: scale(0.3);
     opacity: 0;
   }
+
   50% {
     transform: scale(1.05);
   }
+
   70% {
     transform: scale(0.9);
   }
+
   100% {
     transform: scale(1);
     opacity: 1;
@@ -397,23 +529,31 @@
     padding-left: 16px;
     padding-right: 16px;
   }
-  
+
   /* Adjust font sizes for mobile */
   body {
     font-size: 12px;
   }
-  
-  h1 { font-size: 24px; }
-  h2 { font-size: 20px; }
-  h3 { font-size: 16px; }
-  
+
+  h1 {
+    font-size: 24px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  h3 {
+    font-size: 16px;
+  }
+
   /* Adjust button sizing for mobile */
   .pixel-btn {
     padding: 12px 16px;
     font-size: 10px;
     min-height: 44px;
   }
-  
+
   /* Adjust input sizing for mobile */
   .pixel-input {
     padding: 12px 16px;
@@ -427,7 +567,7 @@
     padding-left: 12px;
     padding-right: 12px;
   }
-  
+
   /* Further mobile adjustments */
   .pixel-card {
     padding: 16px;
@@ -439,7 +579,7 @@
   .no-print {
     display: none !important;
   }
-  
+
   body {
     background-color: white !important;
     color: black !important;
@@ -491,78 +631,79 @@
 
 /* Text overflow utilities */
 @layer utilities {
+
   /* Text truncation utilities */
   .text-truncate {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  
+
   .text-wrap-balance {
     text-wrap: balance;
   }
-  
+
   /* Word break utilities for long strings */
   .word-break-all {
     word-break: break-all;
   }
-  
+
   .word-break-word {
     word-break: break-word;
     overflow-wrap: break-word;
   }
-  
+
   /* Container sizing utilities to prevent overflow */
   .container-safe {
     max-width: 100%;
     overflow-x: hidden;
   }
-  
+
   /* Font size utilities for responsive text */
   .text-responsive {
     font-size: clamp(0.75rem, 2vw, 1rem);
   }
-  
+
   .text-responsive-sm {
     font-size: clamp(0.65rem, 1.5vw, 0.875rem);
   }
-  
+
   .text-responsive-xs {
     font-size: clamp(0.6rem, 1.2vw, 0.75rem);
   }
-  
+
   /* Pixel font with better size control */
   .font-pixel-sm {
     font-family: var(--font-pixel);
     font-size: clamp(10px, 1.5vw, 12px);
   }
-  
+
   .font-pixel-base {
     font-family: var(--font-pixel);
     font-size: clamp(12px, 2vw, 14px);
   }
-  
+
   .font-pixel-lg {
     font-family: var(--font-pixel);
     font-size: clamp(14px, 2.5vw, 16px);
   }
-  
+
   .font-pixel-xl {
     font-family: var(--font-pixel);
     font-size: clamp(16px, 3vw, 20px);
   }
-  
+
   /* Mono font with better size control */
   .font-mono-xs {
     font-family: var(--font-mono);
     font-size: clamp(9px, 1.2vw, 11px);
   }
-  
+
   .font-mono-sm {
     font-family: var(--font-mono);
     font-size: clamp(10px, 1.5vw, 12px);
   }
-  
+
   .font-mono-base {
     font-family: var(--font-mono);
     font-size: clamp(11px, 1.8vw, 13px);

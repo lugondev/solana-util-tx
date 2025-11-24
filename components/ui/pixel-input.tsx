@@ -23,7 +23,7 @@ export const PixelInput = forwardRef<HTMLInputElement, PixelInputProps>(({label,
 			)}
 			<input
 				ref={ref}
-				className={cn('font-mono text-xs md:text-sm w-full px-3 md:px-5 py-3 md:py-4', 'border-4 transition-none min-h-[44px] md:min-h-[52px]', 'shadow-[inset_2px_2px_0_rgba(0,0,0,0.3)]', 'focus:outline-none', 'disabled:opacity-50 disabled:cursor-not-allowed', error ? 'border-red-500' : 'border-gray-600', className)}
+				className={cn('font-mono text-xs md:text-sm w-full px-2 md:px-3 py-2 md:py-2.5', 'border-2 transition-none min-h-[36px] md:min-h-[40px]', 'shadow-[inset_2px_2px_0_rgba(0,0,0,0.3)]', 'focus:outline-none', 'disabled:opacity-50 disabled:cursor-not-allowed', error ? 'border-red-500' : 'border-gray-600', className)}
 				style={{
 					backgroundColor: 'var(--pixel-input-bg)',
 					color: 'var(--pixel-text-primary)',
