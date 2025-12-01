@@ -4,8 +4,6 @@ import Link from 'next/link'
 import {usePathname} from 'next/navigation'
 import {useState} from 'react'
 import {ChevronRight, ChevronDown, Home, Star, BarChart3, Rocket, Wallet, Zap, Coins, Clipboard, RefreshCw, Wrench, Microscope, Factory, Flame, Package, Users} from 'lucide-react'
-import {useSafeTheme} from '@/contexts/ThemeContext'
-import {ThemeToggle} from '@/components/ui/theme-toggle'
 import {LucideIcon} from 'lucide-react'
 
 interface NavigationItem {
@@ -203,54 +201,41 @@ interface NavigationProps {
 
 export default function Navigation({isMobileMenuOpen = false, onMobileMenuToggle, className = ''}: NavigationProps) {
 	const [isCollapsed, setIsCollapsed] = useState(false)
-	const {isDark} = useSafeTheme()
+	const pathname = usePathname()
 
 	return (
-		<nav className={`h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'} border-r-2 border-green-400/20 flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-72'} ${className}`}>
+		<nav className={`h-screen bg-gray-900 border-r-2 border-green-400/20 flex flex-col transition-all duration-300 ease-in-out ${isCollapsed ? 'w-20' : 'w-72'} ${className}`}>
 			{/* Header */}
-			<div className={`${isCollapsed ? 'p-3' : 'p-6'} border-b-2 border-green-400/20`}>
+			<div className={`border-b-2 border-green-400/20 transition-all duration-300 ${isCollapsed ? 'p-3' : 'p-6'}`}>
 				<div className='flex items-center justify-between'>
-					<div className='flex items-center gap-4'>
-						<div className='w-10 h-10 bg-green-400 border-2 border-green-400 animate-pulse' />
-						{!isCollapsed && (
-							<div>
-								<h1 className='font-pixel text-base text-green-400'>SOLANA</h1>
-								<p className='font-pixel text-xs text-gray-400'>UTIL-TX</p>
-							</div>
-						)}
+					<div className='flex items-center gap-4 overflow-hidden'>
+						<div className='w-10 h-10 bg-green-400 border-2 border-green-400 animate-pulse flex-shrink-0' />
+						<div className={`transition-all duration-300 overflow-hidden ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
+							<h1 className='font-pixel text-base text-green-400 whitespace-nowrap'>SOLANA</h1>
+							<p className='font-pixel text-xs text-gray-400 whitespace-nowrap'>UTIL-TX</p>
+						</div>
 					</div>
 
-					{!isCollapsed && (
-						<div className='flex items-center gap-2'>
-							<ThemeToggle />
-							<button onClick={() => setIsCollapsed(true)} className={`p-1 rounded ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-200'} transition-colors`} title='Collapse sidebar'>
-								<ChevronRight size={16} className='text-gray-400' />
+					<div className={`flex items-center gap-2 transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>
+						{!isCollapsed && (
+							<button onClick={() => setIsCollapsed(true)} className='p-2 rounded-md hover:bg-gray-800 transition-all duration-200 hover:text-green-400' title='Collapse sidebar'>
+								<ChevronRight size={18} className='text-gray-400' />
 							</button>
-						</div>
-					)}
-
-					{isCollapsed && (
-						<button onClick={() => setIsCollapsed(false)} className={`p-1 rounded ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-200'} transition-colors`} title='Expand sidebar'>
-							<ChevronDown size={16} className='text-gray-400' />
-						</button>
-					)}
-					{!isCollapsed && (
-						<button onClick={() => setIsCollapsed(!isCollapsed)} className='font-pixel text-xs text-gray-400 hover:text-green-400 p-2'>
-							◀
-						</button>
-					)}
+						)}
+					</div>
 				</div>
+
 				{isCollapsed && (
-					<div className='flex justify-center mt-3'>
-						<button onClick={() => setIsCollapsed(!isCollapsed)} className='font-pixel text-xs text-gray-400 hover:text-green-400 p-2' title='Expand menu'>
-							▶
+					<div className='flex justify-center mt-4 animate-in fade-in duration-300'>
+						<button onClick={() => setIsCollapsed(false)} className='p-2 rounded-md hover:bg-gray-800 transition-all duration-200 hover:text-green-400 group' title='Expand sidebar'>
+							<ChevronRight size={18} className='text-gray-400 group-hover:text-green-400 transition-colors' />
 						</button>
 					</div>
 				)}
 			</div>
 
 			{/* Navigation Items */}
-			<div className='flex-1 overflow-y-auto'>
+			<div className='flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-green-400/20 scrollbar-track-transparent'>
 				{!isCollapsed && (
 					<div className='py-2'>
 						{navigationItems.map((item, index) => (
@@ -261,23 +246,45 @@ export default function Navigation({isMobileMenuOpen = false, onMobileMenuToggle
 
 				{isCollapsed && (
 					<div className='py-2 space-y-1'>
-						{navigationItems.map((item, index) => (
-							<div key={index} className='px-2 flex justify-center'>
-								<div className='w-10 h-10 flex items-center justify-center text-gray-400 hover:text-green-400 transition-colors cursor-pointer rounded' title={item.label}>
-									{item.icon && <item.icon className='h-5 w-5' />}
+						{navigationItems.map((item, index) => {
+							const isActive = item.href ? pathname === item.href : false
+							const hasActiveChild = item.children?.some((child) => pathname === child.href)
+
+							return (
+								<div key={index} className='px-2 flex justify-center group'>
+									{item.href ? (
+										<Link href={item.href} className={`w-12 h-12 flex items-center justify-center transition-all duration-200 cursor-pointer rounded-lg relative ${isActive || hasActiveChild ? 'text-green-400 bg-green-400/10 border-2 border-green-400' : 'text-gray-400 hover:text-green-400 hover:bg-green-400/5 border-2 border-transparent hover:border-green-400/30'}`} title={item.label}>
+											{item.icon && <item.icon className='h-5 w-5' />}
+											{(isActive || hasActiveChild) && <div className='absolute -right-1 w-1 h-8 bg-green-400 rounded-l-full' />}
+										</Link>
+									) : (
+										<div className={`w-12 h-12 flex items-center justify-center transition-all duration-200 cursor-pointer rounded-lg ${hasActiveChild ? 'text-green-400 bg-green-400/10 border-2 border-green-400' : 'text-gray-400 hover:text-green-400 hover:bg-green-400/5 border-2 border-transparent hover:border-green-400/30'}`} title={item.label}>
+											{item.icon && <item.icon className='h-5 w-5' />}
+										</div>
+									)}
 								</div>
-							</div>
-						))}
+							)
+						})}
 					</div>
 				)}
 			</div>
 
 			{/* Footer */}
-			<div className='p-4 border-t-2 border-green-400/20'>
-				{!isCollapsed && (
-					<div className='font-mono text-xs text-gray-500'>
-						<div>v2.0.1</div>
-						<div>WIP</div>
+			<div className={`border-t-2 border-green-400/20 transition-all duration-300 ${isCollapsed ? 'p-3' : 'p-4'}`}>
+				{!isCollapsed ? (
+					<div className='font-mono text-xs text-gray-500 space-y-1'>
+						<div className='flex items-center gap-2'>
+							<span className='text-green-400'>●</span>
+							<span>v2.0.1</span>
+						</div>
+						<div className='flex items-center gap-2'>
+							<span className='text-yellow-400'>◐</span>
+							<span>WIP</span>
+						</div>
+					</div>
+				) : (
+					<div className='flex justify-center'>
+						<div className='w-2 h-2 bg-green-400 rounded-full animate-pulse' />
 					</div>
 				)}
 			</div>

@@ -13,10 +13,7 @@ export const viewport: Viewport = {
 	initialScale: 1,
 	maximumScale: 1,
 	userScalable: false,
-	themeColor: [
-		{media: '(prefers-color-scheme: light)', color: '#10b981'},
-		{media: '(prefers-color-scheme: dark)', color: '#10b981'},
-	],
+	themeColor: [{media: '(prefers-color-scheme: dark)', color: '#10b981'}],
 }
 
 // Pixel fonts
@@ -36,7 +33,7 @@ const jetBrainsMono = JetBrains_Mono({
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
 	return (
-		<html lang='en' className={`${pressStart2P.variable} ${jetBrainsMono.variable}`}>
+		<html lang='en' className={`dark ${pressStart2P.variable} ${jetBrainsMono.variable}`}>
 			<head>
 				{/* Google Analytics */}
 				<script async src='https://www.googletagmanager.com/gtag/js?id=G-DM1VCDF79S'></script>
