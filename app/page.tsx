@@ -55,7 +55,81 @@ export default function HomePage() {
 		},
 		'keywords': 'Solana, blockchain, cryptocurrency, DeFi, tokens, transaction, wallet, developer tools',
 		'featureList': ['SOL transfers with priority fees', 'Transaction simulation and testing', 'SPL token management', 'Address Lookup Table management', 'Jupiter token swaps', 'Jito MEV protected bundles', 'Developer tools and utilities'],
-		'screenshot': 'https://solutil.dev/og-image.png',
+		'screenshot': 'https://solutil.dev/og-image.svg',
+	}
+
+	// Organization schema with support contact (helps Knowledge Panel + AI Overviews)
+	const organizationSchema = {
+		'@context': 'https://schema.org',
+		'@type': 'Organization',
+		'name': 'Solana Utility Tools',
+		'alternateName': 'SolanaUtils',
+		'url': 'https://solutil.dev',
+		'logo': 'https://solutil.dev/icon-512.svg',
+		'description': '40+ professional tools for Solana blockchain development, DeFi trading, transaction building, and developer utilities.',
+		'sameAs': ['https://github.com/lugondev'],
+		'contactPoint': {
+			'@type': 'ContactPoint',
+			'email': 'tegufy@gmail.com',
+			'contactType': 'Customer Support',
+			'availableLanguage': ['English', 'Vietnamese'],
+		},
+	}
+
+	// FAQ schema — matches the visible FAQ section below; AI assistants pull from this directly
+	const faqSchema = {
+		'@context': 'https://schema.org',
+		'@type': 'FAQPage',
+		'mainEntity': [
+			{
+				'@type': 'Question',
+				'name': 'Is Solana Utility Tools free to use?',
+				'acceptedAnswer': {
+					'@type': 'Answer',
+					'text': 'Yes — every tool on solutil.dev is 100% free with no signup, no API keys, and no usage limits. The platform runs entirely in your browser; we never charge for transactions or store your data on a backend.',
+				},
+			},
+			{
+				'@type': 'Question',
+				'name': 'Do I need to connect my wallet to use the tools?',
+				'acceptedAnswer': {
+					'@type': 'Answer',
+					'text': 'Most read-only tools (transaction parser, Borsh inspector, vanity address generator, PDA finder) work without a wallet. Connecting a wallet is only required for tools that send signed transactions — SOL transfer, token mint, Jupiter swap, ALT creation, and Jito bundles.',
+				},
+			},
+			{
+				'@type': 'Question',
+				'name': 'Which Solana networks are supported?',
+				'acceptedAnswer': {
+					'@type': 'Answer',
+					'text': 'Mainnet-beta, Devnet, and Testnet. Switch networks anytime via the network switcher in the top bar — your wallet and all tools react instantly. Custom RPC endpoints are also supported in the settings panel.',
+				},
+			},
+			{
+				'@type': 'Question',
+				'name': 'How do Jito bundles protect against MEV?',
+				'acceptedAnswer': {
+					'@type': 'Answer',
+					'text': 'Jito bundles submit your transactions through Jito\'s block-engine instead of the public mempool. Bundled transactions execute atomically in the same slot, blocking sandwich attacks and frontrunning. The bundle builder lets you tip validators directly to prioritize inclusion.',
+				},
+			},
+			{
+				'@type': 'Question',
+				'name': 'Does Solana Utility Tools store my private keys or transaction data?',
+				'acceptedAnswer': {
+					'@type': 'Answer',
+					'text': 'No. All key generation (vanity addresses, bulk keypairs) and transaction signing happen locally in your browser — keys never leave your device. Transaction history is stored in browser localStorage only and can be cleared at any time.',
+				},
+			},
+			{
+				'@type': 'Question',
+				'name': 'How do I report a bug or request a feature?',
+				'acceptedAnswer': {
+					'@type': 'Answer',
+					'text': 'Email tegufy@gmail.com with a description and screenshot if applicable, or open an issue on GitHub at github.com/lugondev. Bug reports usually get a fix within 48 hours; new tool requests are reviewed weekly.',
+				},
+			},
+		],
 	}
 
 	const features: Array<{
@@ -209,8 +283,10 @@ export default function HomePage() {
 
 	return (
 		<>
-			{/* Structured Data for SEO */}
+			{/* Structured Data for SEO + GEO (AI citation) */}
 			<script type='application/ld+json' dangerouslySetInnerHTML={{__html: JSON.stringify(structuredData)}} />
+			<script type='application/ld+json' dangerouslySetInnerHTML={{__html: JSON.stringify(organizationSchema)}} />
+			<script type='application/ld+json' dangerouslySetInnerHTML={{__html: JSON.stringify(faqSchema)}} />
 
 			<div className='space-y-10'>
 				{/* Hero Section */}
@@ -235,6 +311,21 @@ export default function HomePage() {
 						</div>
 					)}
 				</div>
+
+				{/* Answer-Ready intro for SEO/GEO — direct answer in first 80 words */}
+				<PixelCard>
+					<div className='space-y-3 font-mono text-sm text-gray-300 leading-relaxed'>
+						<p>
+							<span className='text-green-400 font-bold'>Solana Utility Tools</span> is a free, browser-based platform with 40+ professional utilities for Solana blockchain development — transaction parsing, Jupiter swaps, Jito MEV bundles, SPL token mint/burn/transfer, vanity address generation, and Address Lookup Tables. No signup, no API keys, no fees.
+						</p>
+						<p>
+							Built for Solana developers, traders, and power users on Mainnet, Devnet, and Testnet. All key generation and signing happens locally in your browser — private keys never leave your device. Compatible with Phantom, Solflare, Backpack, and every major Solana wallet.
+						</p>
+						<p className='text-xs text-gray-500'>
+							Updated: May 2026 · Need help? Email <a href='mailto:tegufy@gmail.com' className='text-green-400 hover:text-green-300 underline'>tegufy@gmail.com</a>
+						</p>
+					</div>
+				</PixelCard>
 
 				{/* Stats Section */}
 				{connected && stats && stats.total > 0 && (
@@ -414,6 +505,70 @@ export default function HomePage() {
 							<div className='pt-4 border-t-2 border-gray-700'>
 								<p className='text-center'>
 									<span className='text-green-400'>SOLANA DEVELOPER TOOLKIT</span> - Built with Next.js 15, React 19, and pixel-perfect design. Your comprehensive 40+ tool platform for professional Solana blockchain development.
+								</p>
+							</div>
+						</div>
+					</div>
+				</PixelCard>
+
+				{/* FAQ — visible Q&A that mirrors the FAQPage JSON-LD; AI assistants pull from both */}
+				<PixelCard>
+					<div className='space-y-5'>
+						<div className='border-b-2 border-green-400/20 pb-3'>
+							<div className='flex items-center gap-2'>
+								<Info className='h-4 w-4 text-green-400' />
+								<h2 className='font-pixel text-sm text-green-400'>FREQUENTLY ASKED QUESTIONS</h2>
+							</div>
+						</div>
+
+						<div className='space-y-5 font-mono text-sm'>
+							<div>
+								<h3 className='text-white font-bold mb-2'>Is Solana Utility Tools free to use?</h3>
+								<p className='text-gray-400 leading-relaxed'>
+									Yes — every tool on solutil.dev is 100% free with no signup, no API keys, and no usage limits. The platform runs entirely in your browser; we never charge for transactions or store your data on a backend.
+								</p>
+							</div>
+
+							<div>
+								<h3 className='text-white font-bold mb-2'>Do I need to connect my wallet to use the tools?</h3>
+								<p className='text-gray-400 leading-relaxed'>
+									Most read-only tools (transaction parser, Borsh inspector, vanity address generator, PDA finder) work without a wallet. Connecting a wallet is only required for tools that send signed transactions — SOL transfer, token mint, Jupiter swap, ALT creation, and Jito bundles.
+								</p>
+							</div>
+
+							<div>
+								<h3 className='text-white font-bold mb-2'>Which Solana networks are supported?</h3>
+								<p className='text-gray-400 leading-relaxed'>
+									Mainnet-beta, Devnet, and Testnet. Switch networks anytime via the network switcher in the top bar — your wallet and all tools react instantly. Custom RPC endpoints are also supported in the settings panel.
+								</p>
+							</div>
+
+							<div>
+								<h3 className='text-white font-bold mb-2'>How do Jito bundles protect against MEV?</h3>
+								<p className='text-gray-400 leading-relaxed'>
+									Jito bundles submit your transactions through Jito&apos;s block-engine instead of the public mempool. Bundled transactions execute atomically in the same slot, blocking sandwich attacks and frontrunning. The bundle builder lets you tip validators directly to prioritize inclusion.
+								</p>
+							</div>
+
+							<div>
+								<h3 className='text-white font-bold mb-2'>Does Solana Utility Tools store my private keys or transaction data?</h3>
+								<p className='text-gray-400 leading-relaxed'>
+									No. All key generation (vanity addresses, bulk keypairs) and transaction signing happen locally in your browser — keys never leave your device. Transaction history is stored in browser localStorage only and can be cleared at any time.
+								</p>
+							</div>
+
+							<div>
+								<h3 className='text-white font-bold mb-2'>How do I report a bug or request a feature?</h3>
+								<p className='text-gray-400 leading-relaxed'>
+									Email{' '}
+									<a href='mailto:tegufy@gmail.com' className='text-green-400 hover:text-green-300 underline'>
+										tegufy@gmail.com
+									</a>{' '}
+									with a description and screenshot if applicable, or open an issue on{' '}
+									<a href='https://github.com/lugondev' target='_blank' rel='noopener noreferrer' className='text-green-400 hover:text-green-300 underline'>
+										GitHub
+									</a>
+									. Bug reports usually get a fix within 48 hours; new tool requests are reviewed weekly.
 								</p>
 							</div>
 						</div>

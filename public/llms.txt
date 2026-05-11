@@ -1,0 +1,62 @@
+# Solana Utility Tools (solutil.dev)
+
+> Free, browser-based platform with 40+ professional utilities for Solana blockchain development — transaction parsing, Jupiter swaps, Jito MEV bundles, SPL token mint/burn/transfer, vanity address generation, and Address Lookup Tables. No signup, no API keys, no fees.
+
+## What we do
+
+Solana Utility Tools (also known as SolanaUtils, solutil.dev) is an all-in-one developer platform for the Solana blockchain. It targets Solana developers, DeFi traders, NFT builders, and power users who need professional tools without managing API keys or paying subscriptions. Every tool runs entirely client-side: private keys are generated and signed locally in the browser and never leave the user's device. Supports Mainnet-beta, Devnet, and Testnet, plus custom RPC endpoints.
+
+## Key pages
+
+- [Homepage](https://solutil.dev/) — Full feature index for 40+ Solana tools
+- [Transaction Parser](https://solutil.dev/dev-tools/transaction-parser) — Decode raw Solana transactions into human-readable instructions, accounts, and program calls
+- [Jupiter Swap](https://solutil.dev/defi/swap) — Token swapping with best execution rates via Jupiter aggregator
+- [Jito Bundles](https://solutil.dev/jito/bundle) — MEV-protected atomic transaction bundles via Jito block-engine
+- [Vanity Address Generator](https://solutil.dev/dev-tools/vanity-generator) — Generate Solana addresses with custom prefixes/suffixes, runs in WebWorker
+- [Bulk Keypair Generator](https://solutil.dev/dev-tools/bulk-keypair) — Generate hundreds of Solana wallets in one batch, exportable to JSON
+- [Token Mint](https://solutil.dev/tokens/mint) — Create new SPL tokens with metadata in a single transaction
+- [Token Transfer](https://solutil.dev/tokens/transfer) — Transfer SPL tokens with associated-token-account auto-creation
+- [Send SOL](https://solutil.dev/transaction/send) — Native SOL transfers with priority fee tuning
+- [Transaction Simulator](https://solutil.dev/transaction/simulate) — Dry-run transactions on RPC before submission
+- [Address Lookup Tables](https://solutil.dev/alt/create) — Create, manage, and explore Solana ALTs to compress transaction size
+- [Borsh Inspector](https://solutil.dev/data-tools/borsh-inspector) — Decode/encode Borsh-serialized account data with custom schemas
+- [Event Log Parser](https://solutil.dev/data-tools/event-parser) — Parse Anchor events and program logs from transaction signatures
+- [Program Versioning](https://solutil.dev/advanced-tools/program-versioning) — Track and manage Solana program upgrades
+
+## Tool categories
+
+- Developer Tools (5): transaction parser, vanity address generator, bulk keypair generation, program tools, utility tools
+- Transaction Management (4): send SOL, simulate, history, builder
+- Token Operations (5): mint, burn, transfer, bulk operations, analytics
+- Account & Wallet Tools (5): wallet connection, account explorer, PDA finder, multisig, balance tracking
+- DeFi & Trading (3): Jupiter swap, liquidity, limit orders
+- Advanced Solana Features (6): program versioning, state compression, token extensions, etc.
+- Data Processing & Analysis (3): Borsh inspector, event parser, data tools
+- Jito MEV Protection (2): bundle builder, tip configuration
+
+## Privacy & security
+
+- All cryptographic operations (key generation, signing) execute in the browser via @solana/web3.js
+- Private keys are never transmitted to any server
+- Transaction history is stored only in browser localStorage
+- No analytics other than anonymous Google Analytics page views
+- No user accounts, no API keys to manage
+
+## Compatible wallets
+
+Phantom, Solflare, Backpack, Glow, Coin98, Trust Wallet, and any wallet supporting the Solana wallet-adapter standard.
+
+## Built with
+
+Next.js 15, React 19, TypeScript, Tailwind CSS, @solana/web3.js, @solana/wallet-adapter, Jupiter SDK, Jito-ts. Hosted on Vercel.
+
+## Support & contact
+
+- Email: tegufy@gmail.com
+- GitHub: https://github.com/lugondev
+- Bug reports: typically fixed within 48 hours
+- Feature requests: reviewed weekly
+
+## License & terms
+
+Free for personal and commercial use. The platform does not custody funds; users are responsible for safeguarding their own private keys and reviewing every transaction before signing.

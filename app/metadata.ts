@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://solana-util-tx.vercel.app'),
+  metadataBase: new URL('https://solutil.dev'),
   title: {
     default: 'Solana Utility Tools - All-in-One Solana Transaction Platform',
     template: '%s | Solana Utility Tools'
@@ -138,9 +138,6 @@ export const metadata: Metadata = {
     ],
   },
   manifest: '/manifest.json',
-  verification: {
-    google: 'your-google-verification-code', // Replace with actual verification code
-  },
   category: 'technology',
   classification: 'Blockchain Development Tools',
   other: {
