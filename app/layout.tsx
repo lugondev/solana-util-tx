@@ -59,6 +59,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
 				<meta name='mobile-web-app-capable' content='yes' />
 				<meta name='msapplication-TileColor' content='#10b981' />
 				<meta name='msapplication-tap-highlight' content='no' />
+				<meta name='google-adsense-account' content='ca-pub-8164561416682632' />
 			</head>
 			<body className='min-h-screen bg-gray-900 text-white font-mono'>
 				<ClientLayout>{children}</ClientLayout>
