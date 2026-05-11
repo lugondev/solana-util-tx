@@ -6,7 +6,6 @@ import {PublicKey, Transaction} from '@solana/web3.js'
 import {PixelCard} from '@/components/ui/pixel-card'
 import {PixelButton} from '@/components/ui/pixel-button'
 import {PixelInput} from '@/components/ui/pixel-input'
-import {extendALT, deactivateALT, freezeALT, closeALT} from '@/lib/solana/alt/manage-alt'
 import {Plus, Pause, Snowflake, XCircle} from 'lucide-react'
 
 interface ALTOperationsProps {

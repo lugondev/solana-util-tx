@@ -1,9 +1,5 @@
 'use client'
 
-import { ALTCreator } from '@/components/alt/alt-creator'
-
-'use client'
-
 import { useState } from 'react'
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'

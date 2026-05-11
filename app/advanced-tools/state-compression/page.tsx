@@ -1,260 +1,320 @@
-import { Metadata } from 'next'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'State Compression Utils | Advanced Solana Tools',
-  description: 'Manage state compression, Merkle trees, and compressed accounts on Solana. Advanced tools for optimizing storage costs.',
-  keywords: ['state compression', 'merkle trees', 'compressed accounts', 'solana', 'storage optimization'],
+import { useEffect, useMemo, useState } from 'react'
+import { useConnection } from '@solana/wallet-adapter-react'
+import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js'
+import { PixelCard } from '@/components/ui/pixel-card'
+import { PixelButton } from '@/components/ui/pixel-button'
+import { PixelInput } from '@/components/ui/pixel-input'
+import { Loader2, AlertTriangle, Search, TreePine, Calculator, Hash } from 'lucide-react'
+
+// Canonical valid (maxDepth, maxBufferSize) pairs accepted by spl-account-compression.
+// Source: @solana/spl-account-compression validDepthSizePair.ts
+const VALID_DEPTH_BUFFER_PAIRS: ReadonlyArray<{ depth: number; buffer: number }> = [
+	{ depth: 3, buffer: 8 },
+	{ depth: 5, buffer: 8 },
+	{ depth: 14, buffer: 64 },
+	{ depth: 14, buffer: 256 },
+	{ depth: 14, buffer: 1024 },
+	{ depth: 14, buffer: 2048 },
+	{ depth: 15, buffer: 64 },
+	{ depth: 16, buffer: 64 },
+	{ depth: 17, buffer: 64 },
+	{ depth: 18, buffer: 64 },
+	{ depth: 19, buffer: 64 },
+	{ depth: 20, buffer: 64 },
+	{ depth: 20, buffer: 256 },
+	{ depth: 20, buffer: 1024 },
+	{ depth: 20, buffer: 2048 },
+	{ depth: 24, buffer: 64 },
+	{ depth: 24, buffer: 256 },
+	{ depth: 24, buffer: 512 },
+	{ depth: 24, buffer: 1024 },
+	{ depth: 24, buffer: 2048 },
+	{ depth: 26, buffer: 512 },
+	{ depth: 26, buffer: 1024 },
+	{ depth: 26, buffer: 2048 },
+	{ depth: 30, buffer: 512 },
+	{ depth: 30, buffer: 1024 },
+	{ depth: 30, buffer: 2048 },
+]
+
+// Tree account size formula matches getConcurrentMerkleTreeAccountSize() from
+// @solana/spl-account-compression. Result is in bytes.
+function concurrentMerkleTreeAccountSize(maxDepth: number, maxBufferSize: number, canopyDepth: number): number {
+	const headerSize = 8 + 54 // anchor discriminator + ConcurrentMerkleTreeHeader
+	const changeLogSize = (maxDepth + 1) * 32 + 8 // path nodes + index
+	const treeBodySize = changeLogSize * maxBufferSize + 32 + 32 + 32 + 4 + 32 // active changelogs + rightmost proof + leaf + sequence + activeIndex
+	const canopySize = canopyDepth > 0 ? ((1 << (canopyDepth + 1)) - 2) * 32 : 0
+	return headerSize + treeBodySize + canopySize
 }
 
+const fmtBytes = (b: number): string => {
+	if (b >= 1024 * 1024) return `${(b / 1024 / 1024).toFixed(2)} MB`
+	if (b >= 1024) return `${(b / 1024).toFixed(2)} KB`
+	return `${b} B`
+}
+
+const fmtNumber = (n: number): string => n.toLocaleString('en-US')
+
 export default function StateCompressionPage() {
-  const features = [
-    {
-      title: '🌳 Merkle Tree Management',
-      description: 'Create, manage, and validate Merkle trees for state compression',
-      items: [
-        'Tree creation and initialization',
-        'Leaf management and updates',
-        'Proof generation and validation',
-        'Tree statistics and analytics'
-      ]
-    },
-    {
-      title: '🗜️ Account Compression',
-      description: 'Compress and decompress Solana accounts efficiently',
-      items: [
-        'Account compression analysis',
-        'Compression ratio calculation',
-        'Batch compression operations',
-        'Cost savings estimation'
-      ]
-    },
-    {
-      title: '🔍 Proof Validation',
-      description: 'Validate Merkle proofs and verify compressed data integrity',
-      items: [
-        'Proof verification tools',
-        'Data integrity checks',
-        'Batch proof validation',
-        'Error detection and debugging'
-      ]
-    },
-    {
-      title: '📊 Analytics & Monitoring',
-      description: 'Monitor compression performance and track savings',
-      items: [
-        'Compression analytics dashboard',
-        'Storage cost tracking',
-        'Performance metrics',
-        'Historical data analysis'
-      ]
-    }
-  ]
+	const { connection } = useConnection()
 
-  return (
-    <div className="min-h-screen bg-gray-900 py-8">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">
-            🗜️ State Compression Utils
-          </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Advanced tools for managing state compression, Merkle trees, and compressed accounts on Solana. 
-            Optimize storage costs and improve scalability with enterprise-grade compression utilities.
-          </p>
-        </div>
+	// Cost calculator state
+	const [depth, setDepth] = useState(14)
+	const [buffer, setBuffer] = useState(64)
+	const [canopy, setCanopy] = useState(0)
+	const [rentLamports, setRentLamports] = useState<number | null>(null)
+	const [rentLoading, setRentLoading] = useState(false)
+	const [rentError, setRentError] = useState<string | null>(null)
 
-        {/* Status Banner */}
-        <div className="bg-green-900/20 border border-green-500/30 p-4 rounded-lg mb-8 text-center">
-          <div className="flex items-center justify-center space-x-2">
-            <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-            <span className="text-green-400 font-medium">Tool Status: Ready for Production</span>
-          </div>
-        </div>
+	// Tree inspector state
+	const [treeAddress, setTreeAddress] = useState('')
+	const [inspecting, setInspecting] = useState(false)
+	const [inspectError, setInspectError] = useState<string | null>(null)
+	const [treeInfo, setTreeInfo] = useState<{
+		address: string
+		owner: string
+		size: number
+		lamports: number
+		executable: boolean
+	} | null>(null)
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <button className="bg-blue-600 hover:bg-blue-700 p-6 rounded-lg text-center transition-colors">
-            <div className="text-2xl mb-2">🌳</div>
-            <div className="text-white font-medium">Create Tree</div>
-            <div className="text-blue-200 text-sm">Initialize new Merkle tree</div>
-          </button>
-          
-          <button className="bg-green-600 hover:bg-green-700 p-6 rounded-lg text-center transition-colors">
-            <div className="text-2xl mb-2">🗜️</div>
-            <div className="text-white font-medium">Compress Account</div>
-            <div className="text-green-200 text-sm">Compress existing account</div>
-          </button>
-          
-          <button className="bg-purple-600 hover:bg-purple-700 p-6 rounded-lg text-center transition-colors">
-            <div className="text-2xl mb-2">🔍</div>
-            <div className="text-white font-medium">Validate Proof</div>
-            <div className="text-purple-200 text-sm">Verify Merkle proof</div>
-          </button>
-          
-          <button className="bg-orange-600 hover:bg-orange-700 p-6 rounded-lg text-center transition-colors">
-            <div className="text-2xl mb-2">📊</div>
-            <div className="text-white font-medium">View Analytics</div>
-            <div className="text-orange-200 text-sm">Compression metrics</div>
-          </button>
-        </div>
+	const maxLeaves = useMemo(() => Math.pow(2, depth), [depth])
+	const accountSize = useMemo(() => concurrentMerkleTreeAccountSize(depth, buffer, canopy), [depth, buffer, canopy])
 
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-          {features.map((feature) => (
-            <div key={feature.title} className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-              <h3 className="text-xl font-semibold text-white mb-3">
-                {feature.title}
-              </h3>
-              <p className="text-gray-300 mb-4">
-                {feature.description}
-              </p>
-              <ul className="space-y-2">
-                {feature.items.map((item, index) => (
-                  <li key={index} className="flex items-center text-sm text-gray-400">
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-3"></span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+	useEffect(() => {
+		let cancelled = false
+		setRentLamports(null)
+		setRentError(null)
+		setRentLoading(true)
+		connection
+			.getMinimumBalanceForRentExemption(accountSize)
+			.then((l) => {
+				if (!cancelled) setRentLamports(l)
+			})
+			.catch((err: unknown) => {
+				if (!cancelled) setRentError(err instanceof Error ? err.message : 'Failed to fetch rent')
+			})
+			.finally(() => {
+				if (!cancelled) setRentLoading(false)
+			})
+		return () => {
+			cancelled = true
+		}
+	}, [connection, accountSize])
 
-        {/* Technical Specifications */}
-        <div className="bg-gray-800 p-8 rounded-lg border border-gray-700 mb-12">
-          <h2 className="text-2xl font-bold text-white text-center mb-8">
-            🛠️ Technical Specifications
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold text-blue-400 mb-4">Compression Support</h3>
-              <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Account Compression Program</li>
-                <li>• Metaplex Bubblegum</li>
-                <li>• SPL State Compression</li>
-                <li>• Custom compression schemes</li>
-                <li>• Merkle tree variants</li>
-                <li>• Proof size optimization</li>
-              </ul>
-            </div>
+	const availableBuffers = VALID_DEPTH_BUFFER_PAIRS.filter((p) => p.depth === depth).map((p) => p.buffer)
+	const availableDepths = Array.from(new Set(VALID_DEPTH_BUFFER_PAIRS.map((p) => p.depth)))
 
-            <div>
-              <h3 className="text-lg font-semibold text-green-400 mb-4">Tree Management</h3>
-              <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Tree depth: 3-30 levels</li>
-                <li>• Concurrent leaf updates</li>
-                <li>• Batch operations support</li>
-                <li>• Tree migration tools</li>
-                <li>• Backup and recovery</li>
-                <li>• Performance monitoring</li>
-              </ul>
-            </div>
+	const onDepthChange = (newDepth: number) => {
+		setDepth(newDepth)
+		const buffers = VALID_DEPTH_BUFFER_PAIRS.filter((p) => p.depth === newDepth).map((p) => p.buffer)
+		if (buffers.length > 0 && !buffers.includes(buffer)) {
+			setBuffer(buffers[0])
+		}
+		if (canopy > newDepth) setCanopy(newDepth)
+	}
 
-            <div>
-              <h3 className="text-lg font-semibold text-purple-400 mb-4">Cost Optimization</h3>
-              <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Up to 99% storage savings</li>
-                <li>• Reduced account rent</li>
-                <li>• Lower transaction costs</li>
-                <li>• Scalable to millions of items</li>
-                <li>• Real-time cost analysis</li>
-                <li>• ROI calculations</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+	const inspectTree = async () => {
+		setInspectError(null)
+		setTreeInfo(null)
+		if (!treeAddress.trim()) {
+			setInspectError('Enter a Merkle tree account address.')
+			return
+		}
+		setInspecting(true)
+		try {
+			const pk = new PublicKey(treeAddress.trim())
+			const info = await connection.getAccountInfo(pk)
+			if (!info) throw new Error('Account not found on the current network.')
+			setTreeInfo({
+				address: pk.toBase58(),
+				owner: info.owner.toBase58(),
+				size: info.data.length,
+				lamports: info.lamports,
+				executable: info.executable,
+			})
+		} catch (err) {
+			setInspectError(err instanceof Error ? err.message : 'Failed to inspect tree account')
+		} finally {
+			setInspecting(false)
+		}
+	}
 
-        {/* Use Cases */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-white text-center mb-8">
-            💼 Common Use Cases
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 p-6 rounded-lg border border-blue-500/30">
-              <h3 className="text-xl font-semibold text-white mb-4">🎮 Gaming & NFTs</h3>
-              <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Compress large NFT collections</li>
-                <li>• Store game state efficiently</li>
-                <li>• Manage player inventories</li>
-                <li>• Track achievement systems</li>
-                <li>• Optimize metadata storage</li>
-                <li>• Enable mass minting</li>
-              </ul>
-            </div>
+	return (
+		<div className='container mx-auto px-4 py-8 max-w-6xl'>
+			<div className='mb-8'>
+				<h1 className='font-pixel text-2xl text-green-400 mb-2 flex items-center gap-3'>
+					<span className='animate-pulse'>▸</span>
+					STATE COMPRESSION UTILS
+				</h1>
+				<p className='font-mono text-sm text-gray-400'>Concurrent Merkle tree (cMT) cost calculator and inspector. Used by Bubblegum / compressed NFTs and any custom compression program.</p>
+			</div>
 
-            <div className="bg-gradient-to-br from-green-900/20 to-teal-900/20 p-6 rounded-lg border border-green-500/30">
-              <h3 className="text-xl font-semibold text-white mb-4">🏢 Enterprise</h3>
-              <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Supply chain tracking</li>
-                <li>• Document management</li>
-                <li>• Audit trail compression</li>
-                <li>• IoT data storage</li>
-                <li>• User activity logs</li>
-                <li>• Compliance records</li>
-              </ul>
-            </div>
+			<div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+				<PixelCard>
+					<div className='space-y-4'>
+						<div className='border-b-4 border-green-400/20 pb-3 flex items-center gap-2'>
+							<Calculator className='h-4 w-4 text-green-400' />
+							<h2 className='font-pixel text-sm text-green-400'>TREE COST CALCULATOR</h2>
+						</div>
 
-            <div className="bg-gradient-to-br from-orange-900/20 to-red-900/20 p-6 rounded-lg border border-orange-500/30">
-              <h3 className="text-xl font-semibold text-white mb-4">🏦 DeFi</h3>
-              <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Transaction history compression</li>
-                <li>• Price feed optimization</li>
-                <li>• Liquidity pool data</li>
-                <li>• Governance proposal storage</li>
-                <li>• Reward distribution records</li>
-                <li>• Risk assessment data</li>
-              </ul>
-            </div>
+						<div className='space-y-3'>
+							<div>
+								<label className='font-pixel text-xs text-gray-400 block mb-2'>MAX DEPTH (= log2 of max leaves)</label>
+								<select value={depth} onChange={(e) => onDepthChange(parseInt(e.target.value, 10))} className='w-full px-3 py-2 bg-gray-900 border-2 border-gray-600 focus:border-green-400 font-mono text-sm text-white'>
+									{availableDepths.map((d) => (
+										<option key={d} value={d}>{d} (max {fmtNumber(Math.pow(2, d))} leaves)</option>
+									))}
+								</select>
+							</div>
 
-            <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 p-6 rounded-lg border border-purple-500/30">
-              <h3 className="text-xl font-semibold text-white mb-4">📱 Social & Media</h3>
-              <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Social media posts</li>
-                <li>• User profiles and settings</li>
-                <li>• Content metadata</li>
-                <li>• Interaction histories</li>
-                <li>• Media asset management</li>
-                <li>• Community data</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+							<div>
+								<label className='font-pixel text-xs text-gray-400 block mb-2'>BUFFER SIZE (concurrent updates)</label>
+								<select value={buffer} onChange={(e) => setBuffer(parseInt(e.target.value, 10))} className='w-full px-3 py-2 bg-gray-900 border-2 border-gray-600 focus:border-green-400 font-mono text-sm text-white'>
+									{availableBuffers.map((b) => (
+										<option key={b} value={b}>{b}</option>
+									))}
+								</select>
+							</div>
 
-        {/* Getting Started */}
-        <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 p-8 rounded-lg border border-blue-500/30">
-          <h2 className="text-2xl font-bold text-white text-center mb-6">
-            🚀 Getting Started
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Quick Setup</h3>
-              <ol className="space-y-2 text-gray-300 text-sm">
-                <li>1. Connect your Solana wallet</li>
-                <li>2. Choose compression type (Account/Custom)</li>
-                <li>3. Configure tree parameters</li>
-                <li>4. Initialize Merkle tree</li>
-                <li>5. Start compressing data</li>
-                <li>6. Monitor compression metrics</li>
-              </ol>
-            </div>
+							<div>
+								<label className='font-pixel text-xs text-gray-400 block mb-2'>CANOPY DEPTH (0 — {depth})</label>
+								<input type='range' min={0} max={Math.min(depth, 17)} value={canopy} onChange={(e) => setCanopy(parseInt(e.target.value, 10))} className='w-full' />
+								<div className='font-mono text-xs text-gray-400 mt-1'>{canopy} — fewer proof nodes to pass to mint/transfer instructions ({fmtNumber(Math.max(0, depth - canopy))} proof nodes per tx)</div>
+							</div>
+						</div>
 
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Best Practices</h3>
-              <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Test compression ratios on devnet first</li>
-                <li>• Choose appropriate tree depth for your use case</li>
-                <li>• Monitor proof generation costs</li>
-                <li>• Plan for tree migration strategies</li>
-                <li>• Implement proper backup procedures</li>
-                <li>• Use batch operations for efficiency</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+						<div className='pt-3 border-t-2 border-gray-700 space-y-2 font-mono text-xs'>
+							<KV k='Max leaves (NFTs)' v={fmtNumber(maxLeaves)} highlight />
+							<KV k='Account size' v={`${fmtBytes(accountSize)} (${fmtNumber(accountSize)} bytes)`} />
+							<KV k='Rent (one-time)' v={rentLoading ? '…' : rentLamports !== null ? `${(rentLamports / LAMPORTS_PER_SOL).toFixed(4)} SOL (${fmtNumber(rentLamports)} lamports)` : '—'} highlight />
+							<KV k='Cost per NFT (amortised)' v={rentLamports !== null ? `${(rentLamports / LAMPORTS_PER_SOL / maxLeaves * 1_000_000).toFixed(2)} micro-SOL` : '—'} />
+						</div>
+
+						{rentError && (
+							<div className='p-2 bg-red-900/20 border-2 border-red-600/30 font-mono text-xs text-red-400 flex items-start gap-2'>
+								<AlertTriangle className='h-3 w-3 mt-0.5 flex-shrink-0' />
+								{rentError}
+							</div>
+						)}
+
+						<div className='p-3 bg-blue-900/20 border-2 border-blue-600/30 font-mono text-xs text-blue-300 leading-relaxed'>
+							<strong>Tip:</strong> higher canopy = much cheaper transfers (fewer proof nodes) but bigger upfront rent. For minting-heavy use cases keep canopy low; for transfer-heavy use cases bump canopy to depth − 3.
+						</div>
+					</div>
+				</PixelCard>
+
+				<PixelCard>
+					<div className='space-y-4'>
+						<div className='border-b-4 border-green-400/20 pb-3 flex items-center gap-2'>
+							<TreePine className='h-4 w-4 text-green-400' />
+							<h2 className='font-pixel text-sm text-green-400'>TREE ACCOUNT INSPECTOR</h2>
+						</div>
+
+						<div className='flex flex-col gap-3'>
+							<PixelInput label='TREE ADDRESS' value={treeAddress} onChange={(e) => setTreeAddress(e.target.value)} placeholder='Concurrent Merkle tree account pubkey' />
+							<PixelButton onClick={inspectTree} disabled={inspecting} className='w-full'>
+								{inspecting ? <Loader2 className='h-4 w-4 animate-spin' /> : <Search className='h-4 w-4' />}
+								[INSPECT TREE]
+							</PixelButton>
+						</div>
+
+						{inspectError && (
+							<div className='p-2 bg-red-900/20 border-2 border-red-600/30 font-mono text-xs text-red-400 flex items-start gap-2'>
+								<AlertTriangle className='h-3 w-3 mt-0.5 flex-shrink-0' />
+								{inspectError}
+							</div>
+						)}
+
+						{treeInfo && (
+							<div className='space-y-2 font-mono text-xs pt-3 border-t-2 border-gray-700'>
+								<KV k='Address' v={treeInfo.address} mono />
+								<KV k='Owner' v={treeInfo.owner} mono />
+								<KV k='Size' v={`${fmtBytes(treeInfo.size)} (${fmtNumber(treeInfo.size)} bytes)`} />
+								<KV k='Rent locked' v={`${(treeInfo.lamports / LAMPORTS_PER_SOL).toFixed(4)} SOL`} highlight />
+								<KV k='Executable' v={treeInfo.executable ? 'yes' : 'no'} />
+								<div className='pt-2'>
+									<a href={`https://explorer.solana.com/address/${treeInfo.address}`} target='_blank' rel='noopener noreferrer' className='text-green-400 hover:underline'>
+										View on Solana Explorer →
+									</a>
+								</div>
+							</div>
+						)}
+
+						<div className='p-3 bg-gray-800 border-2 border-gray-700 font-mono text-xs text-gray-400 leading-relaxed'>
+							The owner of a valid tree account is typically <code className='text-green-400'>cmtDvXumGCrqC1Age74AVPhSRVXJMd8PJS91L8KbNCK</code> (spl-account-compression). Bubblegum trees have an additional Bubblegum-owned tree-config PDA next to it.
+						</div>
+					</div>
+				</PixelCard>
+			</div>
+
+			<PixelCard>
+				<div className='mt-6 space-y-3'>
+					<div className='border-b-4 border-green-400/20 pb-3 flex items-center gap-2'>
+						<Hash className='h-4 w-4 text-green-400' />
+						<h2 className='font-pixel text-sm text-green-400'>POPULAR CONFIGURATIONS</h2>
+					</div>
+					<div className='overflow-x-auto'>
+						<table className='w-full font-mono text-xs'>
+							<thead>
+								<tr className='text-left text-gray-400 border-b border-gray-700'>
+									<th className='py-2 pr-3'>Use case</th>
+									<th className='py-2 pr-3'>Depth</th>
+									<th className='py-2 pr-3'>Buffer</th>
+									<th className='py-2 pr-3'>Canopy</th>
+									<th className='py-2 pr-3'>Max leaves</th>
+									<th className='py-2 pr-3'>Size</th>
+									<th className='py-2 pr-3'>Action</th>
+								</tr>
+							</thead>
+							<tbody className='text-gray-300'>
+								{[
+									{ name: 'Small cNFT drop', d: 14, b: 64, c: 0 },
+									{ name: 'Medium drop (transfer-friendly)', d: 14, b: 64, c: 11 },
+									{ name: 'Large cNFT collection', d: 20, b: 64, c: 10 },
+									{ name: 'High-throughput trading', d: 20, b: 256, c: 11 },
+									{ name: 'Massive scale (16M leaves)', d: 24, b: 64, c: 14 },
+								].map((preset) => {
+									const size = concurrentMerkleTreeAccountSize(preset.d, preset.b, preset.c)
+									return (
+										<tr key={preset.name} className='border-b border-gray-800'>
+											<td className='py-2 pr-3'>{preset.name}</td>
+											<td className='py-2 pr-3'>{preset.d}</td>
+											<td className='py-2 pr-3'>{preset.b}</td>
+											<td className='py-2 pr-3'>{preset.c}</td>
+											<td className='py-2 pr-3'>{fmtNumber(Math.pow(2, preset.d))}</td>
+											<td className='py-2 pr-3'>{fmtBytes(size)}</td>
+											<td className='py-2 pr-3'>
+												<button
+													className='text-green-400 hover:underline'
+													onClick={() => {
+														onDepthChange(preset.d)
+														setBuffer(preset.b)
+														setCanopy(preset.c)
+													}}
+												>
+													Use this
+												</button>
+											</td>
+										</tr>
+									)
+								})}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</PixelCard>
+		</div>
+	)
+}
+
+function KV({ k, v, mono, highlight }: { k: string; v: string; mono?: boolean; highlight?: boolean }) {
+	return (
+		<div className='flex flex-col md:flex-row md:items-start md:gap-3'>
+			<div className='text-gray-400 md:w-48 md:flex-shrink-0'>{k}</div>
+			<div className={`break-all ${mono ? 'font-mono' : ''} ${highlight ? 'text-green-400' : 'text-white'}`}>{v}</div>
+		</div>
+	)
 }

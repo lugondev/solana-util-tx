@@ -1,408 +1,376 @@
-import { Metadata } from 'next'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Token Extensions Manager | Advanced Solana Tools',
-  description: 'Manage Token-2022 extensions, migration plans, and compatibility. Advanced tools for next-generation token features.',
-  keywords: ['token 2022', 'token extensions', 'migration', 'compatibility', 'solana', 'spl'],
+import { useState } from 'react'
+import { useConnection } from '@solana/wallet-adapter-react'
+import { PublicKey } from '@solana/web3.js'
+import {
+	getMint,
+	getExtensionTypes,
+	ExtensionType,
+	getTransferFeeConfig,
+	getMintCloseAuthority,
+	getNonTransferable,
+	getInterestBearingMintConfigState,
+	getDefaultAccountState,
+	getPermanentDelegate,
+	getMetadataPointerState,
+	getGroupPointerState,
+	getGroupMemberPointerState,
+	getTokenGroupState,
+	getTokenGroupMemberState,
+	getTransferHook,
+	getScaledUiAmountConfig,
+	getTokenMetadata,
+	TOKEN_2022_PROGRAM_ID,
+	TOKEN_PROGRAM_ID,
+	AccountState,
+} from '@solana/spl-token'
+import { PixelCard } from '@/components/ui/pixel-card'
+import { PixelButton } from '@/components/ui/pixel-button'
+import { PixelInput } from '@/components/ui/pixel-input'
+import { Loader2, AlertTriangle, Search, Hash, Layers } from 'lucide-react'
+
+const EXTENSION_LABELS: Record<number, string> = {
+	0: 'Uninitialized',
+	1: 'TransferFeeConfig',
+	2: 'TransferFeeAmount',
+	3: 'MintCloseAuthority',
+	4: 'ConfidentialTransferMint',
+	5: 'ConfidentialTransferAccount',
+	6: 'DefaultAccountState',
+	7: 'ImmutableOwner',
+	8: 'MemoTransfer',
+	9: 'NonTransferable',
+	10: 'InterestBearingConfig',
+	11: 'CpiGuard',
+	12: 'PermanentDelegate',
+	13: 'NonTransferableAccount',
+	14: 'TransferHook',
+	15: 'TransferHookAccount',
+	18: 'MetadataPointer',
+	19: 'TokenMetadata',
+	20: 'GroupPointer',
+	21: 'TokenGroup',
+	22: 'GroupMemberPointer',
+	23: 'TokenGroupMember',
+	25: 'ScaledUiAmountConfig',
+	26: 'PausableConfig',
+	27: 'PausableAccount',
+}
+
+type DecodedExtension = {
+	id: number
+	label: string
+	details: Record<string, string | number | null>
+}
+
+type MintReport = {
+	address: string
+	programId: 'spl-token' | 'token-2022'
+	decimals: number
+	supply: string
+	mintAuthority: string | null
+	freezeAuthority: string | null
+	extensions: DecodedExtension[]
+	metadata: { name: string; symbol: string; uri: string; additional: Array<[string, string]> } | null
+}
+
+const fmtPk = (pk: PublicKey | null | undefined) => (pk ? pk.toBase58() : null)
+const bpsToPercent = (bps: number) => `${(bps / 100).toFixed(2)}%`
+
+const formatAccountState = (s: number) => {
+	switch (s) {
+		case AccountState.Uninitialized:
+			return 'Uninitialized'
+		case AccountState.Initialized:
+			return 'Initialized'
+		case AccountState.Frozen:
+			return 'Frozen'
+		default:
+			return String(s)
+	}
+}
+
+function decodeExtension(e: ExtensionType, mint: Awaited<ReturnType<typeof getMint>>): DecodedExtension['details'] {
+	switch (e) {
+		case ExtensionType.TransferFeeConfig: {
+			const cfg = getTransferFeeConfig(mint)
+			if (!cfg) return {}
+			return {
+				transferFeeConfigAuthority: fmtPk(cfg.transferFeeConfigAuthority),
+				withdrawWithheldAuthority: fmtPk(cfg.withdrawWithheldAuthority),
+				withheldAmount: cfg.withheldAmount.toString(),
+				newerFee_bps: cfg.newerTransferFee.transferFeeBasisPoints,
+				newerFee_pct: bpsToPercent(cfg.newerTransferFee.transferFeeBasisPoints),
+				newerFee_max: cfg.newerTransferFee.maximumFee.toString(),
+				newerFee_epoch: cfg.newerTransferFee.epoch.toString(),
+				olderFee_bps: cfg.olderTransferFee.transferFeeBasisPoints,
+				olderFee_pct: bpsToPercent(cfg.olderTransferFee.transferFeeBasisPoints),
+			}
+		}
+		case ExtensionType.MintCloseAuthority: {
+			const a = getMintCloseAuthority(mint)
+			return { closeAuthority: fmtPk(a?.closeAuthority ?? null) }
+		}
+		case ExtensionType.NonTransferable: {
+			const a = getNonTransferable(mint)
+			return { present: a ? 'yes' : 'no' }
+		}
+		case ExtensionType.InterestBearingConfig: {
+			const a = getInterestBearingMintConfigState(mint)
+			if (!a) return {}
+			return {
+				rateAuthority: fmtPk(a.rateAuthority),
+				currentRate_bps: a.currentRate,
+				currentRate_pct: bpsToPercent(a.currentRate),
+				preUpdateRate_bps: a.preUpdateAverageRate,
+				initializationTimestamp: a.initializationTimestamp.toString(),
+				lastUpdateTimestamp: a.lastUpdateTimestamp.toString(),
+			}
+		}
+		case ExtensionType.DefaultAccountState: {
+			const a = getDefaultAccountState(mint)
+			return { state: a ? formatAccountState(a.state) : null }
+		}
+		case ExtensionType.PermanentDelegate: {
+			const a = getPermanentDelegate(mint)
+			return { delegate: fmtPk(a?.delegate ?? null) }
+		}
+		case ExtensionType.MetadataPointer: {
+			const a = getMetadataPointerState(mint)
+			return { authority: fmtPk(a?.authority ?? null), metadataAddress: fmtPk(a?.metadataAddress ?? null) }
+		}
+		case ExtensionType.GroupPointer: {
+			const a = getGroupPointerState(mint)
+			return { authority: fmtPk(a?.authority ?? null), groupAddress: fmtPk(a?.groupAddress ?? null) }
+		}
+		case ExtensionType.GroupMemberPointer: {
+			const a = getGroupMemberPointerState(mint)
+			return { authority: fmtPk(a?.authority ?? null), memberAddress: fmtPk(a?.memberAddress ?? null) }
+		}
+		case ExtensionType.TokenGroup: {
+			const a = getTokenGroupState(mint)
+			return {
+				updateAuthority: fmtPk(a?.updateAuthority ?? null),
+				mint: fmtPk(a?.mint ?? null),
+				size: a?.size?.toString() ?? null,
+				maxSize: a?.maxSize?.toString() ?? null,
+			}
+		}
+		case ExtensionType.TokenGroupMember: {
+			const a = getTokenGroupMemberState(mint)
+			return {
+				group: fmtPk(a?.group ?? null),
+				mint: fmtPk(a?.mint ?? null),
+				memberNumber: a?.memberNumber?.toString() ?? null,
+			}
+		}
+		case ExtensionType.TransferHook: {
+			const a = getTransferHook(mint)
+			return { authority: fmtPk(a?.authority ?? null), programId: fmtPk(a?.programId ?? null) }
+		}
+		case ExtensionType.ScaledUiAmountConfig: {
+			const a = getScaledUiAmountConfig(mint)
+			if (!a) return {}
+			return {
+				authority: fmtPk(a.authority),
+				multiplier: a.multiplier.toString(),
+				newMultiplier: a.newMultiplier.toString(),
+				newMultiplierEffectiveTimestamp: a.newMultiplierEffectiveTimestamp.toString(),
+			}
+		}
+		default:
+			return { note: 'Detected — no decoder wired for this extension yet.' }
+	}
 }
 
 export default function TokenExtensionsPage() {
-  const extensions = [
-    {
-      name: 'Transfer Hook',
-      description: 'Execute custom logic during token transfers',
-      features: ['Custom transfer validation', 'Fee collection hooks', 'Compliance checks', 'Automated actions'],
-      complexity: 'Advanced',
-      gasImpact: 'Medium'
-    },
-    {
-      name: 'Transfer Fee',
-      description: 'Configurable fees on token transfers',
-      features: ['Percentage or fixed fees', 'Fee recipient configuration', 'Fee history tracking', 'Exemption lists'],
-      complexity: 'Medium',
-      gasImpact: 'Low'
-    },
-    {
-      name: 'Confidential Transfer',
-      description: 'Privacy-preserving token transfers',
-      features: ['Zero-knowledge proofs', 'Hidden amounts', 'Auditable privacy', 'Compliance friendly'],
-      complexity: 'Expert',
-      gasImpact: 'High'
-    },
-    {
-      name: 'Default Account State',
-      description: 'Set default state for new token accounts',
-      features: ['Frozen by default', 'Uninitialized state', 'Custom permissions', 'Batch state management'],
-      complexity: 'Basic',
-      gasImpact: 'Very Low'
-    },
-    {
-      name: 'Interest Bearing',
-      description: 'Tokens that accrue interest over time',
-      features: ['Configurable interest rates', 'Compound interest', 'Interest history', 'Rate adjustments'],
-      complexity: 'Medium',
-      gasImpact: 'Low'
-    },
-    {
-      name: 'Metadata Pointer',
-      description: 'Point to off-chain or on-chain metadata',
-      features: ['Flexible metadata storage', 'Update mechanisms', 'Version control', 'IPFS integration'],
-      complexity: 'Basic',
-      gasImpact: 'Very Low'
-    }
-  ]
+	const { connection } = useConnection()
+	const [mintAddress, setMintAddress] = useState('')
+	const [loading, setLoading] = useState(false)
+	const [report, setReport] = useState<MintReport | null>(null)
+	const [error, setError] = useState<string | null>(null)
 
-  const tools = [
-    {
-      title: '🔧 Extension Configuration',
-      description: 'Configure and deploy Token-2022 extensions',
-      actions: ['Create new token with extensions', 'Add extensions to existing tokens', 'Configure extension parameters', 'Test extension functionality']
-    },
-    {
-      title: '🔄 Migration Planning',
-      description: 'Plan and execute migrations from SPL Token to Token-2022',
-      actions: ['Analyze current token usage', 'Plan migration strategy', 'Estimate migration costs', 'Execute phased migration']
-    },
-    {
-      title: '✅ Compatibility Checker',
-      description: 'Check compatibility with existing integrations',
-      actions: ['Scan for compatibility issues', 'Generate compatibility reports', 'Suggest migration paths', 'Test with major DEXs']
-    },
-    {
-      title: '💰 Cost Estimator',
-      description: 'Estimate costs for extension deployment and usage',
-      actions: ['Calculate deployment costs', 'Estimate ongoing fees', 'Compare extension costs', 'ROI analysis']
-    }
-  ]
+	const inspect = async () => {
+		setError(null)
+		setReport(null)
+		if (!mintAddress.trim()) {
+			setError('Enter a token mint address.')
+			return
+		}
 
-  return (
-    <div className="min-h-screen bg-gray-900 py-8">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">
-            🪙 Token Extensions Manager
-          </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Advanced management tools for Token-2022 extensions. Configure, migrate, and optimize 
-            next-generation token features with enterprise-grade tooling and compatibility checks.
-          </p>
-        </div>
+		setLoading(true)
+		try {
+			const mintPk = new PublicKey(mintAddress.trim())
+			const accountInfo = await connection.getAccountInfo(mintPk)
+			if (!accountInfo) throw new Error('Account not found on the current network.')
 
-        {/* Status Banner */}
-        <div className="bg-green-900/20 border border-green-500/30 p-4 rounded-lg mb-8 text-center">
-          <div className="flex items-center justify-center space-x-2">
-            <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-            <span className="text-green-400 font-medium">Tool Status: Ready for Production</span>
-          </div>
-        </div>
+			const programId = accountInfo.owner.equals(TOKEN_2022_PROGRAM_ID) ? 'token-2022' : accountInfo.owner.equals(TOKEN_PROGRAM_ID) ? 'spl-token' : null
+			if (!programId) {
+				throw new Error(`Account owner is ${accountInfo.owner.toBase58()}, not an SPL-Token / Token-2022 mint.`)
+			}
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <button className="bg-blue-600 hover:bg-blue-700 p-6 rounded-lg text-center transition-colors">
-            <div className="text-2xl mb-2">🔧</div>
-            <div className="text-white font-medium">Configure Extensions</div>
-            <div className="text-blue-200 text-sm">Set up token extensions</div>
-          </button>
-          
-          <button className="bg-green-600 hover:bg-green-700 p-6 rounded-lg text-center transition-colors">
-            <div className="text-2xl mb-2">🔄</div>
-            <div className="text-white font-medium">Plan Migration</div>
-            <div className="text-green-200 text-sm">Migrate from SPL Token</div>
-          </button>
-          
-          <button className="bg-purple-600 hover:bg-purple-700 p-6 rounded-lg text-center transition-colors">
-            <div className="text-2xl mb-2">✅</div>
-            <div className="text-white font-medium">Check Compatibility</div>
-            <div className="text-purple-200 text-sm">Verify integrations</div>
-          </button>
-          
-          <button className="bg-orange-600 hover:bg-orange-700 p-6 rounded-lg text-center transition-colors">
-            <div className="text-2xl mb-2">💰</div>
-            <div className="text-white font-medium">Estimate Costs</div>
-            <div className="text-orange-200 text-sm">Calculate expenses</div>
-          </button>
-        </div>
+			const mint = await getMint(connection, mintPk, undefined, accountInfo.owner)
 
-        {/* Available Extensions */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-white text-center mb-8">
-            🎛️ Available Extensions
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {extensions.map((extension) => (
-              <div key={extension.name} className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-semibold text-white">
-                    {extension.name}
-                  </h3>
-                  <div className="flex space-x-2">
-                    <span className={`px-2 py-1 text-xs rounded ${
-                      extension.complexity === 'Basic' ? 'bg-green-900/30 text-green-400' :
-                      extension.complexity === 'Medium' ? 'bg-yellow-900/30 text-yellow-400' :
-                      extension.complexity === 'Advanced' ? 'bg-orange-900/30 text-orange-400' :
-                      'bg-red-900/30 text-red-400'
-                    }`}>
-                      {extension.complexity}
-                    </span>
-                  </div>
-                </div>
-                
-                <p className="text-gray-300 text-sm mb-4">
-                  {extension.description}
-                </p>
+			const decoded: DecodedExtension[] = []
+			if (programId === 'token-2022' && mint.tlvData.length > 0) {
+				const extTypes = getExtensionTypes(mint.tlvData)
+				for (const e of extTypes) {
+					decoded.push({ id: e, label: EXTENSION_LABELS[e] ?? `Unknown(${e})`, details: decodeExtension(e, mint) })
+				}
+			}
 
-                <div className="mb-4">
-                  <div className="text-xs text-gray-400 mb-1">Gas Impact: {extension.gasImpact}</div>
-                  <div className={`h-1 rounded-full ${
-                    extension.gasImpact === 'Very Low' ? 'bg-green-600' :
-                    extension.gasImpact === 'Low' ? 'bg-yellow-600' :
-                    extension.gasImpact === 'Medium' ? 'bg-orange-600' :
-                    'bg-red-600'
-                  }`}></div>
-                </div>
+			let metadata: MintReport['metadata'] = null
+			if (programId === 'token-2022') {
+				try {
+					const tm = await getTokenMetadata(connection, mintPk)
+					if (tm) {
+						metadata = {
+							name: tm.name,
+							symbol: tm.symbol,
+							uri: tm.uri,
+							additional: tm.additionalMetadata.map(([k, v]) => [k, v] as [string, string]),
+						}
+					}
+				} catch {
+					// metadata extension may not be present — that's fine
+				}
+			}
 
-                <ul className="space-y-1">
-                  {extension.features.map((feature, index) => (
-                    <li key={index} className="flex items-center text-sm text-gray-400">
-                      <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
+			setReport({
+				address: mintPk.toBase58(),
+				programId,
+				decimals: mint.decimals,
+				supply: mint.supply.toString(),
+				mintAuthority: fmtPk(mint.mintAuthority),
+				freezeAuthority: fmtPk(mint.freezeAuthority),
+				extensions: decoded,
+				metadata,
+			})
+		} catch (err) {
+			setError(err instanceof Error ? err.message : 'Failed to inspect mint')
+		} finally {
+			setLoading(false)
+		}
+	}
 
-                <button className="w-full mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors">
-                  Configure Extension
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
+	return (
+		<div className='container mx-auto px-4 py-8 max-w-6xl'>
+			<div className='mb-8'>
+				<h1 className='font-pixel text-2xl text-green-400 mb-2 flex items-center gap-3'>
+					<span className='animate-pulse'>▸</span>
+					TOKEN-2022 EXTENSIONS INSPECTOR
+				</h1>
+				<p className='font-mono text-sm text-gray-400'>Decode every Token-2022 extension on a mint: transfer fees, interest, metadata, transfer hooks, permanent delegate, and more.</p>
+			</div>
 
-        {/* Management Tools */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-white text-center mb-8">
-            🛠️ Management Tools
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {tools.map((tool) => (
-              <div key={tool.title} className="bg-gray-800 rounded-lg border border-gray-700 p-6">
-                <h3 className="text-xl font-semibold text-white mb-3">
-                  {tool.title}
-                </h3>
-                <p className="text-gray-300 mb-4">
-                  {tool.description}
-                </p>
-                <ul className="space-y-2 mb-6">
-                  {tool.actions.map((action, index) => (
-                    <li key={index} className="flex items-center text-sm text-gray-400">
-                      <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-3"></span>
-                      {action}
-                    </li>
-                  ))}
-                </ul>
-                <button className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors">
-                  Launch Tool
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
+			<PixelCard>
+				<div className='space-y-4'>
+					<div className='border-b-4 border-green-400/20 pb-3'>
+						<h3 className='font-pixel text-sm text-green-400'>🔍 INSPECT A MINT</h3>
+					</div>
+					<div className='flex flex-col md:flex-row gap-3'>
+						<div className='flex-1'>
+							<PixelInput label='MINT ADDRESS' value={mintAddress} onChange={(e) => setMintAddress(e.target.value)} placeholder='Token mint pubkey' />
+						</div>
+						<div className='flex items-end'>
+							<PixelButton onClick={inspect} disabled={loading} className='h-12'>
+								{loading ? <Loader2 className='h-4 w-4 animate-spin' /> : <Search className='h-4 w-4' />}
+								[INSPECT]
+							</PixelButton>
+						</div>
+					</div>
+				</div>
+			</PixelCard>
 
-        {/* Migration Guide */}
-        <div className="bg-gray-800 p-8 rounded-lg border border-gray-700 mb-12">
-          <h2 className="text-2xl font-bold text-white text-center mb-8">
-            🔄 Migration Strategy Guide
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold text-blue-400 mb-4">Phase 1: Assessment</h3>
-              <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Analyze current token usage</li>
-                <li>• Identify required extensions</li>
-                <li>• Check integration compatibility</li>
-                <li>• Estimate migration costs</li>
-                <li>• Plan rollback strategy</li>
-                <li>• Create testing timeline</li>
-              </ul>
-            </div>
+			{error && (
+				<div className='mt-6 p-3 bg-red-900/20 border-2 border-red-600/30 font-mono text-sm text-red-400 flex items-start gap-2'>
+					<AlertTriangle className='h-4 w-4 mt-0.5 flex-shrink-0' />
+					{error}
+				</div>
+			)}
 
-            <div>
-              <h3 className="text-lg font-semibold text-green-400 mb-4">Phase 2: Preparation</h3>
-              <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Deploy test tokens on devnet</li>
-                <li>• Configure extensions</li>
-                <li>• Test with major integrations</li>
-                <li>• Update documentation</li>
-                <li>• Prepare migration scripts</li>
-                <li>• Coordinate with partners</li>
-              </ul>
-            </div>
+			{report && (
+				<div className='mt-6 space-y-6'>
+					<PixelCard>
+						<div className='space-y-3'>
+							<div className='border-b-4 border-green-400/20 pb-3 flex items-center gap-2'>
+								<Hash className='h-4 w-4 text-green-400' />
+								<h3 className='font-pixel text-sm text-green-400'>MINT INFO</h3>
+							</div>
+							<div className='grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-xs'>
+								<KV k='Address' v={report.address} mono />
+								<KV k='Program' v={report.programId === 'token-2022' ? 'Token-2022' : 'SPL Token (classic)'} />
+								<KV k='Decimals' v={String(report.decimals)} />
+								<KV k='Supply' v={report.supply} />
+								<KV k='Mint Authority' v={report.mintAuthority ?? 'None (fixed supply)'} mono />
+								<KV k='Freeze Authority' v={report.freezeAuthority ?? 'None'} mono />
+							</div>
+						</div>
+					</PixelCard>
 
-            <div>
-              <h3 className="text-lg font-semibold text-purple-400 mb-4">Phase 3: Execution</h3>
-              <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Deploy new token on mainnet</li>
-                <li>• Execute phased migration</li>
-                <li>• Monitor system health</li>
-                <li>• Update integrations</li>
-                <li>• Communicate with users</li>
-                <li>• Complete final migration</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+					{report.metadata && (
+						<PixelCard>
+							<div className='space-y-3'>
+								<div className='border-b-4 border-green-400/20 pb-3'>
+									<h3 className='font-pixel text-sm text-green-400'>📛 ON-CHAIN METADATA</h3>
+								</div>
+								<div className='grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-xs'>
+									<KV k='Name' v={report.metadata.name} />
+									<KV k='Symbol' v={report.metadata.symbol} />
+								</div>
+								<KV k='URI' v={report.metadata.uri} mono />
+								{report.metadata.additional.length > 0 && (
+									<div className='space-y-1'>
+										<div className='font-pixel text-xs text-gray-400'>Additional fields:</div>
+										{report.metadata.additional.map(([k, v]) => (
+											<KV key={k} k={k} v={v} mono />
+										))}
+									</div>
+								)}
+							</div>
+						</PixelCard>
+					)}
 
-        {/* Compatibility Matrix */}
-        <div className="bg-gray-800 p-8 rounded-lg border border-gray-700 mb-12">
-          <h2 className="text-2xl font-bold text-white text-center mb-8">
-            🔌 Integration Compatibility
-          </h2>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-600">
-                  <th className="text-left text-gray-300 pb-3">Platform</th>
-                  <th className="text-center text-gray-300 pb-3">SPL Token</th>
-                  <th className="text-center text-gray-300 pb-3">Token-2022</th>
-                  <th className="text-center text-gray-300 pb-3">Extensions</th>
-                  <th className="text-center text-gray-300 pb-3">Status</th>
-                </tr>
-              </thead>
-              <tbody className="text-gray-400">
-                <tr className="border-b border-gray-700">
-                  <td className="py-3">Jupiter</td>
-                  <td className="text-center"><span className="text-green-400">✓</span></td>
-                  <td className="text-center"><span className="text-green-400">✓</span></td>
-                  <td className="text-center"><span className="text-yellow-400">Partial</span></td>
-                  <td className="text-center"><span className="text-green-400">Compatible</span></td>
-                </tr>
-                <tr className="border-b border-gray-700">
-                  <td className="py-3">Raydium</td>
-                  <td className="text-center"><span className="text-green-400">✓</span></td>
-                  <td className="text-center"><span className="text-green-400">✓</span></td>
-                  <td className="text-center"><span className="text-yellow-400">Limited</span></td>
-                  <td className="text-center"><span className="text-yellow-400">Testing</span></td>
-                </tr>
-                <tr className="border-b border-gray-700">
-                  <td className="py-3">Orca</td>
-                  <td className="text-center"><span className="text-green-400">✓</span></td>
-                  <td className="text-center"><span className="text-green-400">✓</span></td>
-                  <td className="text-center"><span className="text-red-400">None</span></td>
-                  <td className="text-center"><span className="text-yellow-400">Planned</span></td>
-                </tr>
-                <tr className="border-b border-gray-700">
-                  <td className="py-3">Phantom Wallet</td>
-                  <td className="text-center"><span className="text-green-400">✓</span></td>
-                  <td className="text-center"><span className="text-green-400">✓</span></td>
-                  <td className="text-center"><span className="text-green-400">Full</span></td>
-                  <td className="text-center"><span className="text-green-400">Compatible</span></td>
-                </tr>
-                <tr>
-                  <td className="py-3">Magic Eden</td>
-                  <td className="text-center"><span className="text-green-400">✓</span></td>
-                  <td className="text-center"><span className="text-yellow-400">Beta</span></td>
-                  <td className="text-center"><span className="text-yellow-400">Partial</span></td>
-                  <td className="text-center"><span className="text-yellow-400">In Progress</span></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+					<PixelCard>
+						<div className='space-y-3'>
+							<div className='border-b-4 border-green-400/20 pb-3 flex items-center gap-2'>
+								<Layers className='h-4 w-4 text-green-400' />
+								<h3 className='font-pixel text-sm text-green-400'>EXTENSIONS ({report.extensions.length})</h3>
+							</div>
 
-        {/* Use Cases */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-white text-center mb-8">
-            💼 Enterprise Use Cases
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 p-6 rounded-lg border border-blue-500/30">
-              <h3 className="text-xl font-semibold text-white mb-4">🏦 Financial Services</h3>
-              <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Confidential transfers for privacy</li>
-                <li>• Transfer fees for revenue sharing</li>
-                <li>• Interest bearing tokens for savings</li>
-                <li>• Default frozen state for compliance</li>
-                <li>• Transfer hooks for KYC/AML</li>
-                <li>• Metadata for regulatory reporting</li>
-              </ul>
-            </div>
+							{report.programId === 'spl-token' && <div className='p-3 bg-blue-900/20 border-2 border-blue-600/30 font-mono text-xs text-blue-300'>This mint uses the classic SPL Token program — Token-2022 extensions are not applicable.</div>}
 
-            <div className="bg-gradient-to-br from-green-900/20 to-teal-900/20 p-6 rounded-lg border border-green-500/30">
-              <h3 className="text-xl font-semibold text-white mb-4">🎮 Gaming & Entertainment</h3>
-              <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Transfer hooks for game mechanics</li>
-                <li>• Metadata pointers for item properties</li>
-                <li>• Interest bearing rewards tokens</li>
-                <li>• Default states for character items</li>
-                <li>• Fee collection for marketplace</li>
-                <li>• Confidential transfers for auctions</li>
-              </ul>
-            </div>
+							{report.programId === 'token-2022' && report.extensions.length === 0 && <div className='font-mono text-sm text-gray-400'>No extensions are present on this Token-2022 mint.</div>}
 
-            <div className="bg-gradient-to-br from-orange-900/20 to-red-900/20 p-6 rounded-lg border border-orange-500/30">
-              <h3 className="text-xl font-semibold text-white mb-4">🏢 Enterprise</h3>
-              <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Employee token programs</li>
-                <li>• Supply chain tracking tokens</li>
-                <li>• Loyalty and reward programs</li>
-                <li>• Internal currency systems</li>
-                <li>• Dividend distribution tokens</li>
-                <li>• Access control mechanisms</li>
-              </ul>
-            </div>
+							<div className='space-y-3'>
+								{report.extensions.map((ext) => (
+									<div key={ext.id} className='p-3 bg-gray-800 border-2 border-gray-700 space-y-2'>
+										<div className='flex items-center justify-between'>
+											<span className='font-pixel text-xs text-green-400'>{ext.label}</span>
+											<span className='font-mono text-xs text-gray-500'>id={ext.id}</span>
+										</div>
+										<div className='space-y-1 font-mono text-xs'>
+											{Object.entries(ext.details).map(([k, v]) => (
+												<KV key={k} k={k} v={v == null ? 'null' : String(v)} mono />
+											))}
+										</div>
+									</div>
+								))}
+							</div>
+						</div>
+					</PixelCard>
+				</div>
+			)}
+		</div>
+	)
+}
 
-            <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 p-6 rounded-lg border border-purple-500/30">
-              <h3 className="text-xl font-semibold text-white mb-4">🌐 DeFi Protocols</h3>
-              <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Fee collection for protocol revenue</li>
-                <li>• Yield bearing LP tokens</li>
-                <li>• Privacy-preserving transactions</li>
-                <li>• Automated compliance hooks</li>
-                <li>• Dynamic metadata for positions</li>
-                <li>• Default states for risk management</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Getting Started */}
-        <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 p-8 rounded-lg border border-blue-500/30">
-          <h2 className="text-2xl font-bold text-white text-center mb-6">
-            🚀 Getting Started
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Quick Setup</h3>
-              <ol className="space-y-2 text-gray-300 text-sm">
-                <li>1. Connect your Solana wallet</li>
-                <li>2. Choose token extensions needed</li>
-                <li>3. Configure extension parameters</li>
-                <li>4. Test on devnet environment</li>
-                <li>5. Check integration compatibility</li>
-                <li>6. Deploy to mainnet</li>
-              </ol>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Best Practices</h3>
-              <ul className="space-y-2 text-gray-300 text-sm">
-                <li>• Start with basic extensions</li>
-                <li>• Test thoroughly on devnet</li>
-                <li>• Check major DEX compatibility</li>
-                <li>• Plan migration in phases</li>
-                <li>• Monitor gas costs carefully</li>
-                <li>• Document extension configurations</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+function KV({ k, v, mono }: { k: string; v: string; mono?: boolean }) {
+	return (
+		<div className='flex flex-col md:flex-row md:items-start md:gap-3'>
+			<div className='text-gray-400 md:w-48 md:flex-shrink-0'>{k}</div>
+			<div className={`text-white break-all ${mono ? 'font-mono' : ''}`}>{v}</div>
+		</div>
+	)
 }

@@ -69,24 +69,26 @@ export default function JitoBundlePage() {
   }
 
   const handleSimulate = async () => {
+    if (!connected || !publicKey) return
     if (transactions.length === 0) return
-    
+
     try {
-      const result = await simulateBundle(transactions)
-      console.log('Simulation result:', result)
-    } catch (error) {
-      console.error('Simulation failed:', error)
+      await simulateBundle(transactions)
+    } catch (err) {
+      // hook already surfaces this in `error` state — keep console for dev
+      console.error('Simulation failed:', err)
     }
   }
 
   const handleSubmit = async () => {
+    if (!connected || !publicKey) return
     if (transactions.length === 0) return
-    
+    if (!isJitoSupported) return
+
     try {
-      const result = await submitBundle(transactions)
-      console.log('Bundle result:', result)
-    } catch (error) {
-      console.error('Bundle submission failed:', error)
+      await submitBundle(transactions)
+    } catch (err) {
+      console.error('Bundle submission failed:', err)
     }
   }
 

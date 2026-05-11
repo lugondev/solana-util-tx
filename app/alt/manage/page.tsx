@@ -9,6 +9,7 @@ import {PixelInput} from '@/components/ui/pixel-input'
 import {PixelToast} from '@/components/ui/pixel-toast'
 import {Search, ExternalLink, RefreshCw, Eye} from 'lucide-react'
 import {getAddressLookupTable} from '@/lib/solana/alt/create-alt'
+import {ALTOperations} from '@/components/alt/alt-operations'
 
 interface ALTInfo {
 	address: string
@@ -143,30 +144,23 @@ export default function ManageALTPage() {
 
 					{altInfo && (
 						<PixelCard>
-							<div className='space-y-4'>
-								<div className='border-b-4 border-green-400/20 pb-3'>
-									<h3 className='font-pixel text-sm text-green-400'>🛠️ ACTIONS</h3>
-								</div>
-
-								<div className='space-y-3'>
-									<PixelButton onClick={() => window.open(`https://explorer.solana.com/address/${altInfo.address}`, '_blank')} variant='secondary' className='w-full'>
-										<ExternalLink className='h-4 w-4' />
-										[VIEW ON EXPLORER]
-									</PixelButton>
-
-									{/* ALT Operations Component will be added here */}
-									<div className='font-mono text-xs text-gray-400'>
-										<p className='mb-2'>Available operations:</p>
-										<ul className='list-disc list-inside space-y-1 ml-2'>
-											<li>Extend ALT - Add more addresses</li>
-											<li>Deactivate ALT - Start cooldown period</li>
-											<li>Freeze ALT - Make immutable</li>
-											<li>Close ALT - Reclaim rent</li>
-										</ul>
-									</div>
-								</div>
+							<div className='space-y-3'>
+								<PixelButton onClick={() => window.open(`https://explorer.solana.com/address/${altInfo.address}`, '_blank')} variant='secondary' className='w-full'>
+									<ExternalLink className='h-4 w-4' />
+									[VIEW ON EXPLORER]
+								</PixelButton>
 							</div>
 						</PixelCard>
+					)}
+
+					{altInfo && (
+						<ALTOperations
+							altAddress={altInfo.address}
+							authority={altInfo.authority ? altInfo.authority.toBase58() : null}
+							isDeactivated={!altInfo.isActive}
+							isFrozen={altInfo.isFrozen}
+							onOperationComplete={handleSearchALT}
+						/>
 					)}
 				</div>
 

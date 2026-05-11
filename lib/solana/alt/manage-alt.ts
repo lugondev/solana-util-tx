@@ -207,170 +207,100 @@ export function validateALTAddress(address: string): { valid: boolean; error?: s
 }
 
 /**
- * Extend an Address Lookup Table
- * Add more addresses to an existing ALT
+ * Build an unsigned transaction that extends an ALT with new addresses.
+ * Signing and sending are the caller's responsibility (wallet adapter).
  */
-export async function extendALT(
+export async function buildExtendALTTransaction(
   connection: Connection,
   altAddress: PublicKey,
   authority: PublicKey,
   addressesToAdd: PublicKey[]
-): Promise<{
-  success: boolean
-  signature?: string
-  error?: string
-}> {
-  try {
-    if (addressesToAdd.length === 0) {
-      return { success: false, error: 'No addresses to add' }
-    }
-
-    if (addressesToAdd.length > 30) {
-      return { success: false, error: 'Maximum 30 addresses per transaction' }
-    }
-
-    const extendInstruction = AddressLookupTableProgram.extendLookupTable({
-      lookupTable: altAddress,
-      authority,
-      payer: authority,
-      addresses: addressesToAdd,
-    })
-
-    const transaction = new Transaction().add(extendInstruction)
-    transaction.feePayer = authority
-    transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
-
-    // Note: This returns an unsigned transaction that needs to be signed by the wallet
-    return {
-      success: true,
-      error: 'Transaction created - needs to be signed and sent by wallet'
-    }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to extend ALT'
-    }
+): Promise<Transaction> {
+  if (addressesToAdd.length === 0) {
+    throw new Error('No addresses to add')
   }
+  if (addressesToAdd.length > 30) {
+    throw new Error('Maximum 30 addresses per extend transaction')
+  }
+
+  const ix = AddressLookupTableProgram.extendLookupTable({
+    lookupTable: altAddress,
+    authority,
+    payer: authority,
+    addresses: addressesToAdd,
+  })
+
+  const tx = new Transaction().add(ix)
+  tx.feePayer = authority
+  tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+  return tx
 }
 
 /**
- * Deactivate an Address Lookup Table
- * After deactivation, ALT enters a cooldown period before it can be closed
+ * Build an unsigned transaction that deactivates an ALT.
+ * After deactivation the ALT enters a ~513-slot cooldown before it can be closed.
  */
-export async function deactivateALT(
+export async function buildDeactivateALTTransaction(
   connection: Connection,
   altAddress: PublicKey,
   authority: PublicKey
-): Promise<{
-  success: boolean
-  signature?: string
-  error?: string
-  deactivationSlot?: number
-}> {
-  try {
-    const deactivateInstruction = AddressLookupTableProgram.deactivateLookupTable({
-      lookupTable: altAddress,
-      authority,
-    })
+): Promise<Transaction> {
+  const ix = AddressLookupTableProgram.deactivateLookupTable({
+    lookupTable: altAddress,
+    authority,
+  })
 
-    const transaction = new Transaction().add(deactivateInstruction)
-    transaction.feePayer = authority
-    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash()
-    transaction.recentBlockhash = blockhash
-
-    const slot = await connection.getSlot()
-
-    return {
-      success: true,
-      deactivationSlot: slot,
-      error: 'Transaction created - needs to be signed and sent by wallet'
-    }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to deactivate ALT'
-    }
-  }
+  const tx = new Transaction().add(ix)
+  tx.feePayer = authority
+  tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+  return tx
 }
 
 /**
- * Freeze an Address Lookup Table
- * Makes the ALT immutable - no more addresses can be added
+ * Build an unsigned transaction that freezes an ALT — makes it immutable, no more extends allowed.
  */
-export async function freezeALT(
+export async function buildFreezeALTTransaction(
   connection: Connection,
   altAddress: PublicKey,
   authority: PublicKey
-): Promise<{
-  success: boolean
-  signature?: string
-  error?: string
-}> {
-  try {
-    const freezeInstruction = AddressLookupTableProgram.freezeLookupTable({
-      lookupTable: altAddress,
-      authority,
-    })
+): Promise<Transaction> {
+  const ix = AddressLookupTableProgram.freezeLookupTable({
+    lookupTable: altAddress,
+    authority,
+  })
 
-    const transaction = new Transaction().add(freezeInstruction)
-    transaction.feePayer = authority
-    transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
-
-    return {
-      success: true,
-      error: 'Transaction created - needs to be signed and sent by wallet'
-    }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to freeze ALT'
-    }
-  }
+  const tx = new Transaction().add(ix)
+  tx.feePayer = authority
+  tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+  return tx
 }
 
 /**
- * Close an Address Lookup Table
- * Can only close after deactivation cooldown period
+ * Build an unsigned transaction that closes an ALT and reclaims rent.
+ * Caller MUST deactivate first and wait the cooldown — otherwise the RPC will reject.
  */
-export async function closeALT(
+export async function buildCloseALTTransaction(
   connection: Connection,
   altAddress: PublicKey,
   authority: PublicKey,
   recipient: PublicKey
-): Promise<{
-  success: boolean
-  signature?: string
-  error?: string
-  reclaimedLamports?: number
-}> {
-  try {
-    // Check if ALT is deactivated
-    const altAccount = await connection.getAccountInfo(altAddress)
-    if (!altAccount) {
-      return { success: false, error: 'ALT account not found' }
-    }
-
-    const closeInstruction = AddressLookupTableProgram.closeLookupTable({
-      lookupTable: altAddress,
-      authority,
-      recipient,
-    })
-
-    const transaction = new Transaction().add(closeInstruction)
-    transaction.feePayer = authority
-    transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
-
-    return {
-      success: true,
-      reclaimedLamports: altAccount.lamports,
-      error: 'Transaction created - needs to be signed and sent by wallet'
-    }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to close ALT'
-    }
+): Promise<{ transaction: Transaction; reclaimedLamports: number }> {
+  const altAccount = await connection.getAccountInfo(altAddress)
+  if (!altAccount) {
+    throw new Error('ALT account not found')
   }
+
+  const ix = AddressLookupTableProgram.closeLookupTable({
+    lookupTable: altAddress,
+    authority,
+    recipient,
+  })
+
+  const tx = new Transaction().add(ix)
+  tx.feePayer = authority
+  tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+
+  return { transaction: tx, reclaimedLamports: altAccount.lamports }
 }
 
 /**

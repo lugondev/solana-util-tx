@@ -1,333 +1,297 @@
 import { Connection } from '@solana/web3.js'
 
 export interface JitoTipData {
-  timestamp: string
-  tip: number
-  bundleSuccess: boolean
-  blockPosition: number
-  validator: string
-  slot: number
-  blockTime: number
+	timestamp: string
+	tip: number
+	bundleSuccess: boolean
+	blockPosition: number
+	validator: string
+	slot: number
+	blockTime: number
 }
 
 export interface JitoNetworkStats {
-  avgTip: number
-  successRate: number
-  recommendedTip: number
-  blockTime: number
-  competition: 'LOW' | 'MEDIUM' | 'HIGH'
-  volatility: 'LOW' | 'MEDIUM' | 'HIGH'
+	avgTip: number
+	successRate: number
+	recommendedTip: number
+	blockTime: number
+	competition: 'LOW' | 'MEDIUM' | 'HIGH'
+	volatility: 'LOW' | 'MEDIUM' | 'HIGH'
 }
 
-export interface JitoValidatorInfo {
-  identity: string
-  name: string
-  commission: number
-  totalStake: number
-  tipReceived24h: number
+export interface JitoTipPercentiles {
+	timestamp: string
+	p25: number
+	p50: number
+	p75: number
+	p95: number
+	p99: number
+	emaP50: number
+}
+
+// Public Jito tip-floor API — returns landed-tip percentiles updated roughly once per second.
+const JITO_TIP_FLOOR_URL = 'https://bundles.jito.wtf/api/v1/bundles/tip_floor'
+
+type RawTipFloor = {
+	time: string
+	landed_tips_25th_percentile: number
+	landed_tips_50th_percentile: number
+	landed_tips_75th_percentile: number
+	landed_tips_95th_percentile: number
+	landed_tips_99th_percentile: number
+	ema_landed_tips_50th_percentile: number
 }
 
 export class JitoTipTracker {
-  private connection: Connection
-  private tipHistory: JitoTipData[] = []
-  private updateInterval: NodeJS.Timeout | null = null
+	private connection: Connection
+	private tipHistory: JitoTipData[] = []
+	private percentileHistory: JitoTipPercentiles[] = []
+	private updateInterval: ReturnType<typeof setInterval> | null = null
 
-  constructor(connection: Connection) {
-    this.connection = connection
-  }
+	constructor(connection: Connection) {
+		this.connection = connection
+	}
 
-  /**
-   * Start tracking tips (simulated for now)
-   */
-  startTracking(callback?: (data: JitoTipData) => void): void {
-    if (this.updateInterval) {
-      this.stopTracking()
-    }
+	/**
+	 * Start tracking tips against the public Jito tip-floor API.
+	 * The API returns landed-tip percentiles; we treat each fetch as one sample.
+	 */
+	startTracking(callback?: (data: JitoTipData) => void): void {
+		if (this.updateInterval) {
+			this.stopTracking()
+		}
 
-    this.updateInterval = setInterval(async () => {
-      try {
-        const tipData = await this.fetchLatestTipData()
-        this.tipHistory.unshift(tipData)
-        
-        // Keep only last 100 entries
-        if (this.tipHistory.length > 100) {
-          this.tipHistory = this.tipHistory.slice(0, 100)
-        }
+		const tick = async () => {
+			try {
+				const tipData = await this.fetchLatestTipData()
+				this.tipHistory.unshift(tipData)
+				if (this.tipHistory.length > 100) {
+					this.tipHistory = this.tipHistory.slice(0, 100)
+				}
+				if (callback) callback(tipData)
+			} catch (error) {
+				console.error('Error fetching tip data:', error)
+			}
+		}
 
-        if (callback) {
-          callback(tipData)
-        }
-      } catch (error) {
-        console.error('Error fetching tip data:', error)
-      }
-    }, 10000) // Update every 10 seconds
-  }
+		// fire immediately so the UI shows real data without a 10s delay
+		void tick()
+		this.updateInterval = setInterval(tick, 10000)
+	}
 
-  /**
-   * Stop tracking tips
-   */
-  stopTracking(): void {
-    if (this.updateInterval) {
-      clearInterval(this.updateInterval)
-      this.updateInterval = null
-    }
-  }
+	stopTracking(): void {
+		if (this.updateInterval) {
+			clearInterval(this.updateInterval)
+			this.updateInterval = null
+		}
+	}
 
-  /**
-   * Get tip history
-   */
-  getTipHistory(): JitoTipData[] {
-    return [...this.tipHistory]
-  }
+	getTipHistory(): JitoTipData[] {
+		return [...this.tipHistory]
+	}
 
-  /**
-   * Get network statistics
-   */
-  getNetworkStats(): JitoNetworkStats {
-    if (this.tipHistory.length === 0) {
-      return {
-        avgTip: 0.01,
-        successRate: 75,
-        recommendedTip: 0.02,
-        blockTime: 400,
-        competition: 'MEDIUM',
-        volatility: 'LOW'
-      }
-    }
+	getPercentileHistory(): JitoTipPercentiles[] {
+		return [...this.percentileHistory]
+	}
 
-    const successful = this.tipHistory.filter(tip => tip.bundleSuccess)
-    const avgTip = this.tipHistory.reduce((sum, tip) => sum + tip.tip, 0) / this.tipHistory.length
-    const successRate = (successful.length / this.tipHistory.length) * 100
+	getLatestPercentiles(): JitoTipPercentiles | null {
+		return this.percentileHistory[0] ?? null
+	}
 
-    // Calculate recommended tip (75th percentile of successful tips)
-    const successfulTips = successful.map(tip => tip.tip).sort((a, b) => a - b)
-    const p75Index = Math.floor(successfulTips.length * 0.75)
-    const recommendedTip = successfulTips[p75Index] || avgTip * 1.5
+	getNetworkStats(): JitoNetworkStats {
+		const latest = this.getLatestPercentiles()
 
-    // Calculate competition level based on tip variance
-    const tipVariance = this.calculateVariance(this.tipHistory.map(t => t.tip))
-    const competition = tipVariance > 0.01 ? 'HIGH' : tipVariance > 0.005 ? 'MEDIUM' : 'LOW'
+		if (!latest && this.tipHistory.length === 0) {
+			// no data yet — return safe defaults so UI doesn't render NaN
+			return {
+				avgTip: 0,
+				successRate: 0,
+				recommendedTip: 0,
+				blockTime: 400,
+				competition: 'LOW',
+				volatility: 'LOW',
+			}
+		}
 
-    // Calculate volatility based on recent tip changes
-    const recentTips = this.tipHistory.slice(0, 10)
-    const volatility = this.calculateVolatility(recentTips.map(t => t.tip))
+		// Derive stats from real percentiles when available, otherwise from local history.
+		const avgTip = latest ? latest.emaP50 : this.tipHistory.reduce((s, t) => s + t.tip, 0) / this.tipHistory.length
+		const recommendedTip = latest ? latest.p75 : avgTip * 1.5
 
-    return {
-      avgTip,
-      successRate,
-      recommendedTip,
-      blockTime: 400, // Approximate Solana block time
-      competition,
-      volatility
-    }
-  }
+		// successRate here = share of recent ticks where percentile data was retrievable.
+		// We can't infer "your bundle would land" from public data — that depends on what
+		// you actually pay versus the floor at submit time. We report the floor coverage instead.
+		const successRate = this.percentileHistory.length > 0 ? 100 : 0
 
-  /**
-   * Fetch latest tip data (simulated with realistic patterns)
-   */
-  private async fetchLatestTipData(): Promise<JitoTipData> {
-    try {
-      // In a real implementation, this would fetch from Jito's API
-      // For now, we simulate realistic tip data based on network conditions
-      
-      const currentSlot = await this.connection.getSlot()
-      const blockTime = Date.now()
-      
-      // Simulate tip patterns - higher tips during peak hours
-      const hour = new Date().getHours()
-      const isPeakHour = hour >= 14 && hour <= 22 // UTC peak hours
-      
-      let baseTip = isPeakHour ? 0.015 : 0.008
-      
-      // Add some randomness with realistic distribution
-      const randomFactor = this.generateRealisticTip()
-      const tip = baseTip * randomFactor
-      
-      // Success rate depends on tip amount relative to current average
-      const currentStats = this.getNetworkStats()
-      const successProbability = Math.min(0.95, Math.max(0.2, tip / (currentStats.avgTip || 0.01)))
-      const bundleSuccess = Math.random() < successProbability
-      
-      // Block position correlates with tip amount
-      const blockPosition = bundleSuccess ? 
-        Math.floor(Math.random() * 3) + 1 : // Successful tips get better positions
-        Math.floor(Math.random() * 5) + 1   // Failed tips are more random
-      
-      return {
-        timestamp: new Date().toISOString(),
-        tip,
-        bundleSuccess,
-        blockPosition,
-        validator: 'Jito (Mainnet)',
-        slot: currentSlot,
-        blockTime
-      }
-    } catch (error) {
-      console.error('Error fetching tip data:', error)
-      
-      // Fallback data
-      return {
-        timestamp: new Date().toISOString(),
-        tip: 0.01,
-        bundleSuccess: Math.random() > 0.3,
-        blockPosition: Math.floor(Math.random() * 5) + 1,
-        validator: 'Jito (Mainnet)',
-        slot: 0,
-        blockTime: Date.now()
-      }
-    }
-  }
+		const recentP50s = this.percentileHistory.slice(0, 20).map((p) => p.p50)
+		const volatility = this.calculateVolatility(recentP50s)
+		const competition = this.classifyCompetition(latest?.p95 ?? avgTip * 3)
 
-  /**
-   * Generate realistic tip amounts using log-normal distribution
-   */
-  private generateRealisticTip(): number {
-    // Most tips are small, few are large (log-normal distribution)
-    const normal = this.boxMullerTransform()
-    return Math.max(0.1, Math.exp(normal * 0.5 + 0.2))
-  }
+		return {
+			avgTip,
+			successRate,
+			recommendedTip,
+			blockTime: 400,
+			competition,
+			volatility,
+		}
+	}
 
-  /**
-   * Box-Muller transformation for normal distribution
-   */
-  private boxMullerTransform(): number {
-    let u = 0, v = 0
-    while(u === 0) u = Math.random() // Converting [0,1) to (0,1)
-    while(v === 0) v = Math.random()
-    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v)
-  }
+	private async fetchLatestTipData(): Promise<JitoTipData> {
+		const percentiles = await this.fetchTipFloor()
+		this.percentileHistory.unshift(percentiles)
+		if (this.percentileHistory.length > 100) {
+			this.percentileHistory = this.percentileHistory.slice(0, 100)
+		}
 
-  /**
-   * Calculate variance
-   */
-  private calculateVariance(values: number[]): number {
-    if (values.length === 0) return 0
-    
-    const mean = values.reduce((sum, val) => sum + val, 0) / values.length
-    const squaredDiffs = values.map(val => Math.pow(val - mean, 2))
-    return squaredDiffs.reduce((sum, val) => sum + val, 0) / values.length
-  }
+		let slot = 0
+		try {
+			slot = await this.connection.getSlot()
+		} catch {
+			// connection may not be on mainnet — slot is non-critical
+		}
 
-  /**
-   * Calculate volatility level
-   */
-  private calculateVolatility(values: number[]): 'LOW' | 'MEDIUM' | 'HIGH' {
-    if (values.length < 2) return 'LOW'
-    
-    const changes = []
-    for (let i = 1; i < values.length; i++) {
-      if (values[i-1] !== 0) {
-        changes.push(Math.abs((values[i] - values[i-1]) / values[i-1]))
-      }
-    }
-    
-    if (changes.length === 0) return 'LOW'
-    
-    const avgChange = changes.reduce((sum, change) => sum + change, 0) / changes.length
-    
-    if (avgChange > 0.3) return 'HIGH'
-    if (avgChange > 0.15) return 'MEDIUM'
-    return 'LOW'
-  }
+		return {
+			timestamp: percentiles.timestamp,
+			tip: percentiles.p50,
+			bundleSuccess: true, // each sample represents a window where bundles did land
+			blockPosition: 0,
+			validator: 'Jito tip-floor',
+			slot,
+			blockTime: Date.parse(percentiles.timestamp) || Date.now(),
+		}
+	}
 
-  /**
-   * Get tip recommendation based on success target
-   */
-  getTipRecommendation(targetSuccessRate: number = 0.8): {
-    tip: number
-    confidence: number
-    reasoning: string
-  } {
-    const stats = this.getNetworkStats()
-    
-    if (this.tipHistory.length < 10) {
-      return {
-        tip: 0.01,
-        confidence: 0.5,
-        reasoning: 'Insufficient data for accurate recommendation'
-      }
-    }
+	/**
+	 * Fetch the latest tip-floor percentiles from Jito's public API.
+	 * Throws if the network call fails — caller decides how to surface it.
+	 */
+	async fetchTipFloor(): Promise<JitoTipPercentiles> {
+		const res = await fetch(JITO_TIP_FLOOR_URL, { cache: 'no-store' })
+		if (!res.ok) {
+			throw new Error(`Jito tip-floor API returned ${res.status}`)
+		}
+		const json = (await res.json()) as RawTipFloor[]
+		const first = Array.isArray(json) ? json[0] : null
+		if (!first) {
+			throw new Error('Jito tip-floor API returned empty payload')
+		}
+		return {
+			timestamp: first.time,
+			p25: first.landed_tips_25th_percentile,
+			p50: first.landed_tips_50th_percentile,
+			p75: first.landed_tips_75th_percentile,
+			p95: first.landed_tips_95th_percentile,
+			p99: first.landed_tips_99th_percentile,
+			emaP50: first.ema_landed_tips_50th_percentile,
+		}
+	}
 
-    // Find tips that achieve target success rate
-    const successfulTips = this.tipHistory
-      .filter(tip => tip.bundleSuccess)
-      .map(tip => tip.tip)
-      .sort((a, b) => a - b)
+	private calculateVolatility(values: number[]): 'LOW' | 'MEDIUM' | 'HIGH' {
+		if (values.length < 2) return 'LOW'
+		const changes: number[] = []
+		for (let i = 1; i < values.length; i++) {
+			if (values[i - 1] !== 0) {
+				changes.push(Math.abs((values[i] - values[i - 1]) / values[i - 1]))
+			}
+		}
+		if (changes.length === 0) return 'LOW'
+		const avgChange = changes.reduce((s, c) => s + c, 0) / changes.length
+		if (avgChange > 0.3) return 'HIGH'
+		if (avgChange > 0.15) return 'MEDIUM'
+		return 'LOW'
+	}
 
-    const targetIndex = Math.floor(successfulTips.length * (1 - targetSuccessRate))
-    const recommendedTip = successfulTips[targetIndex] || stats.recommendedTip
+	private classifyCompetition(p95: number): 'LOW' | 'MEDIUM' | 'HIGH' {
+		if (p95 >= 0.01) return 'HIGH'
+		if (p95 >= 0.001) return 'MEDIUM'
+		return 'LOW'
+	}
 
-    const confidence = Math.min(0.95, this.tipHistory.length / 50)
+	getTipRecommendation(targetSuccessRate: number = 0.8): {
+		tip: number
+		confidence: number
+		reasoning: string
+	} {
+		const latest = this.getLatestPercentiles()
+		if (!latest) {
+			return {
+				tip: 0.0001,
+				confidence: 0,
+				reasoning: 'Waiting for live tip-floor data from Jito API…',
+			}
+		}
 
-    return {
-      tip: recommendedTip,
-      confidence,
-      reasoning: `Based on ${this.tipHistory.length} recent bundles, ${targetSuccessRate * 100}% success rate`
-    }
-  }
+		// Map target success-rate to a percentile of landed tips.
+		// 0.5 → p50, 0.75 → p75, 0.9 → p95, ≥0.95 → p99
+		let tip = latest.p50
+		let percentileLabel = '50th'
+		if (targetSuccessRate >= 0.95) {
+			tip = latest.p99
+			percentileLabel = '99th'
+		} else if (targetSuccessRate >= 0.85) {
+			tip = latest.p95
+			percentileLabel = '95th'
+		} else if (targetSuccessRate >= 0.7) {
+			tip = latest.p75
+			percentileLabel = '75th'
+		}
 
-  /**
-   * Get Jito validator information
-   */
-  async getValidatorInfo(): Promise<JitoValidatorInfo[]> {
-    // In real implementation, this would fetch from Solana RPC and Jito APIs
-    // For now, return mock data with realistic values
-    return [
-      {
-        identity: 'JitoValidator1',
-        name: 'Jito Foundation',
-        commission: 5,
-        totalStake: 2500000,
-        tipReceived24h: 12.5
-      },
-      {
-        identity: 'JitoValidator2', 
-        name: 'Jito Labs',
-        commission: 7,
-        totalStake: 1800000,
-        tipReceived24h: 8.3
-      }
-    ]
-  }
+		const confidence = Math.min(0.95, this.percentileHistory.length / 20)
+		return {
+			tip,
+			confidence,
+			reasoning: `Matches the ${percentileLabel} percentile of landed tips on Jito right now (${tip.toFixed(6)} SOL).`,
+		}
+	}
 
-  /**
-   * Analyze tip efficiency 
-   */
-  analyzeTipEfficiency(userTip: number): {
-    efficiency: number
-    suggestion: string
-    expectedSuccessRate: number
-  } {
-    const stats = this.getNetworkStats()
-    
-    let efficiency = 1.0
-    let suggestion = 'Optimal tip amount'
-    let expectedSuccessRate = 0.5
-    
-    if (userTip < stats.avgTip * 0.5) {
-      efficiency = 0.3
-      suggestion = 'Tip too low - likely to fail'
-      expectedSuccessRate = 0.2
-    } else if (userTip < stats.avgTip) {
-      efficiency = 0.6
-      suggestion = 'Below average - moderate success chance'
-      expectedSuccessRate = 0.5
-    } else if (userTip <= stats.recommendedTip) {
-      efficiency = 0.9
-      suggestion = 'Good tip amount - high success chance'
-      expectedSuccessRate = 0.8
-    } else if (userTip <= stats.recommendedTip * 2) {
-      efficiency = 0.85
-      suggestion = 'High tip - very likely to succeed'
-      expectedSuccessRate = 0.9
-    } else {
-      efficiency = 0.7
-      suggestion = 'Overpaying - consider reducing tip'
-      expectedSuccessRate = 0.95
-    }
-    
-    return { efficiency, suggestion, expectedSuccessRate }
-  }
+	analyzeTipEfficiency(userTip: number): {
+		efficiency: number
+		suggestion: string
+		expectedSuccessRate: number
+	} {
+		const latest = this.getLatestPercentiles()
+		if (!latest) {
+			return {
+				efficiency: 0,
+				suggestion: 'Waiting for live tip-floor data…',
+				expectedSuccessRate: 0,
+			}
+		}
+
+		if (userTip < latest.p25) {
+			return {
+				efficiency: 0.2,
+				suggestion: 'Below 25th percentile — most bundles at this tip do not land.',
+				expectedSuccessRate: 0.15,
+			}
+		}
+		if (userTip < latest.p50) {
+			return {
+				efficiency: 0.5,
+				suggestion: 'Between 25th–50th percentile — moderate chance.',
+				expectedSuccessRate: 0.4,
+			}
+		}
+		if (userTip < latest.p75) {
+			return {
+				efficiency: 0.8,
+				suggestion: 'Between 50th–75th percentile — likely to land.',
+				expectedSuccessRate: 0.7,
+			}
+		}
+		if (userTip < latest.p95) {
+			return {
+				efficiency: 0.95,
+				suggestion: 'Above 75th percentile — strong inclusion probability.',
+				expectedSuccessRate: 0.9,
+			}
+		}
+		return {
+			efficiency: 0.75,
+			suggestion: 'Above 95th percentile — likely overpaying.',
+			expectedSuccessRate: 0.97,
+		}
+	}
 }
 
 export default JitoTipTracker
