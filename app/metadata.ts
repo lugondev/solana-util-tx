@@ -59,36 +59,8 @@ export const metadata: Metadata = {
     siteName: 'Solana Utility Tools',
     title: 'Solana Utility Tools - All-in-One Solana Transaction Platform',
     description: 'Professional 40+ tool platform for Solana blockchain development, DeFi trading, transaction building, and developer utilities.',
-    images: [
-      {
-        url: '/og-image.svg',
-        width: 1200,
-        height: 630,
-        alt: 'Solana Utility Tools - All-in-One Platform for 40+ Professional Tools',
-        type: 'image/svg+xml',
-      },
-      {
-        url: '/preview-transaction-parser.svg',
-        width: 800,
-        height: 450,
-        alt: 'Transaction Parser - Decode raw Solana transactions',
-        type: 'image/svg+xml',
-      },
-      {
-        url: '/preview-jupiter-swap.svg',
-        width: 800,
-        height: 450,
-        alt: 'Jupiter DEX Aggregator - Best token swap rates',
-        type: 'image/svg+xml',
-      },
-      {
-        url: '/preview-jito-bundles.svg',
-        width: 800,
-        height: 450,
-        alt: 'Jito MEV Protection Bundles - Secure transactions',
-        type: 'image/svg+xml',
-      },
-    ],
+    // Primary OG image is generated at build time by app/opengraph-image.tsx (PNG)
+    // — Twitter/Facebook/LinkedIn/Discord don't render SVG previews reliably.
   },
   twitter: {
     card: 'summary_large_image',
@@ -96,12 +68,7 @@ export const metadata: Metadata = {
     creator: '@lugondev',
     title: 'Solana Utility Tools - 40+ Professional Blockchain Tools',
     description: 'Professional platform for Solana development: transaction parsing, DEX trading, MEV protection, token management, and 40+ developer utilities.',
-    images: [
-      {
-        url: '/og-image.svg',
-        alt: 'Solana Utility Tools - Professional blockchain development platform',
-      }
-    ],
+    // Twitter image is generated at build time by app/twitter-image.tsx (PNG)
   },
   robots: {
     index: true,

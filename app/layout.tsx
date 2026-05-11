@@ -11,8 +11,6 @@ export {metadata}
 export const viewport: Viewport = {
 	width: 'device-width',
 	initialScale: 1,
-	maximumScale: 1,
-	userScalable: false,
 	themeColor: [{media: '(prefers-color-scheme: dark)', color: '#10b981'}],
 }
 
@@ -35,6 +33,11 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
 	return (
 		<html lang='en' className={`dark ${pressStart2P.variable} ${jetBrainsMono.variable}`}>
 			<head>
+				{/* Preconnect to third-party origins to reduce TTFB on first request */}
+				<link rel='preconnect' href='https://www.googletagmanager.com' />
+				<link rel='preconnect' href='https://www.google-analytics.com' />
+				<link rel='dns-prefetch' href='https://www.googletagmanager.com' />
+
 				{/* Google Analytics */}
 				<script async src='https://www.googletagmanager.com/gtag/js?id=G-DM1VCDF79S'></script>
 				<script

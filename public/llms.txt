@@ -6,6 +6,18 @@
 
 Solana Utility Tools (also known as SolanaUtils, solutil.dev) is an all-in-one developer platform for the Solana blockchain. It targets Solana developers, DeFi traders, NFT builders, and power users who need professional tools without managing API keys or paying subscriptions. Every tool runs entirely client-side: private keys are generated and signed locally in the browser and never leave the user's device. Supports Mainnet-beta, Devnet, and Testnet, plus custom RPC endpoints.
 
+## How to get started
+
+1. Pick a network in the top-bar network switcher (Mainnet, Devnet, Testnet, or custom RPC).
+2. Open a tool — read-only tools (transaction parser, Borsh inspector, vanity generator, PDA finder) work without a wallet. Press `/` or `Cmd+K` for global search.
+3. For tools that submit transactions (Send SOL, token mint, Jupiter swap, ALT, Jito bundles), connect Phantom, Solflare, or Backpack. Signing happens locally in your browser.
+
+## Who it's for
+
+- **Solana developers** — decode raw transactions, generate vanity addresses, brute-force PDAs, deploy programs, inspect Borsh-serialized account data.
+- **DeFi traders** — swap via Jupiter for best execution, protect large trades from sandwich attacks with Jito MEV bundles, tune priority fees per transaction.
+- **Token creators / launchpads** — mint SPL tokens with on-chain metadata in one transaction, batch-transfer to airdrop lists, manage token extensions, create ALTs.
+
 ## Key pages
 
 - [Homepage](https://solutil.dev/) — Full feature index for 40+ Solana tools
@@ -14,25 +26,43 @@ Solana Utility Tools (also known as SolanaUtils, solutil.dev) is an all-in-one d
 - [Jito Bundles](https://solutil.dev/jito/bundle) — MEV-protected atomic transaction bundles via Jito block-engine
 - [Vanity Address Generator](https://solutil.dev/dev-tools/vanity-generator) — Generate Solana addresses with custom prefixes/suffixes, runs in WebWorker
 - [Bulk Keypair Generator](https://solutil.dev/dev-tools/bulk-keypair) — Generate hundreds of Solana wallets in one batch, exportable to JSON
+- [HD Wallet](https://solutil.dev/dev-tools/hd-wallet) — Derive Solana keypairs from BIP39 seed phrases
+- [PDA Finder](https://solutil.dev/dev-tools/pda) — Compute Program Derived Addresses with custom seeds
+- [PDA Brute Force](https://solutil.dev/dev-tools/pda-brute-force) — Search for PDAs with desired bump or prefix
 - [Token Mint](https://solutil.dev/tokens/mint) — Create new SPL tokens with metadata in a single transaction
 - [Token Transfer](https://solutil.dev/tokens/transfer) — Transfer SPL tokens with associated-token-account auto-creation
+- [Token Burn](https://solutil.dev/tokens/burn) — Burn SPL tokens from any associated account
+- [Bulk Token Transfer](https://solutil.dev/tokens/bulk) — Batch SPL token transfers (airdrops)
 - [Send SOL](https://solutil.dev/transaction/send) — Native SOL transfers with priority fee tuning
 - [Transaction Simulator](https://solutil.dev/transaction/simulate) — Dry-run transactions on RPC before submission
+- [Enhanced Simulator](https://solutil.dev/transaction/enhanced-simulate) — Simulate with account state diffs and CPI trace
+- [Transaction History](https://solutil.dev/transaction/history) — Local localStorage-based transaction log
 - [Address Lookup Tables](https://solutil.dev/alt/create) — Create, manage, and explore Solana ALTs to compress transaction size
+- [ALT Manager](https://solutil.dev/alt/manage) — Track and extend your ALTs
+- [ALT Explorer](https://solutil.dev/alt/explorer) — Inspect any public ALT and its contents
 - [Borsh Inspector](https://solutil.dev/data-tools/borsh-inspector) — Decode/encode Borsh-serialized account data with custom schemas
 - [Event Log Parser](https://solutil.dev/data-tools/event-parser) — Parse Anchor events and program logs from transaction signatures
+- [Anchor CPI Decoder](https://solutil.dev/data-tools/anchor-cpi) — Decode cross-program invocations from Anchor programs
+- [Binary Viewer](https://solutil.dev/data-tools/binary-viewer) — Inspect raw account bytes as hex / utf-8 / base58
+- [Schema Validator](https://solutil.dev/data-tools/schema-validator) — Validate account data against custom schemas
 - [Program Versioning](https://solutil.dev/advanced-tools/program-versioning) — Track and manage Solana program upgrades
+- [State Compression](https://solutil.dev/advanced-tools/state-compression) — Compressed NFT / Merkle tree utilities
+- [Token Extensions](https://solutil.dev/advanced-tools/token-extensions) — Token-2022 extensions manager
+- [Multisig Wallet](https://solutil.dev/wallet/multisig) — Squads-style multisig coordination
+- [DeFi Liquidity](https://solutil.dev/defi/liquidity) — Liquidity-pool utilities
+- [Limit Orders](https://solutil.dev/defi/limit-orders) — Place / track Jupiter limit orders
+- [Jito Tips](https://solutil.dev/jito/tips) — Real-time Jito tip percentile reference
 
 ## Tool categories
 
-- Developer Tools (5): transaction parser, vanity address generator, bulk keypair generation, program tools, utility tools
-- Transaction Management (4): send SOL, simulate, history, builder
-- Token Operations (5): mint, burn, transfer, bulk operations, analytics
-- Account & Wallet Tools (5): wallet connection, account explorer, PDA finder, multisig, balance tracking
-- DeFi & Trading (3): Jupiter swap, liquidity, limit orders
-- Advanced Solana Features (6): program versioning, state compression, token extensions, etc.
-- Data Processing & Analysis (3): Borsh inspector, event parser, data tools
-- Jito MEV Protection (2): bundle builder, tip configuration
+- Developer Tools: transaction parser, vanity generator, bulk keypair, HD wallet, keypair converter, PDA finder, PDA brute force, IDL, IDL generator, inspector, program interaction, deploy, programs, CLI, RPC, utils.
+- Transaction Management: send SOL, simulate, enhanced simulate, history, builder.
+- Token Operations: mint, burn, transfer, bulk, analytics.
+- Account & Wallet Tools: wallet, multisig, account explorer, PDA explorer.
+- DeFi & Trading: Jupiter swap, liquidity, limit orders.
+- Advanced Solana Features: program versioning, state compression, token extensions.
+- Data Processing & Analysis: Borsh inspector, event parser, anchor CPI decoder, binary viewer, schema validator, analytics.
+- Jito MEV Protection: bundle builder, tip percentile reference.
 
 ## Privacy & security
 
@@ -56,6 +86,7 @@ Next.js 15, React 19, TypeScript, Tailwind CSS, @solana/web3.js, @solana/wallet-
 - GitHub: https://github.com/lugondev
 - Bug reports: typically fixed within 48 hours
 - Feature requests: reviewed weekly
+- Available language: English
 
 ## License & terms
 

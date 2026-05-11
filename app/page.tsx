@@ -8,14 +8,23 @@ import {PixelWalletButton} from '@/components/ui/pixel-wallet-button'
 import {useState, useEffect} from 'react'
 import {useTransactionHistory} from '@/lib/transaction-history'
 import {LAMPORTS_PER_SOL} from '@solana/web3.js'
-import {Wallet, Zap, TestTube, BarChart3, Coins, Clipboard, Wrench, Search, Factory, Globe, Hammer, Sparkles, Package, Rocket, FileText, Info, LucideIcon} from 'lucide-react'
+import {Wallet, Zap, TestTube, BarChart3, Coins, Clipboard, Wrench, Search, Factory, Globe, Hammer, Sparkles, Package, Rocket, FileText, Info, PlugZap, MousePointerClick, ShieldCheck, Code2, TrendingUp, Layers, LucideIcon} from 'lucide-react'
+
+type TxStatistics = {
+	total: number
+	confirmed: number
+	failed: number
+	pending: number
+	byType: Record<string, number>
+	totalVolume: number
+}
 
 export default function HomePage() {
 	const {publicKey, connected} = useWallet()
 	const {connection} = useConnection()
 	const {getStatistics} = useTransactionHistory()
 
-	const [stats, setStats] = useState<any>(null)
+	const [stats, setStats] = useState<TxStatistics | null>(null)
 	const [balance, setBalance] = useState<number | null>(null)
 
 	useEffect(() => {
@@ -33,7 +42,7 @@ export default function HomePage() {
 		}
 	}, [connected, publicKey, connection])
 
-	// Structured data for SEO
+	// Structured data for SEO + GEO
 	const structuredData = {
 		'@context': 'https://schema.org',
 		'@type': 'WebApplication',
@@ -42,20 +51,47 @@ export default function HomePage() {
 		'description': 'Comprehensive Solana utility platform for token management, DeFi operations, transaction building, Jito bundles, and developer tools',
 		'url': 'https://solutil.dev',
 		'applicationCategory': 'FinanceApplication',
-		'operatingSystem': 'Web',
+		'applicationSubCategory': 'BlockchainDeveloperTools',
+		'operatingSystem': 'Web Browser',
+		'browserRequirements': 'Requires JavaScript. Requires HTML5. Modern browser (Chrome, Firefox, Safari, Edge).',
+		'softwareVersion': '2026.05',
+		'datePublished': '2025-10-04',
+		'dateModified': '2026-05-11',
+		'inLanguage': 'en',
+		'isAccessibleForFree': true,
+		'permissions': 'No special permissions required. Wallet connection optional.',
 		'offers': {
 			'@type': 'Offer',
 			'price': '0',
 			'priceCurrency': 'USD',
+			'availability': 'https://schema.org/InStock',
 		},
 		'author': {
 			'@type': 'Person',
 			'name': 'LugonDev',
 			'url': 'https://github.com/lugondev',
 		},
-		'keywords': 'Solana, blockchain, cryptocurrency, DeFi, tokens, transaction, wallet, developer tools',
-		'featureList': ['SOL transfers with priority fees', 'Transaction simulation and testing', 'SPL token management', 'Address Lookup Table management', 'Jupiter token swaps', 'Jito MEV protected bundles', 'Developer tools and utilities'],
-		'screenshot': 'https://solutil.dev/og-image.svg',
+		'maintainer': {
+			'@type': 'Person',
+			'name': 'LugonDev',
+			'url': 'https://github.com/lugondev',
+		},
+		'license': 'https://opensource.org/licenses/MIT',
+		'keywords': 'Solana, blockchain, cryptocurrency, DeFi, tokens, transaction, wallet, developer tools, Jito, Jupiter, SPL, MEV, vanity address, Borsh, ALT',
+		'featureList': [
+			'SOL transfers with priority fees',
+			'Transaction simulation and testing',
+			'SPL token mint, burn, and transfer',
+			'Address Lookup Table create/manage/explore',
+			'Jupiter aggregator token swaps',
+			'Jito MEV protected transaction bundles',
+			'Vanity Solana address generation',
+			'Bulk keypair generation',
+			'Transaction parser and Borsh inspector',
+			'Anchor event log parser',
+			'Program versioning and upgrade tracking',
+		],
+		'screenshot': 'https://solutil.dev/opengraph-image',
 	}
 
 	// Organization schema with support contact (helps Knowledge Panel + AI Overviews)
@@ -72,7 +108,7 @@ export default function HomePage() {
 			'@type': 'ContactPoint',
 			'email': 'tegufy@gmail.com',
 			'contactType': 'Customer Support',
-			'availableLanguage': ['English', 'Vietnamese'],
+			'availableLanguage': ['English'],
 		},
 	}
 
@@ -293,9 +329,9 @@ export default function HomePage() {
 				<div className='text-center py-16'>
 					<div className='flex items-center justify-center mb-8'>
 						<div className='w-20 h-20 bg-green-400 border-4 border-green-400 animate-pulse mr-6' />
-						<div>
-							<h1 className='font-pixel text-4xl text-green-400 mb-3'>SOLANA UTIL-TX</h1>
-							<p className='font-mono text-lg text-gray-400'>Ultimate Solana transaction utility toolkit</p>
+						<div className='text-left'>
+							<h1 className='font-pixel text-3xl md:text-4xl text-green-400 mb-3 leading-tight'>Solana Utility Tools</h1>
+							<p className='font-mono text-base md:text-lg text-gray-300'>40+ free browser-based tools for Solana developers, DeFi traders, and power users</p>
 						</div>
 					</div>
 
@@ -324,6 +360,51 @@ export default function HomePage() {
 						<p className='text-xs text-gray-500'>
 							Updated: May 2026 · Need help? Email <a href='mailto:tegufy@gmail.com' className='text-green-400 hover:text-green-300 underline'>tegufy@gmail.com</a>
 						</p>
+					</div>
+				</PixelCard>
+
+				{/* Quick Start — numbered steps that AI assistants can quote directly */}
+				<PixelCard>
+					<div className='space-y-5'>
+						<div className='border-b-2 border-green-400/20 pb-3'>
+							<div className='flex items-center gap-2'>
+								<Rocket className='h-4 w-4 text-green-400' />
+								<h2 className='font-pixel text-sm text-green-400'>HOW TO GET STARTED</h2>
+							</div>
+						</div>
+
+						<ol className='grid grid-cols-1 md:grid-cols-3 gap-5 font-mono text-sm'>
+							<li className='bg-gray-800 border-2 border-gray-700 p-4 space-y-2'>
+								<div className='flex items-center gap-2'>
+									<span className='font-pixel text-xs text-green-400'>STEP 1</span>
+									<PlugZap className='h-4 w-4 text-green-400' />
+								</div>
+								<h3 className='font-pixel text-xs text-white'>PICK A NETWORK</h3>
+								<p className='text-gray-400 leading-relaxed'>
+									Use the network switcher in the top bar to choose Mainnet, Devnet, or Testnet. Custom RPC endpoints are configurable in settings.
+								</p>
+							</li>
+							<li className='bg-gray-800 border-2 border-gray-700 p-4 space-y-2'>
+								<div className='flex items-center gap-2'>
+									<span className='font-pixel text-xs text-green-400'>STEP 2</span>
+									<MousePointerClick className='h-4 w-4 text-green-400' />
+								</div>
+								<h3 className='font-pixel text-xs text-white'>OPEN A TOOL</h3>
+								<p className='text-gray-400 leading-relaxed'>
+									Read-only tools like the <Link href='/dev-tools/transaction-parser' className='text-green-400 underline hover:text-green-300'>transaction parser</Link> or <Link href='/data-tools/borsh-inspector' className='text-green-400 underline hover:text-green-300'>Borsh inspector</Link> work without a wallet. Press <span className='text-green-400'>/</span> or <span className='text-green-400'>Cmd+K</span> for global search.
+								</p>
+							</li>
+							<li className='bg-gray-800 border-2 border-gray-700 p-4 space-y-2'>
+								<div className='flex items-center gap-2'>
+									<span className='font-pixel text-xs text-green-400'>STEP 3</span>
+									<ShieldCheck className='h-4 w-4 text-green-400' />
+								</div>
+								<h3 className='font-pixel text-xs text-white'>CONNECT &amp; SIGN</h3>
+								<p className='text-gray-400 leading-relaxed'>
+									For actions that send transactions (<Link href='/transaction/send' className='text-green-400 underline hover:text-green-300'>send SOL</Link>, <Link href='/defi/swap' className='text-green-400 underline hover:text-green-300'>swap</Link>, <Link href='/jito/bundle' className='text-green-400 underline hover:text-green-300'>Jito bundles</Link>) connect Phantom, Solflare, or Backpack. Signing happens locally.
+								</p>
+							</li>
+						</ol>
 					</div>
 				</PixelCard>
 
@@ -402,6 +483,65 @@ export default function HomePage() {
 						))}
 					</div>
 				</div>
+
+				{/* Use Cases — concrete personas help AI assistants surface the site for varied intents */}
+				<PixelCard>
+					<div className='space-y-5'>
+						<div className='border-b-2 border-green-400/20 pb-3'>
+							<div className='flex items-center gap-2'>
+								<Layers className='h-4 w-4 text-green-400' />
+								<h2 className='font-pixel text-sm text-green-400'>WHO IT&apos;S FOR</h2>
+							</div>
+						</div>
+
+						<div className='grid grid-cols-1 md:grid-cols-3 gap-5 font-mono text-sm'>
+							<div className='bg-gray-800 border-2 border-gray-700 p-4 space-y-2'>
+								<div className='flex items-center gap-2'>
+									<Code2 className='h-4 w-4 text-green-400' />
+									<h3 className='font-pixel text-xs text-white'>FOR DEVELOPERS</h3>
+								</div>
+								<p className='text-gray-400 leading-relaxed'>
+									Decode raw transactions, generate vanity addresses, brute-force PDAs, deploy programs, and inspect Borsh-serialized account data. Built on @solana/web3.js so the output matches what your code sees.
+								</p>
+								<div className='pt-1 text-xs text-gray-500'>
+									→ <Link href='/dev-tools/transaction-parser' className='text-green-400 hover:text-green-300 underline'>Transaction Parser</Link>{' · '}
+									<Link href='/dev-tools/vanity-generator' className='text-green-400 hover:text-green-300 underline'>Vanity Generator</Link>{' · '}
+									<Link href='/dev-tools/pda' className='text-green-400 hover:text-green-300 underline'>PDA Finder</Link>
+								</div>
+							</div>
+
+							<div className='bg-gray-800 border-2 border-gray-700 p-4 space-y-2'>
+								<div className='flex items-center gap-2'>
+									<TrendingUp className='h-4 w-4 text-green-400' />
+									<h3 className='font-pixel text-xs text-white'>FOR DEFI TRADERS</h3>
+								</div>
+								<p className='text-gray-400 leading-relaxed'>
+									Swap tokens through Jupiter for best execution, protect large trades from sandwich attacks with Jito MEV bundles, and tune priority fees per transaction to land in the right slot.
+								</p>
+								<div className='pt-1 text-xs text-gray-500'>
+									→ <Link href='/defi/swap' className='text-green-400 hover:text-green-300 underline'>Jupiter Swap</Link>{' · '}
+									<Link href='/jito/bundle' className='text-green-400 hover:text-green-300 underline'>Jito Bundles</Link>{' · '}
+									<Link href='/defi/limit-orders' className='text-green-400 hover:text-green-300 underline'>Limit Orders</Link>
+								</div>
+							</div>
+
+							<div className='bg-gray-800 border-2 border-gray-700 p-4 space-y-2'>
+								<div className='flex items-center gap-2'>
+									<Factory className='h-4 w-4 text-green-400' />
+									<h3 className='font-pixel text-xs text-white'>FOR TOKEN CREATORS</h3>
+								</div>
+								<p className='text-gray-400 leading-relaxed'>
+									Mint SPL tokens with on-chain metadata in one transaction, batch-transfer to airdrop lists, manage token extensions, and create Address Lookup Tables to fit more accounts per transaction.
+								</p>
+								<div className='pt-1 text-xs text-gray-500'>
+									→ <Link href='/tokens/mint' className='text-green-400 hover:text-green-300 underline'>Token Mint</Link>{' · '}
+									<Link href='/tokens/bulk' className='text-green-400 hover:text-green-300 underline'>Bulk Transfer</Link>{' · '}
+									<Link href='/alt/create' className='text-green-400 hover:text-green-300 underline'>Create ALT</Link>
+								</div>
+							</div>
+						</div>
+					</div>
+				</PixelCard>
 
 				{/* About Section */}
 				<PixelCard>
@@ -532,7 +672,7 @@ export default function HomePage() {
 							<div>
 								<h3 className='text-white font-bold mb-2'>Do I need to connect my wallet to use the tools?</h3>
 								<p className='text-gray-400 leading-relaxed'>
-									Most read-only tools (transaction parser, Borsh inspector, vanity address generator, PDA finder) work without a wallet. Connecting a wallet is only required for tools that send signed transactions — SOL transfer, token mint, Jupiter swap, ALT creation, and Jito bundles.
+									Most read-only tools — <Link href='/dev-tools/transaction-parser' className='text-green-400 hover:text-green-300 underline'>transaction parser</Link>, <Link href='/data-tools/borsh-inspector' className='text-green-400 hover:text-green-300 underline'>Borsh inspector</Link>, <Link href='/dev-tools/vanity-generator' className='text-green-400 hover:text-green-300 underline'>vanity generator</Link>, <Link href='/dev-tools/pda' className='text-green-400 hover:text-green-300 underline'>PDA finder</Link> — work without a wallet. Connecting a wallet is only required for tools that send signed transactions — <Link href='/transaction/send' className='text-green-400 hover:text-green-300 underline'>SOL transfer</Link>, <Link href='/tokens/mint' className='text-green-400 hover:text-green-300 underline'>token mint</Link>, <Link href='/defi/swap' className='text-green-400 hover:text-green-300 underline'>Jupiter swap</Link>, <Link href='/alt/create' className='text-green-400 hover:text-green-300 underline'>ALT creation</Link>, and <Link href='/jito/bundle' className='text-green-400 hover:text-green-300 underline'>Jito bundles</Link>.
 								</p>
 							</div>
 
@@ -546,14 +686,14 @@ export default function HomePage() {
 							<div>
 								<h3 className='text-white font-bold mb-2'>How do Jito bundles protect against MEV?</h3>
 								<p className='text-gray-400 leading-relaxed'>
-									Jito bundles submit your transactions through Jito&apos;s block-engine instead of the public mempool. Bundled transactions execute atomically in the same slot, blocking sandwich attacks and frontrunning. The bundle builder lets you tip validators directly to prioritize inclusion.
+									<Link href='/jito/bundle' className='text-green-400 hover:text-green-300 underline'>Jito bundles</Link> submit your transactions through Jito&apos;s block-engine instead of the public mempool. Bundled transactions execute atomically in the same slot, blocking sandwich attacks and frontrunning. The bundle builder lets you tip validators directly to prioritize inclusion.
 								</p>
 							</div>
 
 							<div>
 								<h3 className='text-white font-bold mb-2'>Does Solana Utility Tools store my private keys or transaction data?</h3>
 								<p className='text-gray-400 leading-relaxed'>
-									No. All key generation (vanity addresses, bulk keypairs) and transaction signing happen locally in your browser — keys never leave your device. Transaction history is stored in browser localStorage only and can be cleared at any time.
+									No. All key generation (<Link href='/dev-tools/vanity-generator' className='text-green-400 hover:text-green-300 underline'>vanity addresses</Link>, <Link href='/dev-tools/bulk-keypair' className='text-green-400 hover:text-green-300 underline'>bulk keypairs</Link>) and transaction signing happen locally in your browser — keys never leave your device. <Link href='/transaction/history' className='text-green-400 hover:text-green-300 underline'>Transaction history</Link> is stored in browser localStorage only and can be cleared at any time.
 								</p>
 							</div>
 
